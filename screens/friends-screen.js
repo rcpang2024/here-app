@@ -1,11 +1,67 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useWindowDimensions } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 
 const FriendsScreen = () => {
+    const layout = useWindowDimensions();
+    const [index, setIndex] = useState(0);
+    const [routes] = useState([
+        {key: 'first', title: 'FRIENDS EVENTS'},
+        {key: 'second', title: 'FRIENDS ATTENDING'},
+    ]);
+
+    // const friendsCreatedRoute = () => {
+    //     <View>
+    //         <Text>FRIENDS CREATED</Text>
+    //     </View>
+    // };
+
+    // const friendsAttendingRoute = () => {
+    //     <View style={{flex: 1, backgroundColor: 'red'}}>
+    //         <Text>FRIENDS ATTENDING</Text>
+    //     </View>
+    // };
+    const friendsCreatedRoute = () => (
+        <View>
+            <Text>FRIENDS CREATED</Text>
+        </View>
+    );
+    
+    const friendsAttendingRoute = () => (
+        <View style={{flex: 1, backgroundColor: 'red'}}>
+            <Text>FRIENDS ATTENDING</Text>
+        </View>
+    );
+
+    const renderScene = SceneMap({
+        first: friendsCreatedRoute,
+        second: friendsAttendingRoute
+    });
+
+    const renderTabBar = (props) => {
+        return (
+            <TabBar 
+                {...props}
+                // tabStyle={{backgroundColor: 'black',}}
+                indicatorStyle={{ backgroundColor: 'black' }}
+                renderLabel={({ focused, route}) => (
+                    <Text style={{color: 'black', fontWeight: 'bold'}}>{route.title}</Text>
+                )}
+            />
+        );
+    };
+
     return (
         <View style={styles.container}>
-          <Text>Check here for updates of your friends!</Text>
+            <TabView 
+                navigationState={{ index, routes }}
+                renderScene={renderScene}
+                onIndexChange={setIndex}
+                initialLayout={{ width: layout.width }}
+                renderTabBar={renderTabBar}
+                style={{marginTop: 10, padding: 10}}
+            />
         </View>
     );
 }

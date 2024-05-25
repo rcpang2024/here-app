@@ -15,7 +15,7 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
   
   useEffect(() => {
     fetchCreator();
-  });
+  }, []);
 
   const fetchCreator = async () => {
     try {
@@ -23,7 +23,7 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
         const data = await response.json();
     setCreator(data.username);
     } catch (error) {
-        console.error('Error fetching usernames for attendees:', error);
+        console.error('Error fetching creation user for attendees:', error);
     }
 };
 

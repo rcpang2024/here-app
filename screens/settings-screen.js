@@ -36,7 +36,7 @@ const SettingsScreen = () => {
                 <TouchableOpacity onPress={() => console.log("Security")}>
                     <Text style={styles.text}>Security</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("About Here!")}>
+                <TouchableOpacity onPress={() => navigation.navigate("About Here")}>
                     <Text style={styles.text}>About Here!</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => console.log("Contact Us")}>

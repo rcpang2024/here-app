@@ -80,7 +80,7 @@ const LogInScreen = () => {
                     <TouchableOpacity style={styles.signIn} onPress={handleClick}>
                         <Text style={styles.signInText}>Sign In</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => console.log("PLACEHOLDER")}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
                         <Text style={styles.otherText} >Forgot your username or password?</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate("Create Account")}>
@@ -101,21 +101,21 @@ const styles = StyleSheet.create({
         borderColor: '#e8e8e8',
         borderWidth: 1,
         borderRadius: 5,
-        marginVertical: 10,
+        marginVertical: 12,
         paddingHorizontal: 5,
     },
     logo: {
-        width: '68%',
+        width: '75%',
         height: '55%',
+        marginTop: 25
     },
     input: {
-        fontSize: 18,
-        paddingVertical: 3,
+        fontSize: 22,
+        paddingVertical: 4,
         paddingHorizontal: 2,
     },
     signIn: {
         backgroundColor: '#1c2120',
-        // backgroundColor: 'white',
         marginBottom: 10,
         marginTop: 8,
         alignItems: 'center',

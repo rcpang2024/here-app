@@ -11,6 +11,12 @@ import AttendeesScreen from '../screens/attendees-screen';
 import SettingsScreen from '../screens/settings-screen';
 import LogInScreen from '../screens/login-screen';
 import CreateUserScreen from '../screens/create-user-screen';
+import EditProfileScreen from '../screens/edit-profile-screen';
+import AboutHereScreen from '../screens/about-here-screen';
+import ConfirmEmailScreen from '../screens/confirm-email-screen';
+import ForgotScreen from '../screens/forgot-pw-screen';
+import FollowersScreen from '../screens/list-of-followers';
+import FollowingScreen from '../screens/list-of-following';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const homeName = 'Home';
@@ -37,10 +43,16 @@ export function MainContainer() {
       <Stack.Navigator>
         <Stack.Screen name="Login" options={{ headerShown: false }} component={LogInScreen} />
         <Stack.Screen name="Create Account" component={CreateUserScreen} />
+        <Stack.Screen name="Confirm Email" options={{ headerShown: false }} component={ConfirmEmailScreen} />
+        <Stack.Screen name="Forgot" options={{ headerShown: false }} component={ForgotScreen} />
         <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Event Details" component={EventDetailScreen} />
         <Stack.Screen name="Attendees" component={AttendeesScreen}/>
         <Stack.Screen name="Settings" component={SettingsScreen}/>
+        <Stack.Screen name="Followers" component={FollowersScreen}/>
+        <Stack.Screen name="Following" component={FollowingScreen}/>
+        <Stack.Screen name="Edit Profile" component={EditProfileScreen}/>
+        <Stack.Screen name="About Here" options={{ headerShown: false }} component={AboutHereScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

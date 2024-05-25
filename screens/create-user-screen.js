@@ -109,7 +109,8 @@ const CreateUserScreen = () => {
         })
         .finally(() => {
             dismissKeyboard();
-            navigation.navigate("Login");
+            // PROBLEM - NOT SURE WHY THO
+            // navigation.navigate("Confirm Email");
         });
     };
 
@@ -226,6 +227,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'white',
     },
+    bottomPadding: {
+        marginBottom: 25,
+    }
 })
 
 export default CreateUserScreen;

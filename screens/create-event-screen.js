@@ -4,7 +4,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
 import uuid from 'react-native-uuid';
 
-const CreateEventScreen = ( { onEventCreate } ) => {
+const CreateEventScreen = () => {
   const [eventName, setEventName] = useState("");
   const [eventDesc, setEventDesc] = useState("");
   const [eventLocation, setEventLocation] = useState("");
@@ -70,8 +70,7 @@ const CreateEventScreen = ( { onEventCreate } ) => {
   const fetchPost = async () => {
     try {
       // PLACEHOLDER - GO BACK IN AND RETRIEVE LOGGED IN USER'S ID WHEN WE GET TO THAT POINT
-      // NOTE: THE DATABASE WAS CLEARED SO YOU NEED TO CREATE THIS USER TO TEST
-      const userResponse = await fetch('http://192.168.1.142:8000/api/users/rcpang/');
+      const userResponse = await fetch('http://192.168.1.142:8000/api/users/username/rcpang/');
       const user = await userResponse.json();
   
       const response = await fetch('http://192.168.1.142:8000/api/createevent/', {
@@ -90,7 +89,6 @@ const CreateEventScreen = ( { onEventCreate } ) => {
         }),
       });
       if (!response.ok) {
-        // Handle any error response from the server here
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Unknown error');
       }
@@ -170,7 +168,7 @@ const CreateEventScreen = ( { onEventCreate } ) => {
         </View>
         <View>
           <TouchableOpacity style={styles.button} onPress={handlePostEvent}>
-            <Text style={styles.buttonText}>Post Event</Text>
+            <Text style={styles.buttonText}>POST EVENT</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -205,15 +203,14 @@ const styles = StyleSheet.create({
     paddingVertical: 25,
   },
   button: {
-    backgroundColor: 'white',
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 5,
     alignItems: 'center',
-    // justifyContent: 'center',
+    borderColor: 'black',
+    borderWidth: 3,
   },
   buttonText: {
-    color: 'darkred',
     fontWeight: 'bold',
     fontSize: 16,
     marginLeft: 5,

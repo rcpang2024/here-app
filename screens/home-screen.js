@@ -10,6 +10,7 @@ const HomeScreen = () => {
         fetchData();
     }, []);
 
+    // PLACEHOLDER
     const fetchData = async() => {
         const response = await fetch('http://192.168.1.142:8000/api/events/');
         const data = await response.json();
