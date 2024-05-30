@@ -101,16 +101,16 @@ const styles = StyleSheet.create({
         borderColor: '#e8e8e8',
         borderWidth: 1,
         borderRadius: 5,
-        marginVertical: 12,
+        marginVertical: 3,
         paddingHorizontal: 5,
     },
     logo: {
-        width: '75%',
-        height: '55%',
+        width: '65%',
+        height: '50%',
         marginTop: 25
     },
     input: {
-        fontSize: 22,
+        fontSize: 20,
         paddingVertical: 4,
         paddingHorizontal: 2,
     },
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginTop: 8,
         alignItems: 'center',
-        padding: 12,
+        padding: 10,
         borderRadius: 5,
     },
     signInText: {

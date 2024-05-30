@@ -76,18 +76,18 @@ const ProfileScreen = () => {
     };
 
     const handleCreatedEvent = async () => {
-        const eventDataPromises = created.map(async (eventId) => {
+        const createdPromises = created.map(async (eventId) => {
             try {
-                const eventData = await fetchEvent(eventId);
-                return eventData;
+                const createdData = await fetchEvent(eventId);
+                return createdData;
             } catch (error) {
                 console.error('Error fetching event data:', error.message);
                 return null;
             }
         });
-        const eventDataArray = await Promise.all(eventDataPromises);
-        console.log("EventdataArray: ", eventDataArray);
-        setCreatedEvent(eventDataArray);
+        const createdDataArray = await Promise.all(createdPromises);
+        console.log("createdDataArray: ", createdDataArray);
+        setCreatedEvent(createdDataArray);
     };
 
     useEffect(() => {
@@ -105,58 +105,46 @@ const ProfileScreen = () => {
         fetchUser();
     }, [route.params]);
 
-    // useFocusEffect(
-    //     React.useCallback(() => {
-    //         fetchUser();
-    //     }, [])
-    // );
+    const onTabChange = (newIndex) => {
+        setIndex(newIndex);
+        if (newIndex === 1 && createdEvent.length === 0) {
+            handleCreatedEvent();
+        }
+        else if (newIndex === 2 && event.length === 0) {
+            handleAttendingEvent();
+        }
+    };
 
-    const renderCreate = () => {
+    const renderCreate = ({ item }) => {
+        console.log("created item:", item)
         return (
             <View>
-                {!createdEvent && (
-                    <TouchableOpacity onPress={handleCreatedEvent}>
-                        <Text style={{fontWeight: 'bold'}}>VIEW EVENTS</Text>
-                    </TouchableOpacity>
-                )}
-                {createdEvent && createdEvent.map((eventData) => (
-                    <View key={eventData.id}>
-                        <EventItem
-                            event_id={eventData.id}
-                            creation_user={eventData.creation_user}
-                            event_name={eventData.event_name}
-                            event_description={eventData.event_description}
-                            location={eventData.location}
-                            date={eventData.date}
-                            list_of_attendees={eventData.list_of_attendees}
-                        />
-                    </View>
-                ))}
+                <EventItem
+                    event_id={item.id}
+                    creation_user={item.creation_user}
+                    event_name={item.event_name}
+                    event_description={item.event_description}
+                    location={item.location}
+                    date={item.date}
+                    list_of_attendees={item.list_of_attendees}
+                />
             </View>
         );
     };
 
-    const renderAttending = () => {
+    const renderAttending = ({ item }) => {
+        console.log("attending item:", item)
         return (
             <View>
-                {!event && (
-                    <TouchableOpacity onPress={handleAttendingEvent}>
-                        <Text style={{fontWeight: 'bold'}}>VIEW EVENTS</Text>
-                    </TouchableOpacity>
-                )}
-                {event && event.map((eventData) => (
-                    <View key={eventData.id}>
-                        <EventItem
-                            event_id={eventData.id}
-                            creation_user={eventData.creation_user}
-                            event_name={eventData.event_name}
-                            event_description={eventData.event_description}
-                            location={eventData.location}
-                            date={eventData.date}
-                            list_of_attendees={eventData.list_of_attendees}
-                        />
-                    </View>
-                ))}
+                <EventItem
+                    event_id={item.id}
+                    creation_user={item.creation_user}
+                    event_name={item.event_name}
+                    event_description={item.event_description}
+                    location={item.location}
+                    date={item.date}
+                    list_of_attendees={item.list_of_attendees}
+                />
             </View>
         );
     };
@@ -221,11 +209,11 @@ const ProfileScreen = () => {
             <View>
                 {user.created_events && (
                     <View style={styles.text}>
-                        <FlatList 
-                            data={created}
+                        <FlatList
+                            data={createdEvent}
                             keyExtractor={(item) => item.id}
                             renderItem={renderCreate}
-                            contentContainerStyle={{paddingTop: 5, paddingBottom: 15}}
+                            contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
                         />
                     </View>
                 )}
@@ -239,10 +227,10 @@ const ProfileScreen = () => {
                 {user.attending_events && (
                     <View style={styles.text}>
                         <FlatList 
-                            data={attending}
+                            data={event}
                             keyExtractor={(item) => item.id}
                             renderItem={renderAttending}
-                            contentContainerStyle={{paddingTop: 10, paddingBottom: 100}}
+                            contentContainerStyle={{paddingTop: 5, paddingBottom: 15}}
                         />
                     </View>
                 )}
@@ -274,7 +262,7 @@ const ProfileScreen = () => {
         <TabView 
             navigationState={{ index, routes }}
             renderScene={renderScene}
-            onIndexChange={setIndex}
+            onIndexChange={onTabChange}
             initialLayout={{ width: '90%' }}
             renderTabBar={renderTabBar}
             style={{marginTop: 4, padding: 10, color: 'black'}}
