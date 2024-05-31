@@ -1,5 +1,5 @@
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Pressable, RefreshControl, ScrollView } from "react-native";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // PLACEHOLDER
@@ -23,14 +23,20 @@ const ProfileScreen = () => {
     const [attending, setAttending] = useState([]);
     const [event, setEvent] = useState('');
 
-    const [routes] = useState([
-        {key: 'first', title: 'PROFILE'},
-        {key: 'second', title: 'CREATED EVENTS'},
-        {key: 'third', title: 'ATTENDING EVENTS'},
-    ]);
+    // const [routes] = useState([
+    //     {key: 'first', title: 'PROFILE'},
+    //     {key: 'second', title: 'CREATED EVENTS'},
+    //     {key: 'third', title: 'ATTENDING EVENTS'},
+    // ]);
+    const routes = useMemo(() => ([
+        { key: 'first', title: 'PROFILE' },
+        { key: 'second', title: 'CREATED EVENTS' },
+        { key: 'third', title: 'ATTENDING EVENTS' },
+    ]), []);
 
     const fetchUser = async () => {
         try {
+            // PLACEHOLDER - Next figure out how to pass info from log in state to here
             const response = await fetch(`http://192.168.1.142:8000/api/users/username/rcpang/`);
             if (!response.ok) {
                 throw new Error('Network response for user data was not ok');
@@ -71,7 +77,7 @@ const ProfileScreen = () => {
             }
         });
         const eventDataArray = await Promise.all(eventDataPromises);
-        console.log("EventdataArray: ", eventDataArray);
+        // console.log("EventdataArray: ", eventDataArray);
         setEvent(eventDataArray);
     };
 
@@ -86,7 +92,7 @@ const ProfileScreen = () => {
             }
         });
         const createdDataArray = await Promise.all(createdPromises);
-        console.log("createdDataArray: ", createdDataArray);
+        // console.log("createdDataArray: ", createdDataArray);
         setCreatedEvent(createdDataArray);
     };
 
@@ -108,9 +114,11 @@ const ProfileScreen = () => {
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
         if (newIndex === 1 && createdEvent.length === 0) {
+            console.log("handleCreatedEvent")
             handleCreatedEvent();
         }
         else if (newIndex === 2 && event.length === 0) {
+            console.log("handleAttendingEvent")
             handleAttendingEvent();
         }
     };
@@ -157,7 +165,7 @@ const ProfileScreen = () => {
         }, 2000);
     }, []);
 
-    const profileRoute = () => {
+    const ProfileRoute = () => {
         return (
             <View style={{paddingTop: 10, marginRight: 15}}>
                 <ScrollView 
@@ -204,7 +212,7 @@ const ProfileScreen = () => {
         );
     };
 
-    const createdEventsRoute = () => {
+    const CreatedEventsRoute = () => {
         return (
             <View>
                 {user.created_events && (
@@ -221,7 +229,7 @@ const ProfileScreen = () => {
         );
     };
 
-    const attendingEventsRoute = () => {
+    const AttendingEventsRoute = () => {
         return (
             <View>
                 {user.attending_events && (
@@ -238,13 +246,18 @@ const ProfileScreen = () => {
         );
     };
 
+    // Stores the state of the different tabs to prevent unnecessary re renders
+    const MemoizedProfileRoute = useMemo(() => ProfileRoute, [user]);
+    const MemoizedCreatedRoute = useMemo(() => CreatedEventsRoute, [createdEvent]);
+    const MemoizedAttendingRoute = useMemo(() => AttendingEventsRoute, [event]);
+
     const renderScene = SceneMap({
-        first: profileRoute,
-        second: createdEventsRoute,
-        third: attendingEventsRoute
+        first: MemoizedProfileRoute,
+        second: MemoizedCreatedRoute,
+        third: MemoizedAttendingRoute
     });
 
-    // renders the tab bar
+    // Renders the tab bar
     const renderTabBar = (props) => {
         return (
             <TabBar 
@@ -259,7 +272,8 @@ const ProfileScreen = () => {
     };
 
     return (
-        <TabView 
+        <TabView
+            lazy 
             navigationState={{ index, routes }}
             renderScene={renderScene}
             onIndexChange={onTabChange}
