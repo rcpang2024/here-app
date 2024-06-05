@@ -1,6 +1,7 @@
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Pressable, RefreshControl, ScrollView } from "react-native";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // PLACEHOLDER
 import HereLogo from '../assets/images/HereLogo.png';
@@ -10,7 +11,8 @@ import EventItem from "../components/event-item";
 const ProfileScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
-    const [user, SetUser] = useState('');
+    const { user } = useContext(UserContext); // Access user from context
+    // const [user, SetUser] = useState('');
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
 
@@ -34,23 +36,23 @@ const ProfileScreen = () => {
         { key: 'third', title: 'ATTENDING EVENTS' },
     ]), []);
 
-    const fetchUser = async () => {
-        try {
-            // PLACEHOLDER - Next figure out how to pass info from log in state to here
-            const response = await fetch(`http://192.168.1.142:8000/api/users/username/rcpang/`);
-            if (!response.ok) {
-                throw new Error('Network response for user data was not ok');
-            }
-            const userData = await response.json();
-            SetUser(userData);
-            setCreated(userData.created_events);
-            setAttending(userData.attending_events);
-        }
-        catch (error) {
-            console.error('Error fetching user data:', error.message);
-            alert("PLACEHOLDER FOR PROFILE")
-        }
-    };
+    // const fetchUser = async () => {
+    //     try {
+    //         // PLACEHOLDER - Next figure out how to pass info from log in state to here
+    //         const response = await fetch(`http://192.168.1.142:8000/api/users/username/rcpang/`);
+    //         if (!response.ok) {
+    //             throw new Error('Network response for user data was not ok');
+    //         }
+    //         const userData = await response.json();
+    //         SetUser(userData);
+    //         setCreated(userData.created_events);
+    //         setAttending(userData.attending_events);
+    //     }
+    //     catch (error) {
+    //         console.error('Error fetching user data:', error.message);
+    //         alert("PLACEHOLDER FOR PROFILE")
+    //     }
+    // };
 
     const fetchEvent = async (eventId) => {
         try {
@@ -92,7 +94,7 @@ const ProfileScreen = () => {
             }
         });
         const createdDataArray = await Promise.all(createdPromises);
-        // console.log("createdDataArray: ", createdDataArray);
+        console.log("createdDataArray: ", createdDataArray);
         setCreatedEvent(createdDataArray);
     };
 
@@ -108,8 +110,12 @@ const ProfileScreen = () => {
                 />
             ),
         });
-        fetchUser();
-    }, [route.params]);
+        // fetchUser();
+        if (user) {
+            setCreated(user.created_events);
+            setAttending(user.attending_events);
+        }
+    }, [route.params, user]);
 
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
@@ -159,7 +165,7 @@ const ProfileScreen = () => {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        fetchUser();
+        // fetchUser();
         setTimeout(() => {
             setRefreshing(false);
         }, 2000);

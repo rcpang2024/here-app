@@ -1,12 +1,14 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, 
     Keyboard } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useRef, useState } from "react";
+import { useRef, useState, useContext } from "react";
+import { UserContext } from "../user-context";
 import HereLogo from '../assets/images/HereLogo.png';
 
 const LogInScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    const { setUser } = useContext(UserContext); // Access setUser from context
 
     const [username, setUsername] = useState('');
     const [pw, setPW] = useState('');
@@ -42,6 +44,7 @@ const LogInScreen = () => {
                     alert('Invalid username or password');
                 } else {
                     dismissKeyboard();
+                    setUser(data);
                     navigation.navigate("Tab");
                     setUsername(''); 
                     setPW(''); 

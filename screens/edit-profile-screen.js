@@ -1,12 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, TouchableWithoutFeedback, Keyboard,
         Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
+import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const EditProfileScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    const { user, updateUserContext } = useContext(UserContext); // Access updateUser from context
 
     // const currPic = route.params.pic;
     const currName = route.params.name;
@@ -44,16 +46,49 @@ const EditProfileScreen = () => {
         Keyboard.dismiss();
     };
 
-    const updateUser = async () => {
+    // const updateUser = async () => {
+    //     try {
+    //         const response = await fetch(`http://192.168.1.142:8000/api/updateuser/${currUsername}/`, {
+    //             method: 'PUT',
+    //             headers: {
+    //             'Content-Type': 'application/json', 
+    //             },
+    //             body: JSON.stringify({
+    //                 // ISSUE: PIC OBVIOUSLY ISNT JSON
+    //                 // profile_pic: newPic,
+    //                 name: newName,
+    //                 username: newUsername,
+    //                 bio: newBio,
+    //                 email: currEmail,
+    //                 password: currPW,
+    //                 user_type: 'individual',
+    //                 user_privacy: 'public',
+    //             }),
+    //         });
+    //         const userData = await response.json();
+    //         console.log("userData: ", userData);
+    //         return userData;
+    //     } catch (error) {
+    //         console.error("Error updating user: ", error);
+    //     }
+    // };
+
+    // const handleUpdate = () => {
+    //     updateUser().then(() => {
+    //         navigation.goBack()
+    //     })
+    //     .catch((error) => {
+    //         console.error("Error in handleUpdate: ", error);
+    //     })
+    // };
+    const updateUserInDB = async () => {
         try {
             const response = await fetch(`http://192.168.1.142:8000/api/updateuser/${currUsername}/`, {
                 method: 'PUT',
                 headers: {
-                'Content-Type': 'application/json', 
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    // ISSUE: PIC OBVIOUSLY ISNT JSON
-                    // profile_pic: newPic,
                     name: newName,
                     username: newUsername,
                     bio: newBio,
@@ -64,7 +99,6 @@ const EditProfileScreen = () => {
                 }),
             });
             const userData = await response.json();
-            console.log("userData: ", userData);
             return userData;
         } catch (error) {
             console.error("Error updating user: ", error);
@@ -72,12 +106,12 @@ const EditProfileScreen = () => {
     };
 
     const handleUpdate = () => {
-        updateUser().then(() => {
-            navigation.goBack()
-        })
-        .catch((error) => {
+        updateUserInDB().then((updatedUser) => {
+            updateUserContext(updatedUser); // Update user data in context
+            navigation.goBack();
+        }).catch((error) => {
             console.error("Error in handleUpdate: ", error);
-        })
+        });
     };
 
     const handleCancel = () => {
