@@ -25,34 +25,11 @@ const ProfileScreen = () => {
     const [attending, setAttending] = useState([]);
     const [event, setEvent] = useState('');
 
-    // const [routes] = useState([
-    //     {key: 'first', title: 'PROFILE'},
-    //     {key: 'second', title: 'CREATED EVENTS'},
-    //     {key: 'third', title: 'ATTENDING EVENTS'},
-    // ]);
     const routes = useMemo(() => ([
         { key: 'first', title: 'PROFILE' },
         { key: 'second', title: 'CREATED EVENTS' },
         { key: 'third', title: 'ATTENDING EVENTS' },
     ]), []);
-
-    // const fetchUser = async () => {
-    //     try {
-    //         // PLACEHOLDER - Next figure out how to pass info from log in state to here
-    //         const response = await fetch(`http://192.168.1.142:8000/api/users/username/rcpang/`);
-    //         if (!response.ok) {
-    //             throw new Error('Network response for user data was not ok');
-    //         }
-    //         const userData = await response.json();
-    //         SetUser(userData);
-    //         setCreated(userData.created_events);
-    //         setAttending(userData.attending_events);
-    //     }
-    //     catch (error) {
-    //         console.error('Error fetching user data:', error.message);
-    //         alert("PLACEHOLDER FOR PROFILE")
-    //     }
-    // };
 
     const fetchEvent = async (eventId) => {
         try {

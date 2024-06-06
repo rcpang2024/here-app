@@ -46,41 +46,6 @@ const EditProfileScreen = () => {
         Keyboard.dismiss();
     };
 
-    // const updateUser = async () => {
-    //     try {
-    //         const response = await fetch(`http://192.168.1.142:8000/api/updateuser/${currUsername}/`, {
-    //             method: 'PUT',
-    //             headers: {
-    //             'Content-Type': 'application/json', 
-    //             },
-    //             body: JSON.stringify({
-    //                 // ISSUE: PIC OBVIOUSLY ISNT JSON
-    //                 // profile_pic: newPic,
-    //                 name: newName,
-    //                 username: newUsername,
-    //                 bio: newBio,
-    //                 email: currEmail,
-    //                 password: currPW,
-    //                 user_type: 'individual',
-    //                 user_privacy: 'public',
-    //             }),
-    //         });
-    //         const userData = await response.json();
-    //         console.log("userData: ", userData);
-    //         return userData;
-    //     } catch (error) {
-    //         console.error("Error updating user: ", error);
-    //     }
-    // };
-
-    // const handleUpdate = () => {
-    //     updateUser().then(() => {
-    //         navigation.goBack()
-    //     })
-    //     .catch((error) => {
-    //         console.error("Error in handleUpdate: ", error);
-    //     })
-    // };
     const updateUserInDB = async () => {
         try {
             const response = await fetch(`http://192.168.1.142:8000/api/updateuser/${currUsername}/`, {

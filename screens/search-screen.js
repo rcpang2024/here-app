@@ -1,10 +1,24 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { useState } from "react";
+import { SearchBar } from "react-native-elements";
 
 const SearchScreen = () => {
+    const [search, setSearch] = useState('');
+
+    const dismissKeyboard = () => {
+        Keyboard.dismiss();
+    };
+
     return (
-        <View style={styles.title}>
-            <Text>Search for your Friends!</Text>
-        </View>
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <View style={styles.container}>
+                <SearchBar
+                    placeholder="Search for friends or events"
+                    onChangeText={setSearch}
+                    value={search}
+                />
+            </View>
+        </TouchableWithoutFeedback>
     );
 }
 
@@ -18,9 +32,8 @@ function padding(a, b, c, d) {
 }
 
 const styles = StyleSheet.create({
-    title: {
-        ...padding(10, 0, 0, 10),
-        fontSize: 32
+    container: {
+        flex: 1
     }
 })
 
