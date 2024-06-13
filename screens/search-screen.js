@@ -1,75 +1,205 @@
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, FlatList, TouchableOpacity } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SearchBar } from "react-native-elements";
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import EventItem from "../components/event-item";
 
 const SearchScreen = () => {
-    const [search, setSearch] = useState('');
+    const [searchUser, setUserSearch] = useState('');
+    const [searchEvent, setEventSearch] = useState('');
+    // For Users
     const [results, setResults] = useState([]);
+    // For Events
     const [eventResults, setEventResults] = useState([]);
+
+    const [index, setIndex] = useState(0);
+    const [userSearchCache, setUserSearchCache] = useState({});
+    const [eventSearchCache, setEventSearchCache] = useState({});
+
+    const routes = useMemo(() => ([
+        { key: 'first', title: 'SEARCH USERS' },
+        { key: 'second', title: 'SEARCH EVENTS' },
+    ]), []);
 
     const dismissKeyboard = () => {
         Keyboard.dismiss();
     };
 
     const searchDatabase = async (query) => {
+        if (userSearchCache[query]) {
+            setResults(userSearchCache[query]);
+            return;
+        }
         try {
             // Placeholder 
-            const response = await fetch(`http://192.168.1.142:8000/api/search?query=${query}`);
+            const response = await fetch(`http://192.168.1.142:8000/api/searchusers?query=${query}`);
             const data = await response.json();
+            setUserSearchCache((prevCache) => ({ ...prevCache, [query]: data }));
             setResults(data);
-            // setEventResults(data.events);
         } catch (error) {
             console.error("Error searching the database: ", error);
         }
     };
 
-    useEffect(() => {
-        if (search.length > 0) {
-            searchDatabase(search);
-        } else {
-            setResults([]);
-            // setEventResults([]);
+    const searchEventDatabase = async (query) => {
+        if (eventSearchCache[query]) {
+            setEventResults(eventSearchCache[query]);
+            return;
         }
-    }, [search]);
+        try {
+            // Placeholder
+            const eventResponse = await fetch(`http://192.168.1.142:8000/api/searchevents?query=${query}`);
+            const eventData = await eventResponse.json();
+            console.log(eventData);
+            setEventSearchCache((prevCache) => ({ ...prevCache, [query]: eventData }));
+            setEventResults(eventData);
+        } catch (error) {
+            console.error("Error looking for events: ", error);
+        }
+    };
 
-    const renderUserItem = ({ item }) => (
+    // useEffect(() => {
+    //     if (searchUser.length > 0) {
+    //         searchDatabase(searchUser);
+    //     } else if (searchEvent.length > 0) {
+    //         searchEventDatabase(searchEvent);
+    //     } else {
+    //         setResults([]);
+    //         setEventResults([]);
+    //     }
+    // }, [searchUser, searchEvent]);
+    
+    useEffect(() => {
+        if (index === 0 && searchUser.length > 0) {
+            searchDatabase(searchUser);
+        } else if (index === 1 && searchEvent.length > 0) {
+            searchEventDatabase(searchEvent);
+        }
+    }, [searchUser, searchEvent, index]);
+
+    const renderUserItem = ({ item }) => {
+        return (
+            <View>
+                <TouchableOpacity onPress={() => console.log(item.username)}>
+                    <Text style={styles.resultText}>{item.username}</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+    const renderEventItem = ({ item }) => {
+        return (
+            <View>
+                <EventItem
+                    event_id={item.id}
+                    creation_user={item.creation_user}
+                    event_name={item.event_name}
+                    event_description={item.event_description}
+                    location={item.location}
+                    date={item.date}
+                    list_of_attendees={item.list_of_attendees}
+                />
+            </View>
+        );
+    };
+    
+    const SearchUserRoute = useMemo(() => () => (
         <View>
-            <TouchableOpacity onPress={() => console.log(item.username)}>
-                <Text style={styles.resultText}>{item.username}</Text>
-            </TouchableOpacity>
+            <SearchBar
+                placeholder="Search for friends"
+                onChangeText={setUserSearch}
+                value={searchUser}
+            />
+            <FlatList
+                data={results}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderUserItem}
+                contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+            />
         </View>
-    );
+    ), [searchUser, results]);
+    
+    const SearchEventRoute = useMemo(() => () => (
+        <View>
+            <SearchBar
+                placeholder="Search for events"
+                onChangeText={setEventSearch}
+                value={searchEvent}
+            />
+            <FlatList
+                data={eventResults}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderEventItem}
+                contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+            />
+        </View>
+    ), [searchEvent, eventResults]);
 
-    // const renderEventItem = ({ item }) => (
-    //     <View style={styles.resultItem}>
-    //         <Text style={styles.resultText}>{item.event_name}</Text>
-    //         <Text style={styles.resultText}>{item.description}</Text>
-    //     </View>
-    // );
+    // const SearchUserRoute = () => {
+    //     return (
+    //         <View>
+    //             <SearchBar
+    //                 placeholder="Search for users"
+    //                 onChangeText={setUserSearch}
+    //                 value={searchUser}
+    //             />
+    //             <FlatList
+    //                 data={results}
+    //                 KeyExtractor={(item) => item.id}
+    //                 renderItem={renderUserItem}
+    //                 contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+    //             />
+    //         </View>
+    //     );
+    // };
+
+    // const SearchEventRoute = () => {
+    //     return (
+    //         <View>
+    //             <SearchBar
+    //                 placeholder="Search for events"
+    //                 onChangeText={setEventSearch}
+    //                 value={searchEvent}
+    //             />
+    //             <FlatList
+    //                 data={eventResults}
+    //                 KeyExtractor={(item) => item.id}
+    //                 renderItem={renderEventItem}
+    //                 contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+    //             />
+    //         </View>
+    //     );
+    // };
+
+    const renderTabBar = (props) => {
+        return (
+            <TabBar
+                {...props}
+                indicatorStyle={{backgroundColor: 'black'}}
+                renderLabel={({ route }) => (
+                    <Text style={{color: 'black', fontWeight: 'bold'}}>{route.title}</Text>
+                )}
+            />
+        );
+    };
+
+    const renderSearchScene = SceneMap({
+        first: SearchUserRoute,
+        second: SearchEventRoute
+    });
 
     return (
-        <TouchableWithoutFeedback onPress={dismissKeyboard}>
-            <View style={styles.container}>
-                <SearchBar
-                    placeholder="Search for friends or events"
-                    onChangeText={setSearch}
-                    value={search}
-                />
-                <FlatList
-                    data={results}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={renderUserItem}
-                    contentContainerStyle={styles.resultsContainer}
-                />
-                {/* <Text style={styles.sectionHeader}>Events</Text>
-                <FlatList
-                    data={eventResults}
-                    keyExtractor={(item) => `event-${item.id.toString()}`}
-                    renderItem={renderEventItem}
-                    contentContainerStyle={styles.resultsContainer}
-                /> */}
-            </View>
-        </TouchableWithoutFeedback>
+        <View style={{ flex: 1 }}>
+            <TabView
+                lazy
+                navigationState={{ index, routes }}
+                renderScene={renderSearchScene}
+                onIndexChange={setIndex}
+                initialLayout={{ width: '100%' }}
+                renderTabBar={renderTabBar}
+                style={{ marginTop: 4, padding: 10, color: 'black' }}
+            />
+        </View>
     );
 }
 
