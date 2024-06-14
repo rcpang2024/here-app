@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, FlatList, TouchableOpacity } from "react-native";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { SearchBar } from "react-native-elements";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
@@ -57,25 +57,14 @@ const SearchScreen = () => {
             console.error("Error looking for events: ", error);
         }
     };
-
-    // useEffect(() => {
-    //     if (searchUser.length > 0) {
-    //         searchDatabase(searchUser);
-    //     } else if (searchEvent.length > 0) {
-    //         searchEventDatabase(searchEvent);
-    //     } else {
-    //         setResults([]);
-    //         setEventResults([]);
-    //     }
-    // }, [searchUser, searchEvent]);
     
-    useEffect(() => {
-        if (index === 0 && searchUser.length > 0) {
-            searchDatabase(searchUser);
-        } else if (index === 1 && searchEvent.length > 0) {
-            searchEventDatabase(searchEvent);
-        }
-    }, [searchUser, searchEvent, index]);
+    // useEffect(() => {
+    //     if (index === 0 && searchUser.length > 0) {
+    //         searchDatabase(searchUser);
+    //     } else if (index === 1 && searchEvent.length > 0) {
+    //         searchEventDatabase(searchEvent);
+    //     }
+    // }, [searchUser, searchEvent, index]);
 
     const renderUserItem = ({ item }) => {
         return (
@@ -103,13 +92,28 @@ const SearchScreen = () => {
         );
     };
     
+    const handleUserSearchChange = useCallback((text) => {
+        setUserSearch(text);
+        if (text.length > 0) {
+            searchDatabase(text);
+        } else {
+            setResults([]);
+        }
+    }, [userSearchCache]);
+
+    const handleEventSearchChange = useCallback((text) => {
+        setEventSearch(text);
+        if (text.length > 0) {
+            searchEventDatabase(text);
+        } else {
+            setEventResults([]);
+        }
+    }, [eventSearchCache]);
+
+    // Keyboard disappearance issue was b/c the search bar was being re-rendered everytime input change
+    // SOLUTION (for now): put search bar outside of TabView
     const SearchUserRoute = useMemo(() => () => (
         <View>
-            <SearchBar
-                placeholder="Search for friends"
-                onChangeText={setUserSearch}
-                value={searchUser}
-            />
             <FlatList
                 data={results}
                 keyExtractor={(item) => item.id.toString()}
@@ -117,15 +121,10 @@ const SearchScreen = () => {
                 contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
             />
         </View>
-    ), [searchUser, results]);
+    ), [results]);
     
     const SearchEventRoute = useMemo(() => () => (
         <View>
-            <SearchBar
-                placeholder="Search for events"
-                onChangeText={setEventSearch}
-                value={searchEvent}
-            />
             <FlatList
                 data={eventResults}
                 keyExtractor={(item) => item.id.toString()}
@@ -133,7 +132,7 @@ const SearchScreen = () => {
                 contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
             />
         </View>
-    ), [searchEvent, eventResults]);
+    ), [eventResults]);
 
     // const SearchUserRoute = () => {
     //     return (
@@ -190,6 +189,11 @@ const SearchScreen = () => {
 
     return (
         <View style={{ flex: 1 }}>
+            <SearchBar
+                placeholder={index === 0 ? "Search for friends" : "Search for events"}
+                onChangeText={index === 0 ? handleUserSearchChange : handleEventSearchChange}
+                value={index === 0 ? searchUser : searchEvent}
+            />
             <TabView
                 lazy
                 navigationState={{ index, routes }}
@@ -197,7 +201,7 @@ const SearchScreen = () => {
                 onIndexChange={setIndex}
                 initialLayout={{ width: '100%' }}
                 renderTabBar={renderTabBar}
-                style={{ marginTop: 4, padding: 10, color: 'black' }}
+                style={{ marginTop: 4, padding: 1, color: 'black' }}
             />
         </View>
     );
