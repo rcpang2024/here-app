@@ -57,14 +57,6 @@ const SearchScreen = () => {
             console.error("Error looking for events: ", error);
         }
     };
-    
-    // useEffect(() => {
-    //     if (index === 0 && searchUser.length > 0) {
-    //         searchDatabase(searchUser);
-    //     } else if (index === 1 && searchEvent.length > 0) {
-    //         searchEventDatabase(searchEvent);
-    //     }
-    // }, [searchUser, searchEvent, index]);
 
     const renderUserItem = ({ item }) => {
         return (
@@ -114,69 +106,42 @@ const SearchScreen = () => {
     // SOLUTION (for now): put search bar outside of TabView
     const SearchUserRoute = useMemo(() => () => (
         <View>
-            <FlatList
-                data={results}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderUserItem}
-                contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
-            />
+            {searchUser !== '' && results.length === 0 ? (
+            <Text style={{fontSize: 20, padding: 5}}>No results found...</Text>
+            ) : (
+                <FlatList
+                    data={results}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderUserItem}
+                    contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+                />
+            )}
         </View>
     ), [results]);
     
     const SearchEventRoute = useMemo(() => () => (
         <View>
-            <FlatList
-                data={eventResults}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderEventItem}
-                contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
-            />
+            {searchEvent !== '' && eventResults.length === 0 ? (
+                <Text style={{fontSize: 20, padding: 5}}>No results found...</Text>
+            ) : (
+                <FlatList
+                    data={eventResults}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderEventItem}
+                    contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+                />
+            )}
         </View>
     ), [eventResults]);
-
-    // const SearchUserRoute = () => {
-    //     return (
-    //         <View>
-    //             <SearchBar
-    //                 placeholder="Search for users"
-    //                 onChangeText={setUserSearch}
-    //                 value={searchUser}
-    //             />
-    //             <FlatList
-    //                 data={results}
-    //                 KeyExtractor={(item) => item.id}
-    //                 renderItem={renderUserItem}
-    //                 contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
-    //             />
-    //         </View>
-    //     );
-    // };
-
-    // const SearchEventRoute = () => {
-    //     return (
-    //         <View>
-    //             <SearchBar
-    //                 placeholder="Search for events"
-    //                 onChangeText={setEventSearch}
-    //                 value={searchEvent}
-    //             />
-    //             <FlatList
-    //                 data={eventResults}
-    //                 KeyExtractor={(item) => item.id}
-    //                 renderItem={renderEventItem}
-    //                 contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
-    //             />
-    //         </View>
-    //     );
-    // };
 
     const renderTabBar = (props) => {
         return (
             <TabBar
                 {...props}
                 indicatorStyle={{backgroundColor: 'black'}}
+                style={{ backgroundColor: '#BD7979' }} 
                 renderLabel={({ route }) => (
-                    <Text style={{color: 'black', fontWeight: 'bold'}}>{route.title}</Text>
+                    <Text style={{color: 'white', fontWeight: 'bold'}}>{route.title}</Text>
                 )}
             />
         );
@@ -188,22 +153,28 @@ const SearchScreen = () => {
     });
 
     return (
-        <View style={{ flex: 1 }}>
-            <SearchBar
-                placeholder={index === 0 ? "Search for friends" : "Search for events"}
-                onChangeText={index === 0 ? handleUserSearchChange : handleEventSearchChange}
-                value={index === 0 ? searchUser : searchEvent}
-            />
-            <TabView
-                lazy
-                navigationState={{ index, routes }}
-                renderScene={renderSearchScene}
-                onIndexChange={setIndex}
-                initialLayout={{ width: '100%' }}
-                renderTabBar={renderTabBar}
-                style={{ marginTop: 4, padding: 1, color: 'black' }}
-            />
-        </View>
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <View style={{ flex: 1 }}>
+                <SearchBar
+                    placeholder={index === 0 ? "Search for friends" : "Search for events"}
+                    placeholderTextColor={index === 0 ? 'gray' : 'black'}
+                    onChangeText={index === 0 ? handleUserSearchChange : handleEventSearchChange}
+                    inputStyle={styles.searchBarInput}
+                    value={index === 0 ? searchUser : searchEvent}
+                    style={index === 0 ? styles.searchBarUser : styles.searchBarEvent}
+                    clearIcon={{size: 28, borderRadius: 3, padding: 3}}
+                />
+                <TabView
+                    lazy
+                    navigationState={{ index, routes }}
+                    renderScene={renderSearchScene}
+                    onIndexChange={setIndex}
+                    initialLayout={{ width: '100%' }}
+                    renderTabBar={renderTabBar}
+                    style={{ marginTop: 4, padding: 1, color: 'black' }}
+                />
+            </View>
+        </TouchableWithoutFeedback>
     );
 }
 
@@ -214,6 +185,20 @@ const styles = StyleSheet.create({
     resultText: {
         fontSize: 20,
         padding: 10
+    },
+    searchBarUser: {
+        backgroundColor: '#f0f0f0',
+        borderRadius: 5,
+        padding: 5,
+    },
+    searchBarEvent: {
+        backgroundColor: '#E68D8D',
+        borderRadius: 5,
+        padding: 5
+    },
+    searchBarInput: {
+        fontSize: 18,
+        color: 'black',
     }
 })
 

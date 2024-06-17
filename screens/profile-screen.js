@@ -245,10 +245,10 @@ const ProfileScreen = () => {
         return (
             <TabBar 
                 {...props}
-                // tabStyle={{backgroundColor: 'black',}}
                 indicatorStyle={{ backgroundColor: 'black' }}
-                renderLabel={({ focused, route}) => (
-                    <Text style={{color: 'black', fontWeight: 'bold'}}>{route.title}</Text>
+                style={{ backgroundColor: '#BD7979' }} 
+                renderLabel={({ route}) => (
+                    <Text style={{color: 'white', fontWeight: 'bold'}}>{route.title}</Text>
                 )}
             />
         );
