@@ -1,42 +1,92 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useWindowDimensions } from "react-native";
+import { useState, useContext, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, useWindowDimensions, FlatList } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import { UserContext } from "../user-context";
+import EventItem from '../components/event-item';
 
-const FriendsScreen = () => {
+const ExploreScreen = () => {
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
+    const { user } = useContext(UserContext); // Access user from context
+    const [friendsEvents, setFriendsEvents] = useState([]);
+
     const [routes] = useState([
-        {key: 'first', title: 'FRIENDS EVENTS'},
-        {key: 'second', title: 'FRIENDS ATTENDING'},
+        {key: 'first', title: 'FRIENDS ATTENDING'},
+        {key: 'second', title: 'EVENTS NEARBY'},
     ]);
 
-    // const friendsCreatedRoute = () => {
-    //     <View>
-    //         <Text>FRIENDS CREATED</Text>
-    //     </View>
+    // const fetchFriendsEvents = async () => {
+    //     if (user && user.list_of_following.length > 0) {
+    //         try {
+    //             const response = await fetch(`http://192.168.1.142:8000/api/friendsevents`);
+    //             const eventsData = await response.json();
+    //             setFriendsEvents(eventsData);
+    //         } catch (error) {
+    //             console.log("Error fetching events: ", error);
+    //         }
+    //     }
     // };
 
-    // const friendsAttendingRoute = () => {
-    //     <View style={{flex: 1, backgroundColor: 'red'}}>
-    //         <Text>FRIENDS ATTENDING</Text>
-    //     </View>
-    // };
-    const friendsCreatedRoute = () => (
+    const fetchFriendsEvents = async (user) => {
+        try {
+            const response = await fetch(`http://192.168.1.142:8000/api/friendsevents`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${await AsyncStorage.getItem('access_token')}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch friends events');
+            }
+            const eventsData = await response.json();
+            return eventsData;
+        } catch (error) {
+            console.error("Error fetching friends' events: ", error);
+            return [];
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchFriendsEvents(user).then(setFriendsEvents);
+        }
+    }, [user]);
+
+    const renderEventItem = ({ item }) => (
         <View>
-            <Text>FRIENDS CREATED</Text>
+            <EventItem
+                event_id={item.id}
+                creation_user={item.creation_user}
+                event_name={item.event_name}
+                event_description={item.event_description}
+                location={item.location}
+                date={item.date}
+                list_of_attendees={item.list_of_attendees}
+            />
         </View>
     );
     
     const friendsAttendingRoute = () => (
-        <View style={{flex: 1, backgroundColor: 'red'}}>
-            <Text>FRIENDS ATTENDING</Text>
+        <View>
+            <FlatList
+                data={friendsEvents}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderEventItem}
+                ListEmptyComponent={<Text>No Events Found</Text>}
+            />
+        </View>
+    );
+
+    const exploreRoute = () => (
+        <View>
+            <Text>Find Interesting Events</Text>
         </View>
     );
 
     const renderScene = SceneMap({
-        first: friendsCreatedRoute,
-        second: friendsAttendingRoute
+        first: friendsAttendingRoute,
+        second: exploreRoute
     });
 
     const renderTabBar = (props) => {
@@ -45,7 +95,7 @@ const FriendsScreen = () => {
                 {...props}
                 indicatorStyle={{ backgroundColor: 'black' }}
                 style={{ backgroundColor: '#BD7979' }}
-                renderLabel={({ route}) => (
+                renderLabel={({ route }) => (
                     <Text style={{color: 'white', fontWeight: 'bold'}}>{route.title}</Text>
                 )}
             />
@@ -107,4 +157,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default FriendsScreen;
+export default ExploreScreen;

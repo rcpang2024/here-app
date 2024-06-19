@@ -122,6 +122,7 @@ const CreateEventScreen = () => {
           <TextInput
             ref={eventNameRef}
             placeholder="Event Name"
+            placeholderTextColor={{color: 'black'}}
             style={styles.input}
             returnKeyType="next"
             onChangeText={(val) => setEventName(val)}
@@ -182,22 +183,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 20,
   },
+  placeholderText: {
+    color: 'black'
+  },
   textEntry: {
-    backgroundColor: 'white',
-    borderColor: '#e8e8e8',
+    backgroundColor: '#F3B0B0',
+    borderColor: 'black',
     borderWidth: 1,
     borderRadius: 5,
     marginVertical: 8,
     paddingHorizontal: 12,
-    marginLeft: 5,
-    marginRight: 5,
+    marginLeft: 1,
+    marginRight: 1,
   },
   input: {
     marginBottom: 15,
     marginTop: 15,
-    borderWidth: 3,
-    borderColor: 'gray',
-    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: 'black',
+    borderRadius: 3,
     fontSize: 16,
     paddingHorizontal: 10,
     paddingVertical: 25,

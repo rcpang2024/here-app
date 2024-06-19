@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useRef, useState, useContext } from "react";
 import { UserContext } from "../user-context";
 import HereLogo from '../assets/images/HereLogo.png';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LogInScreen = () => {
     const navigation = useNavigation();
@@ -34,6 +35,46 @@ const LogInScreen = () => {
             // console.error("Error fetching user, make sure the username is correct: ", error);
         }
     };
+
+    // const handleClick = async () => {
+    //     if (username == '' || pw == '') {
+    //         alert('Please type in your username and password');
+    //     } else {
+    //         try {
+    //             const tokenResponse = await fetch(`http://192.168.1.142:8000/api/token/`, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //                 body: JSON.stringify({ username, password: pw }),
+    //             });
+    //             if (!tokenResponse.ok) {
+    //                 throw new Error('Invalid username or password');
+    //             }
+    //             const tokenData = await tokenResponse.json();
+    //             await AsyncStorage.setItem('access_token', tokenData.access);
+    //             await AsyncStorage.setItem('refresh_token', tokenData.refresh);
+    
+    //             const userResponse = await fetch(`http://192.168.1.142:8000/api/users/username/${username}/`, {
+    //                 method: 'GET',
+    //                 headers: {
+    //                     'Authorization': `Bearer ${tokenData.access}`,
+    //                 },
+    //             });
+    //             if (!userResponse.ok) {
+    //                 throw new Error('Failed to fetch user data');
+    //             }
+    //             const userData = await userResponse.json();
+    //             setUser(userData);
+    //             dismissKeyboard();
+    //             navigation.navigate("Tab");
+    //             setUsername(''); 
+    //             setPW(''); 
+    //         } catch (error) {
+    //             alert(error.message);
+    //         }
+    //     }
+    // };
 
     const handleClick = () => {
         if (username == '' || pw == '') {

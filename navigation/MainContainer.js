@@ -4,7 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/home-screen';
 import ProfileScreen from '../screens/profile-screen';
 import CreateEventScreen from '../screens/create-event-screen';
-import FriendsScreen from '../screens/friends-screen';
+import ExploreScreen from '../screens/friends-screen';
 import SearchScreen from '../screens/search-screen';
 import EventDetailScreen from '../screens/event-detail-screen';
 import AttendeesScreen from '../screens/attendees-screen';
@@ -22,7 +22,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 const homeName = 'Home';
 const profileName = 'Profile';
 const createEventName = 'Create Event';
-const friendsName = 'Friends';
+const exploreName = 'Explore';
 const searchName = 'Search';
 const loginName = 'Login';
 const Tab = createBottomTabNavigator();
@@ -72,8 +72,8 @@ function TabNavigator() {
             iconName = focused ? 'person' : 'person-outline';
           } else if (rn === createEventName) {
             iconName = focused ? 'add' : 'add-outline';
-          } else if (rn === friendsName) {
-            iconName = focused ? 'people' : 'people-outline';
+          } else if (rn === exploreName) {
+            iconName = focused ? 'map' : 'map-outline';
           } else if (rn === searchName) {
             iconName = focused ? 'search' : 'search-outline';
           }
@@ -86,7 +86,7 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name={homeName} component={HomeScreen} />
-      <Tab.Screen name={friendsName} component={FriendsScreen} />
+      <Tab.Screen name={exploreName} component={ExploreScreen} />
       <Tab.Screen name={createEventName} component={CreateEventScreen} />
       <Tab.Screen name={searchName} component={SearchScreen} />
       <Tab.Screen name={profileName} component={ProfileScreen} />

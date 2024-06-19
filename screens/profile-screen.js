@@ -12,7 +12,6 @@ const ProfileScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = useContext(UserContext); // Access user from context
-    // const [user, SetUser] = useState('');
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
 
@@ -71,7 +70,7 @@ const ProfileScreen = () => {
             }
         });
         const createdDataArray = await Promise.all(createdPromises);
-        console.log("createdDataArray: ", createdDataArray);
+        // console.log("createdDataArray: ", createdDataArray);
         setCreatedEvent(createdDataArray);
     };
 
@@ -97,17 +96,20 @@ const ProfileScreen = () => {
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
         if (newIndex === 1 && createdEvent.length === 0) {
-            console.log("handleCreatedEvent")
+            // console.log("ppl user follows: ", user.list_of_following);
             handleCreatedEvent();
         }
         else if (newIndex === 2 && event.length === 0) {
-            console.log("handleAttendingEvent")
             handleAttendingEvent();
         }
     };
 
+    // const handleUnregister = (eventId) => {
+    //     setAttending(attending.filter(id => id !== eventId));
+    //     setEvent(event.filter(e => e.id !== eventId));
+    // };
+
     const renderCreate = ({ item }) => {
-        console.log("created item:", item)
         return (
             <View>
                 <EventItem
@@ -124,7 +126,6 @@ const ProfileScreen = () => {
     };
 
     const renderAttending = ({ item }) => {
-        console.log("attending item:", item)
         return (
             <View>
                 <EventItem
@@ -135,6 +136,7 @@ const ProfileScreen = () => {
                     location={item.location}
                     date={item.date}
                     list_of_attendees={item.list_of_attendees}
+                    // onUnregister={handleUnregister}
                 />
             </View>
         );
@@ -142,10 +144,13 @@ const ProfileScreen = () => {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
+        handleCreatedEvent();
+        handleAttendingEvent();
+        setRefreshing(false);
         // fetchUser();
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 2000);
+        // setTimeout(() => {
+        //     setRefreshing(false);
+        // }, 2000);
     }, []);
 
     const ProfileRoute = () => {

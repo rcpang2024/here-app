@@ -1,20 +1,83 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { TouchableOpacity, StyleSheet, Text, View } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { UserContext } from "../user-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const EventItem = ({ event_id, creation_user, event_name, event_description, location, date, list_of_attendees }) => {
   const navigation = useNavigation();
+  const { user, updateUserContext } = useContext(UserContext);
 
   const [creator, setCreator] = useState('');
   const [isGoing, setIsGoing] = useState(false);
 
-  const handleRegister = () => {
-    setIsGoing((prevState) => !prevState);
+  const saveRegistrationStatus = async (event_id, status) => {
+    try {
+      await AsyncStorage.setItem(`event_${event_id}_status`, JSON.stringify(status));
+    } catch (error) {
+      console.error('Error saving registration status:', error);
+    }
+  };
+  
+
+  const handleRegister = async () => {
+    try {
+      const response = await fetch(`http://192.168.1.142:8000/api/registeruser/${event_id}/${user.username}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setIsGoing(true);
+        saveRegistrationStatus(event_id, true); // Save registration status
+        updateUserContext({ ...user, attending_events: [...user.attending_events, event_id] });
+      } else {
+        console.error('Failed to register for the event');
+      }
+    } catch (error) {
+      console.error('Error registering for the event:', error);
+    }
+  };
+
+  const loadRegistrationStatus = async () => {
+    try {
+      const status = await AsyncStorage.getItem(`event_${event_id}_status`);
+      if (status !== null) {
+        setIsGoing(JSON.parse(status));
+      }
+    } catch (error) {
+      console.error('Error loading registration status:', error);
+    }
+  };
+
+  const handleUnregister = async () => {
+    try {
+      const response = await fetch(`http://192.168.1.142:8000/api/unregisteruser/${event_id}/${user.username}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setIsGoing(false);
+        saveRegistrationStatus(event_id, false); // Save registration status
+        updateUserContext({ ...user, attending_events: user.attending_events.filter(id => id !== event_id) });
+        // onUnregister(event_id)
+      } else {
+        console.error('Failed to unregister from the event');
+      }
+    } catch (error) {
+      console.error('Error unregistering from the event:', error);
+    }
   };
   
   useEffect(() => {
     fetchCreator();
+    loadRegistrationStatus();
   }, []);
 
   const fetchCreator = async () => {
@@ -44,12 +107,10 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, isGoing ? styles.alreadyRegistered : null]}
-          onPress={() => {
-            handleRegister()
-          }}
+          onPress={isGoing ? handleUnregister : handleRegister}
         >
           {!isGoing && <Ionicons name="add" size={20} color="white" />}
-          <Text style={styles.buttonText}>{isGoing ? 'Going!' : 'Register'}</Text>
+          <Text style={styles.buttonText}>{isGoing ? 'GOING!' : 'REGISTER'}</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -70,7 +131,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flexDirection: 'row',
-    backgroundColor: 'darkred',
+    backgroundColor: '#BFB3B3',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 10,
@@ -79,7 +140,8 @@ const styles = StyleSheet.create({
   },
   alreadyRegistered: {
     flexDirection: 'row',
-    backgroundColor: 'blue',
+    // backgroundColor: '#73CADF',
+    backgroundColor: '#EC6C6C',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
@@ -89,6 +151,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     marginLeft: 5,
+    // fontStyle: 'oblique',
+    fontWeight: 'bold'
   },
 });
 

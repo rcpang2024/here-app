@@ -10,7 +10,7 @@ const HomeScreen = () => {
         fetchData();
     }, []);
 
-    // PLACEHOLDER
+    // PLACEHOLDER - CHANGE TO A LIST OF EVENTS THE USER'S FOLLOWERS HAVE CREATED
     const fetchData = async() => {
         const response = await fetch('http://192.168.1.142:8000/api/events/');
         const data = await response.json();
@@ -43,7 +43,7 @@ const HomeScreen = () => {
 
     return (
         <View style={styles.title}>
-            <Text style={styles.format}>Some upcoming public events!</Text>
+            <Text style={styles.format}>Events by the people you follow!</Text>
             <FlatList
                 data={data}
                 keyExtractor={(item) => item.id}
