@@ -1,13 +1,18 @@
-import React, { useRef, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard } from "react-native";
+import React, { useRef, useState, useContext } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard, Modal } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
 import uuid from 'react-native-uuid';
+import { UserContext } from "../user-context";
 
 const CreateEventScreen = () => {
   const [eventName, setEventName] = useState("");
   const [eventDesc, setEventDesc] = useState("");
   const [eventLocation, setEventLocation] = useState("");
+  const [modalVisibility, setModalVisibility] = useState(false);
+
+  // User context to update and retrieve current logged in user
+  const { user, updateUserContext } = useContext(UserContext);
 
   const eventNameRef = useRef();
   const eventDescriptionRef = useRef();
@@ -69,10 +74,6 @@ const CreateEventScreen = () => {
 
   const fetchPost = async () => {
     try {
-      // PLACEHOLDER - GO BACK IN AND RETRIEVE LOGGED IN USER'S ID WHEN WE GET TO THAT POINT
-      const userResponse = await fetch('http://192.168.1.142:8000/api/users/username/rcpang/');
-      const user = await userResponse.json();
-  
       const response = await fetch('http://192.168.1.142:8000/api/createevent/', {
         method: 'POST',
         headers: {
@@ -93,6 +94,7 @@ const CreateEventScreen = () => {
         throw new Error(errorData.detail || 'Unknown error');
       }
       const data = await response.json();
+      console.log("Event created:", data); // Log the created event data
       return data; // Return the data from the API response
     } catch (error) {
       console.error('Error creating event:', error);
@@ -102,12 +104,16 @@ const CreateEventScreen = () => {
 
   const handlePostEvent = () => {
     fetchPost().then((data) => {
-      // onEventCreate(data); // Call the function passed as a prop with the new event data
-      console.log("Inside handlePostEvent: ", data);
+      console.log("Inside handlePostEvent: ", data.id);
+      const updatedUser = {
+        ...user,
+        created_events: [...user.created_events, data.id]
+      };
+      updateUserContext(updatedUser);
+      setModalVisibility(true);
     })
     .catch((error) => {
       console.error('Error in handlePostEvent:', error.message);
-      // Handle any error that occurred during the fetch or in onEventCreate here
     })
     .finally(() => {
       dismissKeyboard();
@@ -172,6 +178,26 @@ const CreateEventScreen = () => {
             <Text style={styles.buttonText}>POST EVENT</Text>
           </TouchableOpacity>
         </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisibility}
+          onRequestClose={() => {
+            setModalVisibility(!modalVisibility);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={{fontSize: 20, paddingBottom: 15}}>Event Created Successfully!</Text>
+              <TouchableOpacity
+                onPress={() => setModalVisibility(!modalVisibility)}
+                style={styles.button}
+              >
+                <Text style={styles.buttonText}>CLOSE</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -218,6 +244,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     marginLeft: 5,
+  },
+  modalView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 10,
+    backgroundColor: '#E4DBDB',
+    borderRadius: 5,
+    padding: 35,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

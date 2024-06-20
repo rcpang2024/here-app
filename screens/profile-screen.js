@@ -60,13 +60,26 @@ const ProfileScreen = () => {
     };
 
     const handleCreatedEvent = async () => {
+        // const createdPromises = created.map(async (eventId) => {
+        //     try {
+        //         const createdData = await fetchEvent(eventId);
+        //         return createdData;
+        //     } catch (error) {
+        //         console.error('Error fetching event data:', error.message);
+        //         return null;
+        //     }
+        // });
         const createdPromises = created.map(async (eventId) => {
-            try {
+            if (typeof eventId === 'object') {
+              return eventId;
+            } else {
+              try {
                 const createdData = await fetchEvent(eventId);
                 return createdData;
-            } catch (error) {
+              } catch (error) {
                 console.error('Error fetching event data:', error.message);
                 return null;
+              }
             }
         });
         const createdDataArray = await Promise.all(createdPromises);
@@ -88,7 +101,7 @@ const ProfileScreen = () => {
         });
         // fetchUser();
         if (user) {
-            setCreated(user.created_events);
+            setCreated(user.created_events.map(event => typeof event === 'object' ? event.id : event));
             setAttending(user.attending_events);
         }
     }, [route.params, user]);
