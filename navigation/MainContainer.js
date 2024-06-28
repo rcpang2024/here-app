@@ -12,6 +12,7 @@ import SettingsScreen from '../screens/settings-screen';
 import LogInScreen from '../screens/login-screen';
 import CreateUserScreen from '../screens/create-user-screen';
 import EditProfileScreen from '../screens/edit-profile-screen';
+import EditEventScreen from '../screens/edit-event-screen';
 import AboutHereScreen from '../screens/about-here-screen';
 import ConfirmEmailScreen from '../screens/confirm-email-screen';
 import ForgotScreen from '../screens/forgot-pw-screen';
@@ -52,6 +53,7 @@ export function MainContainer() {
         <Stack.Screen name="Followers" component={FollowersScreen}/>
         <Stack.Screen name="Following" component={FollowingScreen}/>
         <Stack.Screen name="Edit Profile" component={EditProfileScreen}/>
+        <Stack.Screen name="Edit Event" component={EditEventScreen}/>
         <Stack.Screen name="About Here" options={{ headerShown: false }} component={AboutHereScreen}/>
       </Stack.Navigator>
     </NavigationContainer>

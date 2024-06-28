@@ -11,6 +11,11 @@ const LogInScreen = () => {
     const route = useRoute();
     const { setUser } = useContext(UserContext); // Access setUser from context
 
+    // Sets placeholders back to default
+    const [usernamePlaceholder, setUsernamePlaceholder] = useState('Username');
+    const [pwPlaceholder, setPWPlaceholder] = useState('Password');
+
+    // Sets the username and password to whatever the user typed in
     const [username, setUsername] = useState('');
     const [pw, setPW] = useState('');
 
@@ -32,7 +37,6 @@ const LogInScreen = () => {
         }
         catch (error) {
             alert("Please type in a valid username and password")
-            // console.error("Error fetching user, make sure the username is correct: ", error);
         }
     };
 
@@ -88,7 +92,9 @@ const LogInScreen = () => {
                     setUser(data);
                     navigation.navigate("Tab");
                     setUsername(''); 
+                    setUsernamePlaceholder('Username');
                     setPW(''); 
+                    setPWPlaceholder('Password');
                 }
             })
             .catch((error) => {
@@ -105,7 +111,7 @@ const LogInScreen = () => {
                     <View style={styles.container}>
                         <TextInput
                             ref={usernameRef}
-                            placeholder="Username"
+                            placeholder={usernamePlaceholder}
                             style={styles.input}
                             returnKeyType="next"
                             onChangeText={(val) => setUsername(val)}
@@ -114,7 +120,7 @@ const LogInScreen = () => {
                     <View style={styles.container}>
                         <TextInput
                             ref={pwRef}
-                            placeholder="Password"
+                            placeholder={pwPlaceholder}
                             style={styles.input}
                             returnKeyType="next"
                             secureTextEntry={true}

@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import MapView, { Marker } from 'react-native-maps';
+import { useEffect } from "react";
+// import MapView, { Marker } from 'react-native-maps';
 
 const EventDetailScreen = () => {
     const navigation = useNavigation();
@@ -14,7 +14,7 @@ const EventDetailScreen = () => {
     const location = route.params.theLocation;
     const date = route.params.theDate;
     const list_of_attendees = route.params.attendees
-
+    
     useEffect(() => {
     // Set the left header component
     navigation.setOptions({
@@ -58,7 +58,7 @@ const EventDetailScreen = () => {
                     })
                     }
                 >
-                    <Text style={styles.buttonText}>Attendees</Text>
+                    <Text style={styles.buttonText}>ATTENDEES</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     },
     button: {
         flexDirection: 'row',
-        backgroundColor: 'darkred',
+        backgroundColor: '#BD7979',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 10,

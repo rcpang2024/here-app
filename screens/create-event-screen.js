@@ -81,7 +81,7 @@ const CreateEventScreen = () => {
         },
         body: JSON.stringify({
           id: uuid.v4(),
-          creation_user: user.id, // Use the user's ID instead of the entire user object
+          creation_user: user.id, 
           event_name: eventName,
           event_description: eventDesc,
           location: eventLocation,
@@ -94,11 +94,11 @@ const CreateEventScreen = () => {
         throw new Error(errorData.detail || 'Unknown error');
       }
       const data = await response.json();
-      console.log("Event created:", data); // Log the created event data
-      return data; // Return the data from the API response
+      console.log("Event created:", data);
+      return data;
     } catch (error) {
       console.error('Error creating event:', error);
-      throw error; // Re-throw the error to be handled by the caller
+      throw error;
     }
   };
 
@@ -117,7 +117,7 @@ const CreateEventScreen = () => {
     })
     .finally(() => {
       dismissKeyboard();
-      clearTextInputs(); // This should clear the text inputs
+      clearTextInputs();
     });
   };
 

@@ -112,6 +112,25 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
           {!isGoing && <Ionicons name="add" size={20} color="white" />}
           <Text style={styles.buttonText}>{isGoing ? 'GOING!' : 'REGISTER'}</Text>
         </TouchableOpacity>
+        {user.id === creation_user && (
+          <View>
+            <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate("Edit Event", {
+              eventID: event_id,
+              eventName: event_name,
+              eventDescription: event_description,
+              theLocation: location,
+              theDate: date,
+              attendees: list_of_attendees
+            })}>
+              <Ionicons name="create-outline" size={20} color="white" />
+              <Text style={styles.buttonText}>EDIT</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteButton}>
+              <Ionicons name="trash-outline" size={20} color="white" />
+              <Text style={styles.buttonText}>DELETE</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -137,6 +156,26 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  editButton: {
+    flexDirection: 'row',
+    backgroundColor: "#5ADAD8",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    backgroundColor: "red",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10
   },
   alreadyRegistered: {
     flexDirection: 'row',
