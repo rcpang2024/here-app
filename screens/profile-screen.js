@@ -44,21 +44,6 @@ const ProfileScreen = () => {
         }
     };
 
-    const handleAttendingEvent = async () => {
-        const eventDataPromises = attending.map(async (eventId) => {
-            try {
-                const eventData = await fetchEvent(eventId);
-                return eventData;
-            } catch (error) {
-                console.error('Error fetching event data:', error.message);
-                return null;
-            }
-        });
-        const eventDataArray = await Promise.all(eventDataPromises);
-        // console.log("EventdataArray: ", eventDataArray);
-        setEvent(eventDataArray);
-    };
-
     const handleCreatedEvent = async () => {
         const createdPromises = created.map(async (eventId) => {
             if (typeof eventId === 'object') {
@@ -74,8 +59,23 @@ const ProfileScreen = () => {
             }
         });
         const createdDataArray = await Promise.all(createdPromises);
-        // console.log("createdDataArray: ", createdDataArray);
-        setCreatedEvent(createdDataArray);
+        const validCreatedEvents = createdDataArray.filter(event => event !== null);
+        setCreatedEvent(validCreatedEvents);
+    };
+
+    const handleAttendingEvent = async () => {
+        const eventDataPromises = attending.map(async (eventId) => {
+            try {
+                const eventData = await fetchEvent(eventId);
+                return eventData;
+            } catch (error) {
+                console.error('Error fetching event data:', error.message);
+                return null;
+            }
+        });
+        const eventDataArray = await Promise.all(eventDataPromises);
+        const validAttendingEvents = eventDataArray.filter(event => event !== null);
+        setEvent(validAttendingEvents);
     };
 
     useEffect(() => {

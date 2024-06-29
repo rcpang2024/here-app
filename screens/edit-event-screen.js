@@ -21,7 +21,11 @@ const EditEventScreen = () => {
     const [newEventName, setNewEventName] = useState(currEventName);
     const [newDescription, setNewDescription] = useState(currDescription);
     const [newLocation, setNewLocation] = useState(currLocation);
-    const [newDate, setNewDate] = useState(currDate);
+
+    const currDateObject = new Date(currDate);
+    const [newDate, setNewDate] = useState(currDateObject);
+    const [showDate, setShowDate] = useState(false);
+    const [showTime, setShowTime] = useState(false);
 
     const eventNameRef = useRef();
     const descriptionRef = useRef();
@@ -29,17 +33,18 @@ const EditEventScreen = () => {
     const dateRef = useRef();
 
     const [mode, setMode] = useState('date');
-    const [showDate, setShowDate] = useState(false);
-    const [showTime, setShowTime] = useState(false);
-    const [dateText, setDateText] = useState('Choose a Date');
-    const [timeText, setTimeText] = useState('Choose a Time');
+
+    const formattedDate = format(currDateObject, 'MM/dd/yyyy');
+    const formattedTime = format(currDateObject, 'hh:mm a');
+    const [dateText, setDateText] = useState(formattedDate);
+    const [timeText, setTimeText] = useState(formattedTime);
     const today = new Date();
 
     const onChange = (selectedDate) => {
         setShowDate(false);
         setShowTime(false);
         if (selectedDate) {
-          setDate(selectedDate);
+          setNewDate(selectedDate);
           let tempDate = new Date(selectedDate);
           let formattedDate = format(tempDate, 'MM/dd/yyyy');
           let formattedTime = format(tempDate, 'hh:mm a');
@@ -162,21 +167,34 @@ const EditEventScreen = () => {
                             onChangeText={(val) => setNewLocation(val)}
                         />
                     </View>
-                    {/* <View>
-                        <TouchableOpacity style={styles.input} onPress={showDatePicker}>
-                            <Text>{dateText}</Text>
+                    <View>
+                        <TouchableOpacity style={styles.dateInput} onPress={showDatePicker}>
+                            <Text style={{fontSize: 18}}>Date: {dateText}</Text>
                         </TouchableOpacity>
                             {showDate && (
                             <DateTimePickerModal
                                 isVisible={showDate}
                                 mode="date"
-                                date={currDate}
+                                date={newDate}
                                 onConfirm={onChange}
                                 onCancel={hidePicker}
                                 minimumDate={today}
                             />
                             )}
-                    </View> */}
+                        <TouchableOpacity style={styles.dateInput} onPress={showTimePicker}>
+                            <Text style={{fontSize: 18}}>Time: {timeText}</Text>
+                        </TouchableOpacity>
+                            {showTime && (
+                            <DateTimePickerModal
+                                isVisible={showTime}
+                                mode="time"
+                                date={newDate}
+                                onConfirm={onChange}
+                                onCancel={hidePicker}
+                                minimumDate={today}
+                            />
+                            )}
+                    </View>
                 </View>
             </TouchableWithoutFeedback>
             <View>
@@ -199,6 +217,9 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginVertical: 10,
         paddingHorizontal: 5,
+        paddingVertical: 5,
+        marginLeft: 10,
+        marginRight: 10
     },
     input: {
         fontSize: 18,
@@ -225,6 +246,17 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 10,
     },
+    dateInput: {
+        marginBottom: 15,
+        marginTop: 10,
+        marginLeft: 10,
+        marginRight: 10,
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 1,
+        paddingHorizontal: 8,
+        paddingVertical: 20,
+    }
 })
 
 export default EditEventScreen;

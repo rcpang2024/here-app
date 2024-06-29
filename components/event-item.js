@@ -1,9 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState, useEffect, useContext } from "react";
-import { TouchableOpacity, StyleSheet, Text, View } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, View, Alert } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import format from "date-fns/format";
 
 const EventItem = ({ event_id, creation_user, event_name, event_description, location, date, list_of_attendees }) => {
   const navigation = useNavigation();
@@ -11,6 +12,9 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
 
   const [creator, setCreator] = useState('');
   const [isGoing, setIsGoing] = useState(false);
+
+  const formattedDate = format(new Date(date), 'MM-dd-yyyy');
+  const formattedTime = format(new Date(date), 'h:mm a');
 
   const saveRegistrationStatus = async (event_id, status) => {
     try {
@@ -90,6 +94,41 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
     }
 };
 
+const handleDelete = async () => {
+  Alert.alert(
+    "Delete Event",
+    "Are you sure you want to delete this event?",
+    [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", onPress: async () => {
+          try {
+            const response = await fetch(`http://192.168.1.142:8000/api/deleteevent/${event_id}/`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (response.ok) {
+              // Remove event from user context
+              const updatedUser = {
+                ...user,
+                created_events: user.created_events.filter(id => id !== event_id),
+                attending_events: user.attending_events.filter(id => id !== event_id),
+              };
+              updateUserContext(updatedUser);
+            } else {
+              console.error('Failed to delete the event');
+            }
+          } catch (err) {
+            console.error('Error deleting this event: ', err);
+          }
+        }
+      }
+    ]
+  );
+};
+
   return (
     <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("Event Details", {
       eventID: event_id,
@@ -103,7 +142,8 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
       <Text style={{ fontSize: 24, padding: 2, fontWeight: 'bold' }}>{event_name}</Text>
       <Text>Created by: {creator}</Text>
       <Text>Location: {location}</Text>
-      <Text>Date: {date}</Text>
+      <Text style={{fontWeight: 'bold', color: '#BD7979'}}>Date: {formattedDate}</Text>
+      <Text style={{fontWeight: 'bold', color: '#BD7979'}}>Time: {formattedTime}</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, isGoing ? styles.alreadyRegistered : null]}
@@ -125,7 +165,7 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
               <Ionicons name="create-outline" size={20} color="white" />
               <Text style={styles.buttonText}>EDIT</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteButton}>
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
               <Ionicons name="trash-outline" size={20} color="white" />
               <Text style={styles.buttonText}>DELETE</Text>
             </TouchableOpacity>
