@@ -8,7 +8,7 @@ import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 
-const ProfileScreen = ({ route }) => {
+const OtherProfileScreen = ({ route }) => {
     const navigation = useNavigation();
     // User who is logged in
     const { user, updateUserContext } = useContext(UserContext); // Access user from context
@@ -83,31 +83,17 @@ const ProfileScreen = ({ route }) => {
             setCreated(currUser.created_events);
             setAttending(currUser.attending_events);
         }
-        if (currUser === user) {
-            navigation.setOptions({
-                headerRight: () => (
-                    <Ionicons
-                        name="reorder-three-outline"
-                        size={32}
-                        color="black"
-                        onPress={() => navigation.navigate("Settings")}
-                        style={{ marginRight: 14 }}
-                    />
-                ),
-            });
-        } else {
-            navigation.setOptions({
-                headerLeft: () => (
-                    <Ionicons
-                        name="arrow-back"
-                        size={28}
-                        color="black"
-                        onPress={() => navigation.goBack()}
-                        style={{ marginLeft: 16 }}
-                    />
-                ),
-            });
-        }
+        navigation.setOptions({
+            headerLeft: () => (
+                <Ionicons
+                    name="arrow-back"
+                    size={28}
+                    color="black"
+                    onPress={() => navigation.goBack()}
+                    style={{ marginLeft: 16 }}
+                />
+            ),
+        });
     }, [route.params, currUser]);
 
     const onTabChange = (newIndex) => {
@@ -239,15 +225,13 @@ const ProfileScreen = ({ route }) => {
                             </Pressable>
                         </View>
                         <Text style={styles.bio}>{currUser.bio}</Text>
-                        {currUser === user && (
-                            <TouchableOpacity style={styles.editProfile} onPress={() => navigation.navigate('Edit Profile', {
-                                name: user.name,
-                                username: user.username,
-                                bio: user.bio,
-                                email: user.email,
-                                pw: user.password
-                            })}>
-                                <Text style={{fontWeight: 'bold'}}>EDIT PROFILE</Text>
+                        {user.list_of_following.includes(profileUser.id) ? (
+                            <TouchableOpacity style={styles.unfollowUser} onPress={handleUnfollow}>
+                                <Text style={{fontWeight: 'bold', color: 'white'}}>UNFOLLOW</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity style={styles.followUser} onPress={handleFollow}>
+                                <Text style={{fontWeight: 'bold', color: 'white'}}>FOLLOW</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -323,7 +307,7 @@ const ProfileScreen = ({ route }) => {
             onIndexChange={onTabChange}
             initialLayout={{ width: '90%' }}
             renderTabBar={renderTabBar}
-            style={{marginTop: 4, padding: 10, color: 'black'}}
+            style={{marginTop: 4, padding: 10, color: 'black', justifyContent: 'center'}}
         />
     );
 }
@@ -370,13 +354,6 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginLeft: 10,
     },
-    editProfile: {
-        borderColor: 'black',
-        borderRadius: 2,
-        borderWidth: 3,
-        padding: 10,
-        marginTop: 10,
-    },
     viewPager: {
         width: '100%',
         backgroundColor: 'red',
@@ -409,4 +386,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default ProfileScreen;
+export default OtherProfileScreen;

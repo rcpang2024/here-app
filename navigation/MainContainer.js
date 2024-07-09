@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/home-screen';
 import ProfileScreen from '../screens/profile-screen';
+import OtherProfileScreen from '../screens/other-profiles-screen';
 import CreateEventScreen from '../screens/create-event-screen';
 import ExploreScreen from '../screens/friends-screen';
 import SearchScreen from '../screens/search-screen';
@@ -30,14 +31,6 @@ const Tab = createBottomTabNavigator();
 
 const Stack = createStackNavigator();
 
-const customTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: '#1c2120'
-  }
-};
-
 export function MainContainer() {
   return (
     <NavigationContainer>
@@ -55,7 +48,7 @@ export function MainContainer() {
         <Stack.Screen name="Edit Profile" component={EditProfileScreen}/>
         <Stack.Screen name="Edit Event" component={EditEventScreen}/>
         <Stack.Screen name="About Here" options={{ headerShown: false }} component={AboutHereScreen}/>
-        <Stack.Screen name="Profile" component={ProfileScreen}/>
+        <Stack.Screen name="Other Profile" options={{headerTitle: ''}} component={OtherProfileScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

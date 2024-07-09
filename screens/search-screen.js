@@ -1,14 +1,17 @@
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, FlatList, TouchableOpacity } from "react-native";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useContext } from "react";
 import { SearchBar } from "react-native-elements";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { useNavigation } from "@react-navigation/native";
 import EventItem from "../components/event-item";
+import { UserContext } from "../user-context";
 
 const SearchScreen = () => {
     const navigation = useNavigation();
     const [searchUser, setUserSearch] = useState('');
     const [searchEvent, setEventSearch] = useState('');
+    const { user } = useContext(UserContext);
+
     // For Users
     const [results, setResults] = useState([]);
     // For Events
@@ -72,8 +75,10 @@ const SearchScreen = () => {
 
     const handleUserPress = async (username) => {
         const profileUser = await fetchUserProfile(username);
-        if (profileUser) {
-            navigation.navigate('Profile', { profileUser });
+        if (profileUser && profileUser.username !== user.username) {
+            navigation.navigate('Other Profile', { profileUser });
+        } else if (username === user.username) {
+            navigation.navigate('Profile');
         } else {
             console.error('Failed to fetch profile user');
         }
@@ -83,7 +88,7 @@ const SearchScreen = () => {
     const renderUserItem = ({ item }) => {
         return (
             <View>
-                <TouchableOpacity onPress={() => console.log(item)}>
+                <TouchableOpacity onPress={() => handleUserPress(item.username)}>
                     <Text style={styles.resultText}>{item.username}</Text>
                 </TouchableOpacity>
             </View>

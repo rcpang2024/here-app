@@ -40,8 +40,10 @@ const FollowersScreen = () => {
 
     const handleUserPress = async (username) => {
         const profileUser = await fetchUserProfile(username);
-        if (profileUser) {
-            navigation.navigate('Profile', { profileUser });
+        if (profileUser && profileUser.username !== user.username) {
+            navigation.navigate('Other Profile', { profileUser });
+        } else if (username === user.username) {
+            navigation.navigate('Profile');
         } else {
             console.error('Failed to fetch profile user');
         }

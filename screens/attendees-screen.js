@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { UserContext } from "../user-context";
 
 const AttendeesScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    const { user } = useContext(UserContext);
 
     const list_of_attendees = route.params.attendees;
     const [attendeesWithUsernames, setAttendeesWithUsernames] = useState([]);
@@ -42,14 +44,35 @@ const AttendeesScreen = () => {
             ),
         });
         fetchUsernamesForAttendees();
-        }, []);
+    }, []);
+
+    const fetchUserProfile = async (username) => {
+        try {
+            const response = await fetch(`http://192.168.1.142:8000/api/users/username/${username}/`);
+            const userData = response.json();
+            return userData;
+        } catch (err) {
+            console.log("Error fetching user profile: ", err);
+        }
+    };
+
+    const handleUserPress = async (username) => {
+        const profileUser = await fetchUserProfile(username);
+        if (profileUser && profileUser.username !== user.username) {
+            navigation.navigate('Other Profile', { profileUser });
+        } else if (username === user.username) {
+            navigation.navigate('Profile');
+        } else {
+            console.error('Failed to fetch profile user');
+        }
+    };
 
     return (
         <View style={styles.title}>
             <FlatList
                 data={attendeesWithUsernames}
                 keyExtractor={(item) => item}
-                renderItem={({ item }) => <TouchableOpacity onPress={()=> console.log("Item: ", item)}>
+                renderItem={({ item }) => <TouchableOpacity onPress={() => handleUserPress(item)}>
                     <Text style={styles.text}>{item}</Text></TouchableOpacity>}
                 refreshControl = {
                     <RefreshControl
