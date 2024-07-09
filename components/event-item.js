@@ -219,7 +219,6 @@ const styles = StyleSheet.create({
   },
   alreadyRegistered: {
     flexDirection: 'row',
-    // backgroundColor: '#73CADF',
     backgroundColor: '#EC6C6C',
     paddingVertical: 5,
     paddingHorizontal: 10,
@@ -230,7 +229,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     marginLeft: 5,
-    // fontStyle: 'oblique',
     fontWeight: 'bold'
   },
 });

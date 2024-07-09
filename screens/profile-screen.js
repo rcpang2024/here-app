@@ -8,10 +8,13 @@ import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ route }) => {
     const navigation = useNavigation();
-    const route = useRoute();
-    const { user } = useContext(UserContext); // Access user from context
+    // User who is logged in
+    const { user, updateUserContext } = useContext(UserContext); // Access user from context
+    const { profileUser } = route.params || {};
+    const currUser = profileUser || user;
+
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
 
@@ -39,8 +42,7 @@ const ProfileScreen = () => {
             const eventData = await response.json();
             return eventData;
         } catch (error) {
-            console.log("fetchEventDetails error: ", error);
-            return null;
+            console.error("fetchEventDetails error: ", error);
         }
     };
 
@@ -54,7 +56,6 @@ const ProfileScreen = () => {
                 return createdData;
               } catch (error) {
                 console.error('Error fetching event data:', error.message);
-                return null;
               }
             }
         });
@@ -70,7 +71,6 @@ const ProfileScreen = () => {
                 return eventData;
             } catch (error) {
                 console.error('Error fetching event data:', error.message);
-                return null;
             }
         });
         const eventDataArray = await Promise.all(eventDataPromises);
@@ -79,27 +79,40 @@ const ProfileScreen = () => {
     };
 
     useEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <Ionicons
-                    name="reorder-three-outline"
-                    size={32}
-                    color="black"
-                    onPress={() => navigation.navigate("Settings")}
-                    style={{ marginRight: 14 }}
-                />
-            ),
-        });
-        if (user) {
-            setCreated(user.created_events.map(event => typeof event === 'object' ? event.id : event));
-            setAttending(user.attending_events);
+        if (currUser) {
+            setCreated(currUser.created_events);
+            setAttending(currUser.attending_events);
         }
-    }, [route.params, user]);
+        if (currUser === user) {
+            navigation.setOptions({
+                headerRight: () => (
+                    <Ionicons
+                        name="reorder-three-outline"
+                        size={32}
+                        color="black"
+                        onPress={() => navigation.navigate("Settings")}
+                        style={{ marginRight: 14 }}
+                    />
+                ),
+            });
+        } else {
+            navigation.setOptions({
+                headerLeft: () => (
+                    <Ionicons
+                        name="arrow-back"
+                        size={28}
+                        color="black"
+                        onPress={() => navigation.goBack()}
+                        style={{ marginLeft: 16 }}
+                    />
+                ),
+            });
+        }
+    }, [route.params, currUser]);
 
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
         if (newIndex === 1 && createdEvent.length === 0) {
-            // console.log("ppl user follows: ", user.list_of_following);
             handleCreatedEvent();
         }
         else if (newIndex === 2 && event.length === 0) {
@@ -107,10 +120,53 @@ const ProfileScreen = () => {
         }
     };
 
-    // const handleUnregister = (eventId) => {
-    //     setAttending(attending.filter(id => id !== eventId));
-    //     setEvent(event.filter(e => e.id !== eventId));
-    // };
+    const handleFollow = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.142:8000/api/followuser/${user.username}/${profileUser.username}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ follower: user.username }),
+            });
+            if (response.ok) {
+                // Update user context
+                const updatedUser = {
+                    ...user,
+                    list_of_following: [...user.list_of_following, profileUser.id],
+                };
+                updateUserContext(updatedUser);
+            } else {
+                console.error('Failed to follow the user');
+            }
+        } catch (err) {
+            console.error('Error when trying to follow user: ', err);
+        }
+    };
+
+    const handleUnfollow = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.142:8000/api/unfollowuser/${user.username}/${profileUser.username}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ follower: user.username }),
+            });
+            if (response.ok) {
+                // Update user context
+                const updatedUser = {
+                    ...user,
+                    list_of_following: user.list_of_following.filter(id => id !== profileUser.id),
+                };
+                updateUserContext(updatedUser);
+            } else {
+                console.error('Failed to unfollow the user');
+            }
+        } catch (err) {
+            console.error('Error unfollowing user: ', err);
+        }
+    };
 
     const renderCreate = ({ item }) => {
         return (
@@ -150,10 +206,6 @@ const ProfileScreen = () => {
         handleCreatedEvent();
         handleAttendingEvent();
         setRefreshing(false);
-        // fetchUser();
-        // setTimeout(() => {
-        //     setRefreshing(false);
-        // }, 2000);
     }, []);
 
     const ProfileRoute = () => {
@@ -166,37 +218,48 @@ const ProfileScreen = () => {
                 >
                     <View style={styles.title}>
                         <Image source={HereLogo} style={styles.profilePic}/>
-                        <Text style={styles.name}>{user.name}</Text>
-                        <Text style={styles.username}>{user.username}</Text>
+                        <Text style={styles.name}>{currUser.name}</Text>
+                        <Text style={styles.username}>{currUser.username}</Text>
                         <View style={styles.follow}>
-                            <Pressable onPress={() => navigation.navigate("Followers", { followers: user.list_of_followers })}>
-                                {user.list_of_followers && (
+                            <Pressable onPress={() => navigation.navigate("Followers", { followers: currUser.list_of_followers })}>
+                                {currUser.list_of_followers && (
                                     <View style={styles.text}>
                                         <Text style={{fontWeight:'bold'}}>FOLLOWERS</Text>
-                                        <Text style={{fontWeight:'bold', marginTop: 2}}>{user.list_of_followers.length}</Text>
+                                        <Text style={{fontWeight:'bold', marginTop: 2}}>{currUser.list_of_followers.length}</Text>
                                     </View>
                                 )}
                             </Pressable>
-                            <Pressable onPress={() => navigation.navigate("Following", { following: user.list_of_following })}>
-                                {user.list_of_following && (
+                            <Pressable onPress={() => navigation.navigate("Following", { following: currUser.list_of_following })}>
+                                {currUser.list_of_following && (
                                     <View style={styles.text}>
                                         <Text style={{fontWeight:'bold'}}>FOLLOWING</Text>
-                                        <Text style={{fontWeight:'bold', marginTop: 2}}>{user.list_of_following.length}</Text>
+                                        <Text style={{fontWeight:'bold', marginTop: 2}}>{currUser.list_of_following.length}</Text>
                                     </View>
                                 )}
                             </Pressable>
                         </View>
-                        <Text style={styles.bio}>{user.bio}</Text>
-                        <TouchableOpacity style={styles.editProfile} onPress={() => navigation.navigate('Edit Profile', {
-                            // pic: user.profile_pic,
-                            name: user.name,
-                            username: user.username,
-                            bio: user.bio,
-                            email: user.email,
-                            pw: user.password
-                        })}>
-                            <Text style={{fontWeight: 'bold'}}>EDIT PROFILE</Text>
-                        </TouchableOpacity>
+                        <Text style={styles.bio}>{currUser.bio}</Text>
+                        {currUser === user ? (
+                            <TouchableOpacity style={styles.editProfile} onPress={() => navigation.navigate('Edit Profile', {
+                                name: user.name,
+                                username: user.username,
+                                bio: user.bio,
+                                email: user.email,
+                                pw: user.password
+                            })}>
+                                <Text style={{fontWeight: 'bold'}}>EDIT PROFILE</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            user.list_of_following.includes(profileUser.id) ? (
+                                <TouchableOpacity style={styles.unfollowUser} onPress={handleUnfollow}>
+                                    <Text style={{fontWeight: 'bold', color: 'white'}}>UNFOLLOW</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity style={styles.followUser} onPress={handleFollow}>
+                                    <Text style={{fontWeight: 'bold', color: 'white'}}>FOLLOW</Text>
+                                </TouchableOpacity>
+                            )
+                        )}
                     </View>
                 </ScrollView>
             </View>
@@ -332,6 +395,28 @@ const styles = StyleSheet.create({
         flex: 1,
         marginBottom: 10,
     },
+    followUser: {
+        borderColor: '#5ADAD8',
+        borderRadius: 2,
+        borderWidth: 3,
+        padding: 10,
+        marginTop: 10,
+        alignItems: 'center',
+        marginLeft: 10,
+        marginRight: 10,
+        backgroundColor: '#5ADAD8',
+    },
+    unfollowUser: {
+        borderColor: '#EC6C6C',
+        borderRadius: 2,
+        borderWidth: 3,
+        padding: 10,
+        marginTop: 10,
+        alignItems: 'center',
+        marginLeft: 10,
+        marginRight: 10,
+        backgroundColor: '#EC6C6C',
+    }
 })
 
 export default ProfileScreen;

@@ -28,6 +28,25 @@ const FollowersScreen = () => {
         }
     };
 
+    const fetchUserProfile = async (username) => {
+        try {
+            const response = await fetch(`http://192.168.1.142:8000/api/users/username/${username}/`);
+            const userData = response.json();
+            return userData;
+        } catch (err) {
+            console.log("Error fetching user profile: ", err);
+        }
+    };
+
+    const handleUserPress = async (username) => {
+        const profileUser = await fetchUserProfile(username);
+        if (profileUser) {
+            navigation.navigate('Profile', { profileUser });
+        } else {
+            console.error('Failed to fetch profile user');
+        }
+    };
+
     useEffect(() => {
         // Set the left header component
         navigation.setOptions({
@@ -49,7 +68,7 @@ const FollowersScreen = () => {
             <FlatList
                 data={followers}
                 keyExtractor={(item) => item}
-                renderItem={({ item }) => <TouchableOpacity onPress={()=> console.log("Item: ", item)}>
+                renderItem={({ item }) => <TouchableOpacity onPress={() => handleUserPress(item)}>
                     <Text style={styles.text}>{item}</Text></TouchableOpacity>}
                 contentContainerStyle={{paddingBottom: 100}}
             />

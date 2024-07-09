@@ -55,6 +55,7 @@ export function MainContainer() {
         <Stack.Screen name="Edit Profile" component={EditProfileScreen}/>
         <Stack.Screen name="Edit Event" component={EditEventScreen}/>
         <Stack.Screen name="About Here" options={{ headerShown: false }} component={AboutHereScreen}/>
+        <Stack.Screen name="Profile" component={ProfileScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

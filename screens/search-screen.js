@@ -2,9 +2,11 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, FlatList, T
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { SearchBar } from "react-native-elements";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import { useNavigation } from "@react-navigation/native";
 import EventItem from "../components/event-item";
 
 const SearchScreen = () => {
+    const navigation = useNavigation();
     const [searchUser, setUserSearch] = useState('');
     const [searchEvent, setEventSearch] = useState('');
     // For Users
@@ -58,10 +60,30 @@ const SearchScreen = () => {
         }
     };
 
+    const fetchUserProfile = async (username) => {
+        try {
+            const response = await fetch(`http://192.168.1.142:8000/api/users/username/${username}/`);
+            const userData = response.json();
+            return userData;
+        } catch (err) {
+            console.log("Error fetching user profile: ", err);
+        }
+    };
+
+    const handleUserPress = async (username) => {
+        const profileUser = await fetchUserProfile(username);
+        if (profileUser) {
+            navigation.navigate('Profile', { profileUser });
+        } else {
+            console.error('Failed to fetch profile user');
+        }
+    };
+
+    // FIX ISSUE WITH NOT PULLING UP USER PROFILE
     const renderUserItem = ({ item }) => {
         return (
             <View>
-                <TouchableOpacity onPress={() => console.log(item.username)}>
+                <TouchableOpacity onPress={() => console.log(item)}>
                     <Text style={styles.resultText}>{item.username}</Text>
                 </TouchableOpacity>
             </View>
