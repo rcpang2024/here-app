@@ -71,7 +71,8 @@ const FollowersScreen = () => {
                 data={followers}
                 keyExtractor={(item) => item}
                 renderItem={({ item }) => <TouchableOpacity onPress={() => handleUserPress(item)}>
-                    <Text style={styles.text}>{item}</Text></TouchableOpacity>}
+                    <Text style={styles.text}>{item}</Text>
+                </TouchableOpacity>}
                 contentContainerStyle={{paddingBottom: 100}}
             />
         </View>

@@ -120,54 +120,6 @@ const ProfileScreen = ({ route }) => {
         }
     };
 
-    const handleFollow = async () => {
-        try {
-            const response = await fetch(`http://192.168.1.142:8000/api/followuser/${user.username}/${profileUser.username}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ follower: user.username }),
-            });
-            if (response.ok) {
-                // Update user context
-                const updatedUser = {
-                    ...user,
-                    list_of_following: [...user.list_of_following, profileUser.id],
-                };
-                updateUserContext(updatedUser);
-            } else {
-                console.error('Failed to follow the user');
-            }
-        } catch (err) {
-            console.error('Error when trying to follow user: ', err);
-        }
-    };
-
-    const handleUnfollow = async () => {
-        try {
-            const response = await fetch(`http://192.168.1.142:8000/api/unfollowuser/${user.username}/${profileUser.username}/`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ follower: user.username }),
-            });
-            if (response.ok) {
-                // Update user context
-                const updatedUser = {
-                    ...user,
-                    list_of_following: user.list_of_following.filter(id => id !== profileUser.id),
-                };
-                updateUserContext(updatedUser);
-            } else {
-                console.error('Failed to unfollow the user');
-            }
-        } catch (err) {
-            console.error('Error unfollowing user: ', err);
-        }
-    };
-
     const renderCreate = ({ item }) => {
         return (
             <View>

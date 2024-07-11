@@ -1,6 +1,5 @@
-import { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, useWindowDimensions, FlatList } from "react-native";
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useState, useContext, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, useWindowDimensions, FlatList, RefreshControl } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
@@ -8,50 +7,36 @@ import EventItem from '../components/event-item';
 const ExploreScreen = () => {
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
-    const { user } = useContext(UserContext); // Access user from context
     const [friendsEvents, setFriendsEvents] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const [routes] = useState([
+    const { user } = useContext(UserContext); // Access user from context
+
+    // const [routes] = useState([
+    //     {key: 'first', title: 'FRIENDS ATTENDING'},
+    //     {key: 'second', title: 'EVENTS NEARBY'},
+    // ]);
+
+    const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},
         {key: 'second', title: 'EVENTS NEARBY'},
-    ]);
-
-    // const fetchFriendsEvents = async () => {
-    //     if (user && user.list_of_following.length > 0) {
-    //         try {
-    //             const response = await fetch(`http://192.168.1.142:8000/api/friendsevents`);
-    //             const eventsData = await response.json();
-    //             setFriendsEvents(eventsData);
-    //         } catch (error) {
-    //             console.log("Error fetching events: ", error);
-    //         }
-    //     }
-    // };
-
-    const fetchFriendsEvents = async (user) => {
-        try {
-            const response = await fetch(`http://192.168.1.142:8000/api/friendsevents`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${await AsyncStorage.getItem('access_token')}`,
-                },
-            });
-            if (!response.ok) {
-                throw new Error('Failed to fetch friends events');
-            }
-            const eventsData = await response.json();
-            return eventsData;
-        } catch (error) {
-            console.error("Error fetching friends' events: ", error);
-            return [];
-        }
-    };
+    ]), []);
 
     useEffect(() => {
         if (user) {
-            fetchFriendsEvents(user).then(setFriendsEvents);
+            fetchFriendsAttending();
         }
     }, [user]);
+
+    const fetchFriendsAttending = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.142:8000/api/friends_attending_events/${user.username}/`);
+            const data = await response.json();
+            setFriendsEvents(data);
+        } catch (e) {
+            console.error("Error retrieving friends' attending events: ", e);
+        }
+    };
 
     const renderEventItem = ({ item }) => (
         <View>
@@ -66,27 +51,45 @@ const ExploreScreen = () => {
             />
         </View>
     );
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        fetchFriendsAttending()
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
+    }, []);
     
-    const friendsAttendingRoute = () => (
+    const FriendsAttendingRoute = () => (
         <View>
             <FlatList
                 data={friendsEvents}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderEventItem}
                 ListEmptyComponent={<Text>No Events Found</Text>}
+                contentContainerStyle={{ paddingTop: 10, paddingBottom: 15, marginRight: 10 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => onRefresh()}
+                    />
+                }
             />
         </View>
     );
 
-    const exploreRoute = () => (
+    const ExploreRoute = () => (
         <View>
             <Text>Find Interesting Events</Text>
         </View>
     );
 
+    const MemoizedFriendsAttendingRoute = useMemo(() => FriendsAttendingRoute, [friendsEvents]);
+    const MemoizedExploreRoute = useMemo(() => ExploreRoute, []);
+
     const renderScene = SceneMap({
-        first: friendsAttendingRoute,
-        second: exploreRoute
+        first: MemoizedFriendsAttendingRoute,
+        second: MemoizedExploreRoute
     });
 
     const renderTabBar = (props) => {

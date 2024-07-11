@@ -1,19 +1,21 @@
 import { View, Text, FlatList, RefreshControl, StyleSheet } from "react-native";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useContext } from "react";
 import EventItem from "../components/event-item";
+import { UserContext } from "../user-context";
 
 const HomeScreen = () => {
     const [data, setData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
         fetchData();
     }, []);
 
-    // PLACEHOLDER - CHANGE TO A LIST OF EVENTS THE USER'S FOLLOWERS HAVE CREATED
-    const fetchData = async() => {
-        const response = await fetch('http://192.168.1.142:8000/api/events/');
+    const fetchData = async () => {
+        const response = await fetch(`http://192.168.1.142:8000/api/friendsevents/${user.username}/`);
         const data = await response.json();
+        // const filteredEvents = data.filter(event => followedUserIDs.includes(event.creation_user));
         setData(data);
     };
 
@@ -60,25 +62,17 @@ const HomeScreen = () => {
     );
 }
 
-function padding(a, b, c, d) {
-    return {
-      paddingTop: a,
-      paddingBottom: c !== undefined ? c : a,
-      paddingRight: b !== undefined ? b : a,
-      paddingLeft: d !== undefined ? d : (b !== undefined ? b : a)
-    }
-}
-
 const styles = StyleSheet.create({
     title: {
-        ...padding(10, 0, 0, 10),
+        paddingTop: 10,
+        paddingLeft: 10,
         fontSize: 32
     },
     format: {
         padding: 7,
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: 'darkred',
+        color: '#BD7979',
     },
     flatListContainer: {
         flex: 1,

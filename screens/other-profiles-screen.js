@@ -1,6 +1,7 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Pressable, RefreshControl, ScrollView } from "react-native";
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Pressable, RefreshControl, ScrollView,
+    Modal } from "react-native";
 import { useEffect, useState, useCallback, useMemo, useContext } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // PLACEHOLDER
@@ -14,6 +15,8 @@ const OtherProfileScreen = ({ route }) => {
     const { user, updateUserContext } = useContext(UserContext); // Access user from context
     const { profileUser } = route.params || {};
     const currUser = profileUser || user;
+    // For options modal
+    const [modalVisible, setModalVisible] = useState(false);
 
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
@@ -78,6 +81,27 @@ const OtherProfileScreen = ({ route }) => {
         setEvent(validAttendingEvents);
     };
 
+    // FIX THIS LATER: MODAL DOESN'T SHOW UP RN
+    const renderModal = () => {
+        return (
+            <View>
+                <Modal
+                    transparent={true}
+                    visible={modalVisible}
+                    animationType="slide"
+                    onRequestClose={setModalVisible(false)}
+                >
+                    <TouchableOpacity>
+                        <Text>BLOCK USER</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                        <Text>CANCEL</Text>
+                    </TouchableOpacity>
+                </Modal>
+            </View>
+        );
+    };
+
     useEffect(() => {
         if (currUser) {
             setCreated(currUser.created_events);
@@ -91,6 +115,15 @@ const OtherProfileScreen = ({ route }) => {
                     color="black"
                     onPress={() => navigation.goBack()}
                     style={{ marginLeft: 16 }}
+                />
+            ),
+            headerRight: () => (
+                <Ionicons
+                    name="person"
+                    size={28}
+                    color="black"
+                    onPress={() => setModalVisible(true)}
+                    style={{marginRight: 16}}
                 />
             ),
         });
@@ -235,6 +268,7 @@ const OtherProfileScreen = ({ route }) => {
                             </TouchableOpacity>
                         )}
                     </View>
+                    {/* {renderModal()} */}
                 </ScrollView>
             </View>
         );
