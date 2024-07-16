@@ -84,7 +84,6 @@ const SearchScreen = () => {
         }
     };
 
-    // FIX ISSUE WITH NOT PULLING UP USER PROFILE
     const renderUserItem = ({ item }) => {
         return (
             <View>
@@ -155,7 +154,7 @@ const SearchScreen = () => {
                     data={eventResults}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderEventItem}
-                    contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+                    contentContainerStyle={{ paddingTop: 5, paddingBottom: 15, marginLeft: 8, marginRight: 1 }}
                 />
             )}
         </View>

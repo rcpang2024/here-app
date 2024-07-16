@@ -3,9 +3,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-
 const SettingsScreen = () => {
-
     const navigation = useNavigation();
     const route = useRoute();
 

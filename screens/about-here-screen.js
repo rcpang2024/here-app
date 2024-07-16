@@ -5,13 +5,12 @@ import { useNavigation } from "@react-navigation/native";
 
 const AboutHereScreen = () => {
     const navigation = useNavigation();
+
     return (
         <SafeAreaView style={styles.container}>
-            <TouchableOpacity style={styles.buttonBorder} onPress={() => navigation.navigate("Settings")}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
                 <View style={styles.buttonContent}>
-                    <Ionicons name="arrow-back" size={20}>
-                        <Text>BACK</Text>
-                    </Ionicons>
+                    <Ionicons name="arrow-back" size={28}></Ionicons>
                 </View>
             </TouchableOpacity>
             <Image source={HereLogo} style={styles.herePic}/>

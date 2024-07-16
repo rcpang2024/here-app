@@ -2,14 +2,30 @@ import { View, Text, FlatList, RefreshControl, StyleSheet } from "react-native";
 import { useEffect, useState, useCallback, useContext } from "react";
 import EventItem from "../components/event-item";
 import { UserContext } from "../user-context";
+import * as Location from 'expo-location';
 
 const HomeScreen = () => {
     const [data, setData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
-    const { user } = useContext(UserContext);
+    // const [location, setLocation] = useState();
+    // const [addr, setAddr] = useState();
+
+    const { user, updateUserLocation } = useContext(UserContext);
 
     useEffect(() => {
         fetchData();
+        const getPermissions = async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.log("Please grant location permissions")
+                return;
+            }
+            let currLocation = await Location.getCurrentPositionAsync({});
+            updateUserLocation(currLocation.coords);
+            // setLocation(currLocation);
+            console.log("Current location: ", currLocation);
+        };
+        getPermissions();
     }, []);
 
     const fetchData = async () => {

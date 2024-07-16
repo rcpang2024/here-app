@@ -10,12 +10,9 @@ const ExploreScreen = () => {
     const [friendsEvents, setFriendsEvents] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
 
-    const { user } = useContext(UserContext); // Access user from context
-
-    // const [routes] = useState([
-    //     {key: 'first', title: 'FRIENDS ATTENDING'},
-    //     {key: 'second', title: 'EVENTS NEARBY'},
-    // ]);
+    const [nearbyEvents, setNearbyEvents] = useState([]);
+    // TODO: Update Backend after some research on how to do it to handle location:
+    const { user, location } = useContext(UserContext); // Access user from context
 
     const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},

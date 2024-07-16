@@ -11,10 +11,6 @@ const LogInScreen = () => {
     const route = useRoute();
     const { setUser } = useContext(UserContext); // Access setUser from context
 
-    // Sets placeholders back to default
-    const [usernamePlaceholder, setUsernamePlaceholder] = useState('Username');
-    const [pwPlaceholder, setPWPlaceholder] = useState('Password');
-
     // Sets the username and password to whatever the user typed in
     const [username, setUsername] = useState('');
     const [pw, setPW] = useState('');
@@ -92,9 +88,7 @@ const LogInScreen = () => {
                     setUser(data);
                     navigation.navigate("Tab");
                     setUsername(''); 
-                    setUsernamePlaceholder('Username');
                     setPW(''); 
-                    setPWPlaceholder('Password');
                 }
             })
             .catch((error) => {
@@ -111,20 +105,22 @@ const LogInScreen = () => {
                     <View style={styles.container}>
                         <TextInput
                             ref={usernameRef}
-                            placeholder={usernamePlaceholder}
+                            placeholder="Username"
                             style={styles.input}
                             returnKeyType="next"
                             onChangeText={(val) => setUsername(val)}
+                            value={username}
                         />
                     </View>
                     <View style={styles.container}>
                         <TextInput
                             ref={pwRef}
-                            placeholder={pwPlaceholder}
+                            placeholder="Password"
                             style={styles.input}
                             returnKeyType="next"
                             secureTextEntry={true}
                             onChangeText={(val) => setPW(val)}
+                            value={pw}
                         />
                     </View>
                     <TouchableOpacity style={styles.signIn} onPress={handleClick}>

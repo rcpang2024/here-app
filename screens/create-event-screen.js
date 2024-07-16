@@ -128,7 +128,7 @@ const CreateEventScreen = () => {
           <TextInput
             ref={eventNameRef}
             placeholder="Event Name"
-            placeholderTextColor={{color: 'black'}}
+            placeholderTextColor={"black"}
             style={styles.input}
             returnKeyType="next"
             onChangeText={(val) => setEventName(val)}
@@ -136,6 +136,7 @@ const CreateEventScreen = () => {
           <TextInput
             ref={eventDescriptionRef}
             placeholder="Event Description"
+            placeholderTextColor={"black"}
             style={styles.input}
             returnKeyType="next"
             onChangeText={(val) => setEventDesc(val)}
@@ -144,6 +145,7 @@ const CreateEventScreen = () => {
             ref={locationRef}
             style={styles.input}
             placeholder="Location"
+            placeholderTextColor={"black"}
             returnKeyType="next"
             onChangeText={(val) => setEventLocation(val)}
           />
