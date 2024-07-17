@@ -7,7 +7,6 @@ import * as Location from 'expo-location';
 const HomeScreen = () => {
     const [data, setData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
-    // const [location, setLocation] = useState();
     // const [addr, setAddr] = useState();
 
     const { user, updateUserLocation } = useContext(UserContext);

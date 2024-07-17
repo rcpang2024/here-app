@@ -1,8 +1,10 @@
 import { useState, useContext, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions, FlatList, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, useWindowDimensions, FlatList, RefreshControl, TextInput, 
+    Button } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
+import * as Location from 'expo-location';
 
 const ExploreScreen = () => {
     const layout = useWindowDimensions();
@@ -12,7 +14,8 @@ const ExploreScreen = () => {
 
     const [nearbyEvents, setNearbyEvents] = useState([]);
     // TODO: Update Backend after some research on how to do it to handle location:
-    const { user, location } = useContext(UserContext); // Access user from context
+    const { user, userLocation } = useContext(UserContext); // Access user from context
+    const [addr, setAddr] = useState("110 W. Stinson St. Chapel Hill, NC");
 
     const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},
@@ -25,6 +28,11 @@ const ExploreScreen = () => {
         }
     }, [user]);
 
+    const geocode = async () => {
+        const geocodedLocation = await Location.geocodeAsync(addr);
+        console.log("Geocoded address: ", geocodedLocation);
+    };
+
     const fetchFriendsAttending = async () => {
         try {
             const response = await fetch(`http://192.168.1.142:8000/api/friends_attending_events/${user.username}/`);
@@ -34,6 +42,16 @@ const ExploreScreen = () => {
             console.error("Error retrieving friends' attending events: ", e);
         }
     };
+
+    // const fetchNearbyEvents = async () => {
+    //     try {
+    //         const response = await fetch();
+    //         const data = await response.json();
+    //         setNearbyEvents(data);
+    //     } catch (e) {
+    //         console.error("Error retrieving nearby events: ", e);
+    //     }
+    // };
 
     const renderEventItem = ({ item }) => (
         <View>
@@ -78,6 +96,8 @@ const ExploreScreen = () => {
     const ExploreRoute = () => (
         <View>
             <Text>Find Interesting Events</Text>
+            <TextInput placeholder="Address" value={addr} onChangeText={setAddr}/>
+            <Button title="Geocode Address" onPress={geocode}/>
         </View>
     );
 
