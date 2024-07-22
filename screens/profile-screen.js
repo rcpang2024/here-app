@@ -35,7 +35,7 @@ const ProfileScreen = ({ route }) => {
 
     const fetchEvent = async (eventId) => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/events/${eventId}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`);
             if (!response.ok) {
                 throw new Error('Network response for event data was not ok');
             }
@@ -120,7 +120,7 @@ const ProfileScreen = ({ route }) => {
         }
     };
 
-    const renderCreate = ({ item }) => {
+    const renderEventItem = ({ item }) => {
         return (
             <View>
                 <EventItem
@@ -128,26 +128,9 @@ const ProfileScreen = ({ route }) => {
                     creation_user={item.creation_user}
                     event_name={item.event_name}
                     event_description={item.event_description}
-                    location={item.location}
+                    location_addr={item.location_addr}
                     date={item.date}
                     list_of_attendees={item.list_of_attendees}
-                />
-            </View>
-        );
-    };
-
-    const renderAttending = ({ item }) => {
-        return (
-            <View>
-                <EventItem
-                    event_id={item.id}
-                    creation_user={item.creation_user}
-                    event_name={item.event_name}
-                    event_description={item.event_description}
-                    location={item.location}
-                    date={item.date}
-                    list_of_attendees={item.list_of_attendees}
-                    // onUnregister={handleUnregister}
                 />
             </View>
         );
@@ -216,7 +199,7 @@ const ProfileScreen = ({ route }) => {
                         <FlatList
                             data={createdEvent}
                             keyExtractor={(item) => item.id}
-                            renderItem={renderCreate}
+                            renderItem={renderEventItem}
                             contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
                         />
                     </View>
@@ -233,7 +216,7 @@ const ProfileScreen = ({ route }) => {
                         <FlatList 
                             data={event}
                             keyExtractor={(item) => item.id}
-                            renderItem={renderAttending}
+                            renderItem={renderEventItem}
                             contentContainerStyle={{paddingTop: 5, paddingBottom: 15}}
                         />
                     </View>

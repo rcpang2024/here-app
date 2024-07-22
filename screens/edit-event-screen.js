@@ -91,7 +91,7 @@ const EditEventScreen = () => {
 
     const updateEventInDB = async () => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/updateevent/${event_id}/`, {
+            const response = await fetch(`http://192.168.1.6:8000/api/updateevent/${event_id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

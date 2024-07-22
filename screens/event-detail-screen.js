@@ -38,7 +38,7 @@ const EventDetailScreen = () => {
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
             const userData = response.json();
             return userData;
         } catch (err) {

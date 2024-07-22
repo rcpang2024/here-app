@@ -38,7 +38,7 @@ const OtherProfileScreen = ({ route }) => {
 
     const fetchEvent = async (eventId) => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/events/${eventId}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`);
             if (!response.ok) {
                 throw new Error('Network response for event data was not ok');
             }
@@ -141,7 +141,7 @@ const OtherProfileScreen = ({ route }) => {
 
     const handleFollow = async () => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/followuser/${user.username}/${profileUser.username}/`, {
+            const response = await fetch(`http://192.168.1.6:8000/api/followuser/${user.username}/${profileUser.username}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,7 +165,7 @@ const OtherProfileScreen = ({ route }) => {
 
     const handleUnfollow = async () => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/unfollowuser/${user.username}/${profileUser.username}/`, {
+            const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

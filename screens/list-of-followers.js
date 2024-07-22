@@ -14,7 +14,7 @@ const FollowersScreen = () => {
         try {
             const followersWithUsernames = await Promise.all(
                 list_of_followers.map(async (followerID) => {
-                const response = await fetch(`http://192.168.1.142:8000/api/users/id/${followerID}/`);
+                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${followerID}/`);
                 if (!response.ok) {
                     throw new Error('Network response for user data was not ok');
                 }
@@ -30,7 +30,7 @@ const FollowersScreen = () => {
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
             const userData = response.json();
             return userData;
         } catch (err) {

@@ -1,9 +1,11 @@
 import React, { useRef, useState, useContext } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard, Modal } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, 
+  Keyboard, Modal, Alert } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
 import uuid from 'react-native-uuid';
 import { UserContext } from "../user-context";
+import * as Location from 'expo-location';
 
 const CreateEventScreen = () => {
   const [eventName, setEventName] = useState("");
@@ -36,6 +38,21 @@ const CreateEventScreen = () => {
       let formattedTime = format(tempDate, 'hh:mm a');
       setDateText(formattedDate);
       setTimeText(formattedTime);
+    }
+  };
+
+  const geocode = async (address) => {
+    try {
+      const geocodedLocation = await Location.geocodeAsync(address);
+      if (geocodedLocation.length > 0) {
+        const { latitude, longitude } = geocodedLocation[0];
+        return { latitude, longitude };
+      } else {
+        Alert.alert('Address not found, please enter a more specifi address');
+      }
+    } catch (error) {
+      console.error('Error geocoding address:', error);
+      throw error;
     }
   };
 
@@ -74,7 +91,8 @@ const CreateEventScreen = () => {
 
   const fetchPost = async () => {
     try {
-      const response = await fetch('http://192.168.1.142:8000/api/createevent/', {
+      const { latitude, longitude } = await geocode(eventLocation);
+      const response = await fetch('http://192.168.1.6:8000/api/createevent/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', 
@@ -84,7 +102,8 @@ const CreateEventScreen = () => {
           creation_user: user.id, 
           event_name: eventName,
           event_description: eventDesc,
-          location: eventLocation,
+          location_addr: eventLocation,
+          location_point: {latitude, longitude},
           date: date,
           list_of_attendees: [], 
         }),
@@ -144,7 +163,7 @@ const CreateEventScreen = () => {
           <TextInput
             ref={locationRef}
             style={styles.input}
-            placeholder="Location"
+            placeholder="Address"
             placeholderTextColor={"black"}
             returnKeyType="next"
             onChangeText={(val) => setEventLocation(val)}

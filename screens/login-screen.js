@@ -24,7 +24,7 @@ const LogInScreen = () => {
 
     const fetchUser = async () => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
             if (!response.ok) {
                 throw new Error('Network response for user data was not ok');
             }

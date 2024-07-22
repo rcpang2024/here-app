@@ -48,7 +48,7 @@ const EditProfileScreen = () => {
 
     const updateUserInDB = async () => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/updateuser/${currUsername}/`, {
+            const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${currUsername}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

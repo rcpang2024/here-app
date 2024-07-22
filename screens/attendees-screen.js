@@ -16,7 +16,7 @@ const AttendeesScreen = () => {
         try {
             const attendeesWithUsernames = await Promise.all(
                 list_of_attendees.map(async (attendeeID) => {
-                const response = await fetch(`http://192.168.1.142:8000/api/users/id/${attendeeID}/`);
+                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${attendeeID}/`);
                 if (!response.ok) {
                     throw new Error('Network response for user data was not ok');
                 }

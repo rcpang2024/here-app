@@ -1,10 +1,8 @@
 import { useState, useContext, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions, FlatList, RefreshControl, TextInput, 
-    Button } from "react-native";
+import { View, Text, StyleSheet, useWindowDimensions, FlatList, RefreshControl } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
-import * as Location from 'expo-location';
 
 const ExploreScreen = () => {
     const layout = useWindowDimensions();
@@ -13,9 +11,7 @@ const ExploreScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const [nearbyEvents, setNearbyEvents] = useState([]);
-    // TODO: Update Backend after some research on how to do it to handle location:
     const { user, userLocation } = useContext(UserContext); // Access user from context
-    const [addr, setAddr] = useState("110 W. Stinson St. Chapel Hill, NC");
 
     const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},
@@ -26,16 +22,12 @@ const ExploreScreen = () => {
         if (user) {
             fetchFriendsAttending();
         }
+        fetchNearbyEvents();
     }, [user]);
-
-    const geocode = async () => {
-        const geocodedLocation = await Location.geocodeAsync(addr);
-        console.log("Geocoded address: ", geocodedLocation);
-    };
 
     const fetchFriendsAttending = async () => {
         try {
-            const response = await fetch(`http://192.168.1.142:8000/api/friends_attending_events/${user.username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/friends_attending_events/${user.username}/`);
             const data = await response.json();
             setFriendsEvents(data);
         } catch (e) {
@@ -43,15 +35,15 @@ const ExploreScreen = () => {
         }
     };
 
-    // const fetchNearbyEvents = async () => {
-    //     try {
-    //         const response = await fetch();
-    //         const data = await response.json();
-    //         setNearbyEvents(data);
-    //     } catch (e) {
-    //         console.error("Error retrieving nearby events: ", e);
-    //     }
-    // };
+    const fetchNearbyEvents = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/nearby_events/${userLocation.latitude}/${userLocation.longitude}/`);
+            const data = await response.json();
+            setNearbyEvents(data);
+        } catch (e) {
+            console.error("Error retrieving nearby events: ", e);
+        }
+    };
 
     const renderEventItem = ({ item }) => (
         <View>
@@ -60,7 +52,7 @@ const ExploreScreen = () => {
                 creation_user={item.creation_user}
                 event_name={item.event_name}
                 event_description={item.event_description}
-                location={item.location}
+                location_addr={item.location_addr}
                 date={item.date}
                 list_of_attendees={item.list_of_attendees}
             />
@@ -69,7 +61,8 @@ const ExploreScreen = () => {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        fetchFriendsAttending()
+        fetchFriendsAttending();
+        fetchNearbyEvents();
         setTimeout(() => {
             setRefreshing(false);
         }, 2000);
@@ -81,13 +74,10 @@ const ExploreScreen = () => {
                 data={friendsEvents}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderEventItem}
-                ListEmptyComponent={<Text>No Events Found</Text>}
+                ListEmptyComponent={<Text>No Events Found!</Text>}
                 contentContainerStyle={{ paddingTop: 10, paddingBottom: 15, marginRight: 10 }}
                 refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={() => onRefresh()}
-                    />
+                    <RefreshControl refreshing={refreshing} onRefresh={() => onRefresh()}/>
                 }
             />
         </View>
@@ -95,14 +85,21 @@ const ExploreScreen = () => {
 
     const ExploreRoute = () => (
         <View>
-            <Text>Find Interesting Events</Text>
-            <TextInput placeholder="Address" value={addr} onChangeText={setAddr}/>
-            <Button title="Geocode Address" onPress={geocode}/>
+            <FlatList
+                data={nearbyEvents}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderEventItem}
+                ListEmptyComponent={<Text>No Events Found</Text>}
+                contentContainerStyle={{ paddingTop: 10, paddingBottom: 15, marginRight: 10 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => onRefresh()}/>
+                }
+            />
         </View>
     );
 
     const MemoizedFriendsAttendingRoute = useMemo(() => FriendsAttendingRoute, [friendsEvents]);
-    const MemoizedExploreRoute = useMemo(() => ExploreRoute, []);
+    const MemoizedExploreRoute = useMemo(() => ExploreRoute, [nearbyEvents]);
 
     const renderScene = SceneMap({
         first: MemoizedFriendsAttendingRoute,
@@ -136,20 +133,7 @@ const ExploreScreen = () => {
     );
 }
 
-function padding(a, b, c, d) {
-    return {
-      paddingTop: a,
-      paddingBottom: c !== undefined ? c : a,
-      paddingRight: b !== undefined ? b : a,
-      paddingLeft: d !== undefined ? d : (b !== undefined ? b : a)
-    }
-}
-
 const styles = StyleSheet.create({
-    title: {
-        ...padding(10, 0, 0, 10),
-        fontSize: 32
-    },
     container: {
         flex: 1,
     },
