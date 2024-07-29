@@ -20,6 +20,7 @@
     "expo-image-picker": "~15.0.7",
     "expo-location": "~17.0.1",
     "expo-status-bar": "~1.12.1",
+    "firebase": "^10.12.4",
     "react": "18.2.0",
     "react-native": "^0.74.3",
     "react-native-elements": "^3.4.3",
@@ -32,7 +33,8 @@
     "react-native-screens": "~3.31.1",
     "react-native-simple-radio-button": "^2.7.4",
     "react-native-tab-view": "^3.5.2",
-    "react-native-uuid": "^2.0.1"
+    "react-native-uuid": "^2.0.1",
+    "typescript": "~5.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
