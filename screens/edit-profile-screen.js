@@ -59,8 +59,6 @@ const EditProfileScreen = () => {
                     bio: newBio,
                     email: currEmail,
                     password: currPW,
-                    user_type: 'individual',
-                    user_privacy: 'public',
                 }),
             });
             const userData = await response.json();

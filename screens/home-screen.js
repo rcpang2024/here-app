@@ -3,15 +3,27 @@ import { useEffect, useState, useCallback, useContext } from "react";
 import EventItem from "../components/event-item";
 import { UserContext } from "../user-context";
 import * as Location from 'expo-location';
+import { useNavigation } from "@react-navigation/native";
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const HomeScreen = () => {
+    const navigation = useNavigation();
     const [data, setData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
-    // const [addr, setAddr] = useState();
-
     const { user, updateUserLocation } = useContext(UserContext);
 
     useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Ionicons
+                    name="notifications"
+                    size={28}
+                    color="black"
+                    onPress={() => navigation.navigate("Notifications")}
+                    style={{ marginRight: 16 }}
+                />
+            )
+        });
         fetchData();
         const getPermissions = async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();

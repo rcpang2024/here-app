@@ -30,6 +30,10 @@ const OtherProfileScreen = ({ route }) => {
     const [attending, setAttending] = useState([]);
     const [event, setEvent] = useState('');
 
+    // Checks to see if the context user follows the other user
+    const isPrivateUser = currUser.user_privacy === "private";
+    const isFollowing = currUser.list_of_followers.includes(user.id);
+
     const routes = useMemo(() => ([
         { key: 'first', title: 'PROFILE' },
         { key: 'second', title: 'CREATED EVENTS' },
@@ -322,14 +326,24 @@ const OtherProfileScreen = ({ route }) => {
     // Renders the tab bar
     const renderTabBar = (props) => {
         return (
-            <TabBar 
-                {...props}
-                indicatorStyle={{ backgroundColor: 'black' }}
-                style={{ backgroundColor: '#BD7979' }} 
-                renderLabel={({ route}) => (
-                    <Text style={{color: 'white', fontWeight: 'bold'}}>{route.title}</Text>
+            <View>
+                {isPrivateUser && !isFollowing ? (
+                    <View>
+                        <Text style={{fontSize: 16, alignSelf: 'center', fontWeight: 'bold', color: '#BD7979'}}>
+                            PRIVATE - FOLLOW TO VIEW EVENTS
+                        </Text>
+                    </View>
+                ) : (
+                    <TabBar 
+                        {...props}
+                        indicatorStyle={{ backgroundColor: 'black' }}
+                        style={{ backgroundColor: '#BD7979' }} 
+                        renderLabel={({ route }) => (
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>{route.title}</Text>
+                        )}
+                    />
                 )}
-            />
+        </View>
         );
     };
 
@@ -341,7 +355,7 @@ const OtherProfileScreen = ({ route }) => {
             onIndexChange={onTabChange}
             initialLayout={{ width: '90%' }}
             renderTabBar={renderTabBar}
-            style={{marginTop: 4, padding: 10, color: 'black', justifyContent: 'center'}}
+            style={{ marginTop: 4, padding: 10, color: 'black', justifyContent: 'center' }}
         />
     );
 }

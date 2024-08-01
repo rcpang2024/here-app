@@ -19,6 +19,8 @@ import ConfirmEmailScreen from '../screens/confirm-email-screen';
 import ForgotScreen from '../screens/forgot-pw-screen';
 import FollowersScreen from '../screens/list-of-followers';
 import FollowingScreen from '../screens/list-of-following';
+import NotificationsScreen from '../screens/notifications-screen';
+import FollowRequestScreen from '../screens/follow-request-screen';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const homeName = 'Home';
@@ -49,6 +51,8 @@ export function MainContainer() {
         <Stack.Screen name="Edit Event" component={EditEventScreen}/>
         <Stack.Screen name="About Here" options={{ headerShown: false }} component={AboutHereScreen}/>
         <Stack.Screen name="Other Profile" options={{headerTitle: ''}} component={OtherProfileScreen}/>
+        <Stack.Screen name="Notifications" component={NotificationsScreen}/>
+        <Stack.Screen name="Follow Request" options={{headerTitle: ''}} component={FollowRequestScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

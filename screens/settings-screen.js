@@ -1,11 +1,22 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useEffect } from "react";
+import { useEffect, useState, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import RadioForm from "react-native-simple-radio-button";
+import { UserContext } from "../user-context";
 
 const SettingsScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    const { user, updateUserContext } = useContext(UserContext);
+    const [userPrivacy, setUserPrivacy] = useState(null);
+
+    const privacyItems = [
+        {label: 'Public', value: 'public'},
+        {label: 'Private', value: 'private'}
+    ];
+
+    const initialPrivacyIndex = privacyItems.findIndex(item => item.value === user.user_privacy);
 
     useEffect(() => {
         // Set the left header component
@@ -22,12 +33,47 @@ const SettingsScreen = () => {
         });
     }, [route.params]);
 
+    const updateUserInDB = async (newPrivacy) => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${user.username}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_privacy: newPrivacy
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const userData = await response.json();
+            // Update the context with the new user data
+            updateUserContext(prevState => ({
+                ...prevState,
+                user_privacy: newPrivacy,
+            }));
+            return userData;
+        } catch (error) {
+            console.error("Error updating user: ", error);
+        }
+    };
+
     return (
         <View style={styles.title}>
             <View style={styles.buttons}>
                 <TouchableOpacity onPress={() => console.log("Settings")}>
                     <Text style={styles.text}>Settings</Text>
                 </TouchableOpacity>
+                <Text style={{fontSize: 26, marginBottom: 8}}>Account Privacy</Text>
+                <RadioForm
+                    radio_props={privacyItems}
+                    initial={initialPrivacyIndex}
+                    onPress={(val) => {setUserPrivacy(val); updateUserInDB(val)}}
+                    style={{marginBottom: 15}}
+                />
                 <TouchableOpacity onPress={() => console.log("Account Information")}>
                     <Text style={styles.text}>Account Information</Text>
                 </TouchableOpacity>
