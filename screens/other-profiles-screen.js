@@ -8,13 +8,17 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OtherProfileScreen = ({ route }) => {
     const navigation = useNavigation();
     // User who is logged in
-    const { user, updateUserContext } = useContext(UserContext); // Access user from context
+    const { user, updateUserContext } = useContext(UserContext); 
     const { profileUser } = route.params || {};
-    const currUser = profileUser || user;
+    const currUser = profileUser;
+
+    const [isRequested, setIsRequested] = useState(false); // New state for follow request
+
     // For options modal
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -111,6 +115,10 @@ const OtherProfileScreen = ({ route }) => {
             setCreated(currUser.created_events);
             setAttending(currUser.attending_events);
         }
+        if (user.requesting_users.includes(currUser.id)) {
+            console.log("inside useEffect", isRequested);
+            setIsRequested(true); // Update the request state if a follow request is already sent
+        }
         navigation.setOptions({
             headerLeft: () => (
                 <Ionicons
@@ -145,22 +153,42 @@ const OtherProfileScreen = ({ route }) => {
 
     const handleFollow = async () => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/followuser/${user.username}/${profileUser.username}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ follower: user.username }),
-            });
-            if (response.ok) {
-                // Update user context
-                const updatedUser = {
-                    ...user,
-                    list_of_following: [...user.list_of_following, profileUser.id],
-                };
-                updateUserContext(updatedUser);
+            if (isPrivateUser && !isFollowing) {
+                const followRequestResponse = await fetch(`http://192.168.1.6:8000/api/request_to_follow_user/${user.username}/${profileUser.username}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ follower: user.username }),
+                });
+                if (followRequestResponse.ok) {
+                    const updatedUser = {
+                        ...user,
+                        requesting_users: [...user.requesting_users, profileUser.id]
+                    };
+                    updateUserContext(updatedUser);
+                    setIsRequested(true);
+                } else {
+                    console.error("Failed to request to follow user.");
+                }
             } else {
-                console.error('Failed to follow the user');
+                const response = await fetch(`http://192.168.1.6:8000/api/followuser/${user.username}/${profileUser.username}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ follower: user.username }),
+                });
+                if (response.ok) {
+                    // Update user context
+                    const updatedUser = {
+                        ...user,
+                        list_of_following: [...user.list_of_following, profileUser.id],
+                    };
+                    updateUserContext(updatedUser);
+                } else {
+                    console.error('Failed to follow the user');
+                }
             }
         } catch (err) {
             console.error('Error when trying to follow user: ', err);
@@ -262,7 +290,20 @@ const OtherProfileScreen = ({ route }) => {
                             </Pressable>
                         </View>
                         <Text style={styles.bio}>{currUser.bio}</Text>
-                        {user.list_of_following.includes(profileUser.id) ? (
+                        {isFollowing ? (
+                            <TouchableOpacity style={styles.unfollowUser} onPress={handleUnfollow}>
+                                <Text style={{fontWeight: 'bold', color: 'white'}}>UNFOLLOW</Text>
+                            </TouchableOpacity>
+                        ) : isRequested ? (
+                            <TouchableOpacity style={styles.requestUser}>
+                                <Text style={{fontWeight: 'bold', color: 'white'}}>REQUESTED</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity style={styles.followUser} onPress={handleFollow}>
+                                <Text style={{fontWeight: 'bold', color: 'white'}}>FOLLOW</Text>
+                            </TouchableOpacity>
+                        )}
+                        {/* {user.list_of_following.includes(profileUser.id) ? (
                             <TouchableOpacity style={styles.unfollowUser} onPress={handleUnfollow}>
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>UNFOLLOW</Text>
                             </TouchableOpacity>
@@ -270,7 +311,7 @@ const OtherProfileScreen = ({ route }) => {
                             <TouchableOpacity style={styles.followUser} onPress={handleFollow}>
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>FOLLOW</Text>
                             </TouchableOpacity>
-                        )}
+                        )} */}
                     </View>
                     {/* {renderModal()} */}
                 </ScrollView>
@@ -420,6 +461,17 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 10,
         backgroundColor: '#5ADAD8',
+    },
+    requestUser: {
+        borderColor: '#abb4c2',
+        borderRadius: 2,
+        borderWidth: 3,
+        padding: 10,
+        marginTop: 10,
+        alignItems: 'center',
+        marginLeft: 10,
+        marginRight: 10,
+        backgroundColor: '#abb4c2',
     },
     unfollowUser: {
         borderColor: '#EC6C6C',
