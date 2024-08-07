@@ -17,7 +17,8 @@ const OtherProfileScreen = ({ route }) => {
     const { profileUser } = route.params || {};
     const currUser = profileUser;
 
-    const [isRequested, setIsRequested] = useState(false); // New state for follow request
+    const hasRequested = user.requesting_users.includes(profileUser.id);
+    const [isRequested, setIsRequested] = useState(hasRequested);
 
     // For options modal
     const [modalVisible, setModalVisible] = useState(false);
@@ -111,14 +112,18 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     useEffect(() => {
-        if (currUser) {
-            setCreated(currUser.created_events);
-            setAttending(currUser.attending_events);
+        console.log("hasRequested: ", hasRequested);
+        console.log("isRequested: ", isRequested);
+        if (profileUser) {
+            setCreated(profileUser.created_events);
+            setAttending(profileUser.attending_events);
+            checkFollowRequestState();
         }
-        if (user.requesting_users.includes(currUser.id)) {
-            console.log("inside useEffect", isRequested);
-            setIsRequested(true); // Update the request state if a follow request is already sent
-        }
+        // if (user.requesting_users.includes(currUser.id)) {
+        //     console.log("inside useEffect: ",`isRequested_${profileUser.username}`);
+        //     console.log("isRequested: ", isRequested);
+        //     setIsRequested(true); // Update the request state if a follow request is already sent
+        // }
         navigation.setOptions({
             headerLeft: () => (
                 <Ionicons
@@ -139,7 +144,11 @@ const OtherProfileScreen = ({ route }) => {
                 />
             ),
         });
-    }, [route.params, currUser]);
+    }, [route.params, profileUser, isRequested]);
+
+    // useEffect(() => {
+    //     console.log("isRequested has changed:", isRequested);
+    // }, [isRequested]);
 
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
@@ -166,8 +175,10 @@ const OtherProfileScreen = ({ route }) => {
                         ...user,
                         requesting_users: [...user.requesting_users, profileUser.id]
                     };
-                    updateUserContext(updatedUser);
+                    await updateUserContext(updatedUser);
                     setIsRequested(true);
+                    console.log("isRequested inside handleFollow:", isRequested);
+                    await AsyncStorage.setItem(`isRequested_${profileUser.username}`, 'true');
                 } else {
                     console.error("Failed to request to follow user.");
                 }
@@ -185,7 +196,7 @@ const OtherProfileScreen = ({ route }) => {
                         ...user,
                         list_of_following: [...user.list_of_following, profileUser.id],
                     };
-                    updateUserContext(updatedUser);
+                    await updateUserContext(updatedUser);
                 } else {
                     console.error('Failed to follow the user');
                 }
@@ -219,6 +230,56 @@ const OtherProfileScreen = ({ route }) => {
         }
     };
 
+    const handleRemoveRequest = async () => {
+        try {
+            const removeRequestResponse = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${profileUser.username}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ follower: user.username })
+            });
+            if (removeRequestResponse.ok) {
+                const updatedUser = {
+                    ...user,
+                    // requesting_users: [...user.requesting_users, profileUser.id]
+                    requesting_users: user.requesting_users.filter(id => id !== profileUser.id)
+                };
+                updateUserContext(updatedUser);
+                setIsRequested(false);
+                console.log("isRequested inside handleUnfollow", isRequested);
+                AsyncStorage.setItem(`isRequested_${profileUser.username}`, 'false');
+            } else {
+                console.error("Failed to request to follow user.");
+            }
+        } catch (e) {
+            console.error("Error removing follow request: ", e);
+        }
+    };
+
+    const checkFollowRequestState = async () => {
+        try {
+            const value = await AsyncStorage.getItem(`isRequested_${profileUser.username}`);
+            // console.log("Inside checkFollowRequestState: ", value);
+            if (value === 'true') {
+                setIsRequested(true);
+            } else {
+                setIsRequested(false);
+            }
+        } catch (error) {
+            console.error('Error loading follow request state:', error);
+        }
+    };
+
+    const saveFollowRequestState = async (state) => {
+        try {
+            await AsyncStorage.setItem(`isRequested_${profileUser.username}`, state.toString());
+            console.log("The state: ", state);
+        } catch (error) {
+            console.error('Error saving follow request state:', error);
+        }
+    };
+
     const renderCreate = ({ item }) => {
         return (
             <View>
@@ -246,7 +307,6 @@ const OtherProfileScreen = ({ route }) => {
                     location={item.location}
                     date={item.date}
                     list_of_attendees={item.list_of_attendees}
-                    // onUnregister={handleUnregister}
                 />
             </View>
         );
@@ -295,7 +355,7 @@ const OtherProfileScreen = ({ route }) => {
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>UNFOLLOW</Text>
                             </TouchableOpacity>
                         ) : isRequested ? (
-                            <TouchableOpacity style={styles.requestUser}>
+                            <TouchableOpacity style={styles.requestUser} onPress={handleRemoveRequest}>
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>REQUESTED</Text>
                             </TouchableOpacity>
                         ) : (
@@ -303,15 +363,6 @@ const OtherProfileScreen = ({ route }) => {
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>FOLLOW</Text>
                             </TouchableOpacity>
                         )}
-                        {/* {user.list_of_following.includes(profileUser.id) ? (
-                            <TouchableOpacity style={styles.unfollowUser} onPress={handleUnfollow}>
-                                <Text style={{fontWeight: 'bold', color: 'white'}}>UNFOLLOW</Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity style={styles.followUser} onPress={handleFollow}>
-                                <Text style={{fontWeight: 'bold', color: 'white'}}>FOLLOW</Text>
-                            </TouchableOpacity>
-                        )} */}
                     </View>
                     {/* {renderModal()} */}
                 </ScrollView>
@@ -365,6 +416,8 @@ const OtherProfileScreen = ({ route }) => {
     });
 
     // Renders the tab bar
+    // PROBLEM: DISABLE ABILITY TO SLIDE ON THE PHONE B/C CURRENTLY YOU CAN STILL SEE THE EVENTS IF PRIVATE BY
+    // SLIDING TO THE RIGHT
     const renderTabBar = (props) => {
         return (
             <View>
