@@ -1,15 +1,43 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import RadioForm from "react-native-simple-radio-button";
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SettingsScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user, updateUserContext } = useContext(UserContext);
     const [userPrivacy, setUserPrivacy] = useState(null);
+    useEffect(() => {
+        if (!user) {
+            navigation.navigate('Login');  // Navigate to login if no user is signed in
+            return;
+        }
+
+        // Set the left header component
+        navigation.setOptions({
+            headerLeft: () => (
+                <Ionicons
+                    name="arrow-back"
+                    size={28}
+                    color="black"
+                    onPress={() => navigation.goBack()}
+                    style={{ marginLeft: 16 }}
+                />
+            ),
+        });
+    }, [user, route.params, navigation]);
+
+    if (!user) {
+        return (
+            <View style={styles.container}>
+                <Text>No user signed in</Text>
+            </View>
+        );
+    }
 
     const privacyItems = [
         {label: 'Public', value: 'public'},
@@ -18,20 +46,20 @@ const SettingsScreen = () => {
 
     const initialPrivacyIndex = privacyItems.findIndex(item => item.value === user.user_privacy);
 
-    useEffect(() => {
-        // Set the left header component
-        navigation.setOptions({
-            headerLeft: () => (
-            <Ionicons
-                name="arrow-back"
-                size={28}
-                color="black"
-                onPress={() => navigation.goBack()}
-                style={{ marginLeft: 16 }}
-            />
-            ),
-        });
-    }, [route.params]);
+    // useEffect(() => {
+    //     // Set the left header component
+    //     navigation.setOptions({
+    //         headerLeft: () => (
+    //         <Ionicons
+    //             name="arrow-back"
+    //             size={28}
+    //             color="black"
+    //             onPress={() => navigation.goBack()}
+    //             style={{ marginLeft: 16 }}
+    //         />
+    //         ),
+    //     });
+    // }, [route.params]);
 
     const updateUserInDB = async (newPrivacy) => {
         try {
@@ -61,6 +89,34 @@ const SettingsScreen = () => {
         }
     };
 
+    const handleLogOut = async () => {
+        try {
+            await FIREBASE_AUTH.signOut();
+            updateUserContext(null);
+            navigation.navigate('Login');
+        } catch (e) {
+            console.error("Error signing out: ", e);
+        }
+    };
+
+    const confirmLogOut = () => {
+        Alert.alert(
+            "Log Out",
+            "Are you sure you want to log out?",
+            [
+                {
+                    text: "No",
+                    onPress: () => {},
+                    style: "cancel"
+                },
+                {
+                    text: "Yes",
+                    onPress: handleLogOut
+                }
+            ],
+        );
+    };
+
     return (
         <View style={styles.title}>
             <View style={styles.buttons}>
@@ -86,7 +142,7 @@ const SettingsScreen = () => {
                 <TouchableOpacity onPress={() => console.log("Contact Us")}>
                     <Text style={styles.text}>Contact Us</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <TouchableOpacity onPress={confirmLogOut}>
                     <Text style={styles.logOut}>Log Out</Text>
                 </TouchableOpacity>
             </View>

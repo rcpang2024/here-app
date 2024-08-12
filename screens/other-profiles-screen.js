@@ -216,6 +216,7 @@ const OtherProfileScreen = ({ route }) => {
                     list_of_following: user.list_of_following.filter(id => id !== profileUser.id),
                 };
                 setFollowingStatus(false);
+                setIsRequested(false);
                 await updateUserContext(updatedUser);
             } else {
                 console.error('Failed to unfollow the user');

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from "react-native";
 import { useEffect, useContext, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -19,7 +19,8 @@ const FollowRequestScreen = () => {
                     throw new Error('Network response for user data was not ok');
                 }
                 const userData = await response.json();
-                return userData.username;
+                // return userData.username;
+                return {username: userData.username, id: followerID};
             })
         );
         setFollowRequests(requestersWithUsernames);
@@ -64,16 +65,69 @@ const FollowRequestScreen = () => {
         }
     };
 
+    // ISSUE: Item is a username, but I need the ID of the user
+    const handleAccept = async (item) => {
+        console.log("item: ", item);
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/followuser/${item.username}/${user.username}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ follower: user.username }),
+            });
+            console.log("Item: ", item);
+            if (response.ok) {
+                const updatedUser = {
+                    ...user,
+                    list_of_followers: [...user.list_of_followers, item.id], // find a way to get user id
+                };
+                await updateUserContext(updatedUser);
+                console.log("Follow accepted");
+                setFollowRequests((prevRequests) => prevRequests.filter(req => req.id !== item.id));
+            } else {
+                console.log("Response not OK when accepting follow request");
+            }
+        } catch (e) {
+            console.error("Failed to accept follow request: ", e);
+        }
+    };
+
+    const handleDeny = async (item) => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${item.username}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ follower: user.username })
+            });
+            if (response.ok) {
+                const updatedUser = {
+                    ...user,
+                    follow_requests: user.follow_requests.filter(id => id !== item.id) // get user id
+                };
+                await updateUserContext(updatedUser);
+                console.log("Follow rejected");
+                setFollowRequests((prevRequests) => prevRequests.filter(req => req.id !== item.id));
+            } else {
+                console.error("Response error during rejecting follow request.");
+            }
+        } catch (e) {
+            console.error("Error denying follow request: ", e);
+        }
+    };
+
     const renderItem = ({ item }) => (
         <View style={styles.requestItem}>
-            <TouchableOpacity>
-                <Text style={styles.text}>{item}</Text>
+            <TouchableOpacity onPress={() => handleUserPress(item.username)}>
+                <Text style={styles.text}>{item.username}</Text>
             </TouchableOpacity>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={() => console.log("Accepted")}>
+                <TouchableOpacity onPress={() => handleAccept(item)}>
                     <Text style={{fontSize: 18}}>ACCEPT</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("Denied")}>
+                <TouchableOpacity onPress={() => handleDeny(item)}>
                     <Text style={{fontSize: 18, color: 'red'}}>DENY</Text>
                 </TouchableOpacity>
             </View>
@@ -84,7 +138,7 @@ const FollowRequestScreen = () => {
         <View style={styles.container}>
             <FlatList 
                 data={followRequests}
-                keyExtractor={(item) => item}
+                keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
                 contentContainerStyle={{paddingBottom: 100}}
             />

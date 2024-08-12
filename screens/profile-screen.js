@@ -144,6 +144,13 @@ const ProfileScreen = ({ route }) => {
     }, []);
 
     const ProfileRoute = () => {
+        if (!user) {
+            return (
+                <View>
+                    <Text>User is not signed in</Text>
+                </View>
+            );
+        }
         return (
             <View style={{paddingTop: 10, marginRight: 15}}>
                 <ScrollView 

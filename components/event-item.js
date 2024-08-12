@@ -153,7 +153,7 @@ const handleDelete = async () => {
           {!isGoing && <Ionicons name="add" size={20} color="white" />}
           <Text style={styles.buttonText}>{isGoing ? 'GOING!' : 'REGISTER'}</Text>
         </TouchableOpacity>
-        {user.id === creation_user && (
+        {user && user.id === creation_user && (
           <View>
             <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate("Edit Event", {
               eventID: event_id,

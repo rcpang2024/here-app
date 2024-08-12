@@ -70,7 +70,7 @@ const FollowingScreen = () => {
             <FlatList
                 data={following}
                 keyExtractor={(item) => item}
-                renderItem={({ item }) => <TouchableOpacity onPress={() => {handleUserPress(item)}}>
+                renderItem={({ item }) => <TouchableOpacity onPress={() => handleUserPress(item)}>
                     <Text style={styles.text}>{item}</Text></TouchableOpacity>}
                 contentContainerStyle={{paddingBottom: 100}}
             />
