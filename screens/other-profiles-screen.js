@@ -1,5 +1,5 @@
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Pressable, RefreshControl, ScrollView,
-    Modal } from "react-native";
+    Modal, Alert } from "react-native";
 import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
@@ -297,6 +297,24 @@ const OtherProfileScreen = ({ route }) => {
         );
     };
 
+    const confirmUnfollow = () => {
+        Alert.alert(
+            "Unfollow",
+            "Are you sure you want to unfollow this user?",
+            [
+                {
+                    text: "No",
+                    onPress: () => {},
+                    style: "cancel"
+                },
+                {
+                    text: "Yes",
+                    onPress: handleUnfollow
+                }
+            ],
+        );
+    };
+
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         handleCreatedEvent();
@@ -336,7 +354,7 @@ const OtherProfileScreen = ({ route }) => {
                         </View>
                         <Text style={styles.bio}>{currUser.bio}</Text>
                         {followingStatus ? (
-                            <TouchableOpacity style={styles.unfollowUser} onPress={handleUnfollow}>
+                            <TouchableOpacity style={styles.unfollowUser} onPress={confirmUnfollow}>
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>UNFOLLOW</Text>
                             </TouchableOpacity>
                         ) : isRequested ? (

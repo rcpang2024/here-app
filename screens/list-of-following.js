@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { UserContext } from "../user-context";
 
 const FollowingScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    const { user } = useContext(UserContext);
 
     const list_of_following = route.params.following;
     const [following, setFollowing] = useState([]);
