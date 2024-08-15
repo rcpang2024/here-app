@@ -91,25 +91,6 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     // FIX THIS LATER: MODAL DOESN'T SHOW UP RN
-    const renderModal = () => {
-        return (
-            <View>
-                <Modal
-                    transparent={true}
-                    visible={modalVisible}
-                    animationType="slide"
-                    onRequestClose={setModalVisible(false)}
-                >
-                    <TouchableOpacity>
-                        <Text>BLOCK USER</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setModalVisible(false)}>
-                        <Text>CANCEL</Text>
-                    </TouchableOpacity>
-                </Modal>
-            </View>
-        );
-    };
 
     useEffect(() => {
         console.log("isRequested: ", isRequested);
@@ -133,16 +114,32 @@ const OtherProfileScreen = ({ route }) => {
                     name="person"
                     size={28}
                     color="black"
-                    onPress={() => setModalVisible(true)}
+                    onPress={renderModal}
                     style={{marginRight: 16}}
                 />
             ),
         });
     }, [route.params, profileUser]);
 
-    useEffect(() => {
-        console.log("isRequested has changed:", isRequested);
-    }, [isRequested]);
+    const renderModal = () => {
+        return (
+            <View>
+                <Modal
+                    transparent={true}
+                    visible={modalVisible}
+                    animationType="slide"
+                    onRequestClose={setModalVisible(false)}
+                >
+                    <TouchableOpacity onPress={() => console.log("Block User")}>
+                        <Text>BLOCK USER</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                        <Text>CANCEL</Text>
+                    </TouchableOpacity>
+                </Modal>
+            </View>
+        );
+    };
 
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
@@ -265,31 +262,16 @@ const OtherProfileScreen = ({ route }) => {
         }
     };
 
-    const renderCreate = ({ item }) => {
+    const renderEventItem = ({ item }) => {
         return (
             <View>
                 <EventItem
                     event_id={item.id}
                     creation_user={item.creation_user}
+                    creation_user_username={item.creation_user_username}
                     event_name={item.event_name}
                     event_description={item.event_description}
-                    location={item.location}
-                    date={item.date}
-                    list_of_attendees={item.list_of_attendees}
-                />
-            </View>
-        );
-    };
-
-    const renderAttending = ({ item }) => {
-        return (
-            <View>
-                <EventItem
-                    event_id={item.id}
-                    creation_user={item.creation_user}
-                    event_name={item.event_name}
-                    event_description={item.event_description}
-                    location={item.location}
+                    location_addr={item.location_addr}
                     date={item.date}
                     list_of_attendees={item.list_of_attendees}
                 />
@@ -381,7 +363,7 @@ const OtherProfileScreen = ({ route }) => {
                         <FlatList
                             data={createdEvent}
                             keyExtractor={(item) => item.id}
-                            renderItem={renderCreate}
+                            renderItem={renderEventItem}
                             contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
                         />
                     </View>
@@ -398,7 +380,7 @@ const OtherProfileScreen = ({ route }) => {
                         <FlatList 
                             data={event}
                             keyExtractor={(item) => item.id}
-                            renderItem={renderAttending}
+                            renderItem={renderEventItem}
                             contentContainerStyle={{paddingTop: 5, paddingBottom: 15}}
                         />
                     </View>

@@ -42,6 +42,7 @@ const HomeScreen = () => {
     const fetchData = async () => {
         const response = await fetch(`http://192.168.1.6:8000/api/friendsevents/${user.username}/`);
         const data = await response.json();
+        // console.log("data", data);
         // const filteredEvents = data.filter(event => followedUserIDs.includes(event.creation_user));
         setData(data);
     };
@@ -60,6 +61,7 @@ const HomeScreen = () => {
             <EventItem
               event_id={item.id}
               creation_user={item.creation_user}
+              creation_user_username={item.creation_user_username}
               event_name={item.event_name}
               event_description={item.event_description}
               location_addr={item.location_addr}

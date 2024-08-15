@@ -6,11 +6,10 @@ import { UserContext } from "../user-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import format from "date-fns/format";
 
-const EventItem = ({ event_id, creation_user, event_name, event_description, location_addr, date, list_of_attendees }) => {
+const EventItem = ({ event_id, creation_user, creation_user_username, event_name, event_description, location_addr, date, list_of_attendees }) => {
   const navigation = useNavigation();
   const { user, updateUserContext } = useContext(UserContext);
 
-  const [creator, setCreator] = useState('');
   const [isGoing, setIsGoing] = useState(false);
 
   const formattedDate = format(new Date(date), 'MM-dd-yyyy');
@@ -80,20 +79,8 @@ const EventItem = ({ event_id, creation_user, event_name, event_description, loc
   };
   
   useEffect(() => {
-    fetchCreator();
     loadRegistrationStatus();
   }, []);
-
-  // Fetch creation_user's username from their ID number in database
-  const fetchCreator = async () => {
-    try {
-        const response = await fetch(`http://192.168.1.6:8000/api/users/id/${creation_user}/`);
-        const data = await response.json();
-    setCreator(data.username);
-    } catch (error) {
-        console.error('Error fetching creation user for attendees:', error);
-    }
-};
 
 const handleDelete = async () => {
   Alert.alert(
@@ -133,7 +120,7 @@ const handleDelete = async () => {
   return (
     <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("Event Details", {
       eventID: event_id,
-      creationUser: creator,
+      creationUser: creation_user_username,
       eventName: event_name,
       eventDescription: event_description,
       theLocation: location_addr,
@@ -141,7 +128,7 @@ const handleDelete = async () => {
       attendees: list_of_attendees
     })}>
       <Text style={{ fontSize: 24, padding: 2, fontWeight: 'bold' }}>{event_name}</Text>
-      <Text>Created by: {creator}</Text>
+      <Text>Created by: {creation_user_username}</Text>
       <Text>Location: {location_addr}</Text>
       <Text style={{fontWeight: 'bold', color: '#BD7979'}}>Date: {formattedDate}</Text>
       <Text style={{fontWeight: 'bold', color: '#BD7979'}}>Time: {formattedTime}</Text>

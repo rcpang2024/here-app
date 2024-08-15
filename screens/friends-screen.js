@@ -22,8 +22,14 @@ const ExploreScreen = () => {
         if (user) {
             fetchFriendsAttending();
         }
-        fetchNearbyEvents();
     }, [user]);
+
+    const onTabChange = (newIndex) => {
+        setIndex(newIndex);
+        if (newIndex === 1) {
+            fetchNearbyEvents();
+        }
+    };
 
     const fetchFriendsAttending = async () => {
         try {
@@ -51,6 +57,7 @@ const ExploreScreen = () => {
             <EventItem
                 event_id={item.id}
                 creation_user={item.creation_user}
+                creation_user_username={item.creation_user_username}
                 event_name={item.event_name}
                 event_description={item.event_description}
                 location_addr={item.location_addr}
@@ -125,7 +132,7 @@ const ExploreScreen = () => {
             <TabView 
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
-                onIndexChange={setIndex}
+                onIndexChange={onTabChange}
                 initialLayout={{ width: layout.width }}
                 renderTabBar={renderTabBar}
                 style={{marginTop: 10, padding: 10}}

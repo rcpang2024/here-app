@@ -55,7 +55,6 @@ const SearchScreen = () => {
             // Placeholder
             const eventResponse = await fetch(`http://192.168.1.6:8000/api/searchevents?query=${query}`);
             const eventData = await eventResponse.json();
-            console.log(eventData);
             setEventSearchCache((prevCache) => ({ ...prevCache, [query]: eventData }));
             setEventResults(eventData);
         } catch (error) {
@@ -100,9 +99,10 @@ const SearchScreen = () => {
                 <EventItem
                     event_id={item.id}
                     creation_user={item.creation_user}
+                    creation_user_username={item.creation_user_username}
                     event_name={item.event_name}
                     event_description={item.event_description}
-                    location={item.location}
+                    location_addr={item.location_addr}
                     date={item.date}
                     list_of_attendees={item.list_of_attendees}
                 />
