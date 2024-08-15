@@ -11,7 +11,6 @@ const NotificationsScreen = () => {
         follow_notifications: [],
         event_registrations: []
     });
-    const [senderUsernames, setSenderUsernames] = useState([]);
 
     useEffect(() => {
         navigation.setOptions({
@@ -36,6 +35,8 @@ const NotificationsScreen = () => {
             const response = await fetch(`http://192.168.1.6:8000/api/follower_notifications/${user.id}/`);
             if (response.ok) {
                 const data = await response.json();
+                // const follower_arr = [data]
+                // const sorted = follower_arr.sort((a ,b) => new Date(b.timestamp) - new Date(a.timestamp));
                 setNotifications(prevNotifications => ({
                     ...prevNotifications,
                     follow_notifications: data
@@ -53,9 +54,11 @@ const NotificationsScreen = () => {
             const response = await fetch(`http://192.168.1.6:8000/api/event_notifications/${user.id}/`);
             if (response.ok) {
                 const data = await response.json();
+                const events_arr = [...data];
+                const sorted = events_arr.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 setNotifications(prevNotifications => ({
                     ...prevNotifications,
-                    event_registrations: data
+                    event_registrations: sorted
                 }));
                 console.log("notifications: ", notifications.event_registrations)
             } else {
@@ -69,7 +72,7 @@ const NotificationsScreen = () => {
     const fetchUserProfile = async (username) => {
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
-            const userData = response.json();
+            const userData = await response.json();
             return userData;
         } catch (err) {
             console.log("Error fetching user profile: ", err);
@@ -87,6 +90,33 @@ const NotificationsScreen = () => {
         }
     };
 
+    const fetchEvent = async (eventID) => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventID}/`);
+            const data = await response.json()
+            return data;
+        } catch (e) {
+            console.error("Error fetching event: ", e);
+        }
+    };
+
+    const handleEventPress = async (eventID) => {
+        const theEvent = await fetchEvent(eventID);
+        if (theEvent) {
+            navigation.navigate('Event Details', {
+                eventID: theEvent.id,
+                creationUser: theEvent.creation_user_username,
+                eventName: theEvent.event_name,
+                eventDescription: theEvent.event_description,
+                theLocation: theEvent.location_addr,
+                theDate: theEvent.date,
+                attendees: theEvent.list_of_attendees
+            });
+        } else {
+            console.error("Failed to retrieve the event in handleEventPress");
+        }
+    };
+
     const memoizedFollowerNotification = useMemo(() => notifications.follow_notifications, [notifications.follow_notifications]);
     const memoizedEventNotifications = useMemo(() => notifications.event_registrations, [notifications.event_registrations]);
 
@@ -98,6 +128,7 @@ const NotificationsScreen = () => {
                 </TouchableOpacity>
                 <Text style={styles.text}> began following you.</Text>
             </View>
+            <View style={{borderBottomColor: 'black', borderBottomWidth: StyleSheet.hairlineWidth}}/>
         </View>
     ), []);
 
@@ -107,8 +138,16 @@ const NotificationsScreen = () => {
                 <TouchableOpacity onPress={() => handleUserPress(item.sender_username)}>
                     <Text style={styles.userText}>{item.sender_username}</Text>
                 </TouchableOpacity>
-                <Text style={styles.text}> is going to your event.</Text>
+                <Text style={styles.text}> is going to your event:</Text>
             </View>
+            {item.event && item.event_name ? (
+                <TouchableOpacity onPress={() => handleEventPress(item.event)}>
+                    <Text style={styles.event_name_text}>{item.event_name}</Text>
+                </TouchableOpacity>
+            ) : (
+                <Text style={styles.event_name_text}>Event name not found</Text>
+            )}
+            <View style={{borderBottomColor: 'black', borderBottomWidth: StyleSheet.hairlineWidth}}/>
         </View>
     ), []);
 
@@ -143,14 +182,22 @@ const styles = StyleSheet.create({
     },
     userText: {
         paddingLeft: 10,
-        paddingBottom: 20,
+        paddingBottom: 5,
+        paddingTop: 5,
         fontSize: 20,
         color: '#BD7979'
     },
     text: {
-        paddingTop: 3,
-        paddingBottom: 20,
-        fontSize: 16
+        paddingBottom: 3,
+        paddingTop: 5,
+        fontSize: 20
+    }, 
+    event_name_text: {
+        paddingLeft: 10,
+        paddingTop: 2,
+        paddingBottom: 5,
+        fontSize: 20,
+        color: '#2da7a6'
     }
 })
 

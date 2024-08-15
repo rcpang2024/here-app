@@ -17,8 +17,16 @@ const EventDetailScreen = () => {
     const date = route.params.theDate;
     const list_of_attendees = route.params.attendees
 
-    const formattedDate = format(new Date(date), 'MM-dd-yyyy');
-    const formattedTime = format(new Date(date), 'h:mm a');
+    let formattedDate = 'Date not available';
+    let formattedTime = 'Time not available';
+
+    if (date) {
+        const parsedDate = new Date(date);
+        if (!isNaN(parsedDate)) {
+            formattedDate = format(parsedDate, 'MM-dd-yyyy');
+            formattedTime = format(parsedDate, 'h:mm a');
+        }
+    }
     const { user } = useContext(UserContext);
     
     useEffect(() => {
