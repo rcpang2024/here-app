@@ -90,8 +90,6 @@ const OtherProfileScreen = ({ route }) => {
         setEvent(validAttendingEvents);
     };
 
-    // FIX THIS LATER: MODAL DOESN'T SHOW UP RN
-
     useEffect(() => {
         console.log("isRequested: ", isRequested);
         if (profileUser) {
@@ -114,32 +112,12 @@ const OtherProfileScreen = ({ route }) => {
                     name="person"
                     size={28}
                     color="black"
-                    onPress={renderModal}
+                    onPress={() => setModalVisible(true)}
                     style={{marginRight: 16}}
                 />
             ),
         });
     }, [route.params, profileUser]);
-
-    const renderModal = () => {
-        return (
-            <View>
-                <Modal
-                    transparent={true}
-                    visible={modalVisible}
-                    animationType="slide"
-                    onRequestClose={setModalVisible(false)}
-                >
-                    <TouchableOpacity onPress={() => console.log("Block User")}>
-                        <Text>BLOCK USER</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setModalVisible(false)}>
-                        <Text>CANCEL</Text>
-                    </TouchableOpacity>
-                </Modal>
-            </View>
-        );
-    };
 
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
@@ -204,7 +182,6 @@ const OtherProfileScreen = ({ route }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ follower: user.username }),
             });
             if (response.ok) {
                 // Update user context
@@ -222,6 +199,28 @@ const OtherProfileScreen = ({ route }) => {
             console.error('Error unfollowing user: ', err);
         }
     };
+    
+    const handleRemoveFollower = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${profileUser.username}/${user.username}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                const updatedUser = {
+                    ...user,
+                    list_of_followers: user.list_of_followers.filter(id => id !== profileUser.id)
+                };
+                await updateUserContext(updatedUser);
+            } else {
+                console.error("Response for remove follower not OK");
+            }
+        } catch (e) {
+            console.error("Error removing follower: ", e);
+        }
+    };
 
     const handleRemoveRequest = async () => {
         try {
@@ -230,7 +229,6 @@ const OtherProfileScreen = ({ route }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ follower: user.username })
             });
             if (removeRequestResponse.ok) {
                 const updatedUser = {
@@ -297,6 +295,22 @@ const OtherProfileScreen = ({ route }) => {
         );
     };
 
+    const confirmRemoveFollower = () => {
+        Alert.alert(
+            "Remove Follower", 
+            "Are you sure you want to remove this user as a follower?", 
+            [{
+                text: "No",
+                onPress: () => {},
+                style: "cancel"
+            },
+            {
+                text: "Yes",
+                onPress: handleRemoveFollower
+            }]
+        );
+    };
+
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         handleCreatedEvent();
@@ -349,7 +363,6 @@ const OtherProfileScreen = ({ route }) => {
                             </TouchableOpacity>
                         )}
                     </View>
-                    {/* {renderModal()} */}
                 </ScrollView>
             </View>
         );
@@ -421,21 +434,50 @@ const OtherProfileScreen = ({ route }) => {
                         
                     />
                 )}
-        </View>
+            </View>
         );
     };
 
     return (
-        <TabView
-            lazy 
-            navigationState={{ index, routes }}
-            renderScene={renderScene}
-            onIndexChange={onTabChange}
-            initialLayout={{ width: '90%' }}
-            renderTabBar={renderTabBar}
-            swipeEnabled={!isPrivateUser || isFollowing} // conditionally enable or disable swiping
-            style={{ marginTop: 4, padding: 10, color: 'black', justifyContent: 'center' }}
-        />
+        <View style={{ flex: 1 }}>
+            <TabView
+                lazy 
+                navigationState={{ index, routes }}
+                renderScene={renderScene}
+                onIndexChange={onTabChange}
+                initialLayout={{ width: '90%' }}
+                renderTabBar={renderTabBar}
+                swipeEnabled={!isPrivateUser || isFollowing} // conditionally enable or disable swiping
+                style={{ marginTop: 4, padding: 10, color: 'black', justifyContent: 'center' }}
+            />
+             {modalVisible && (
+                <Modal
+                    transparent={true}
+                    visible={modalVisible}
+                    animationType="slide"
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+                        <View style={{backgroundColor: 'white', padding: 30, borderRadius: 10, alignItems: 'center'}}>
+                            <TouchableOpacity onPress={() => console.log("Set Notifications")}>
+                                <Text style={{paddingBottom: 10, fontSize: 18}}>SET NOTIFICATIONS</Text>
+                            </TouchableOpacity>
+                            {user.list_of_followers.includes(profileUser.id) && (
+                                <TouchableOpacity onPress={confirmRemoveFollower}>
+                                    <Text style={{paddingBottom: 10, fontSize: 18}}>REMOVE FOLLOWER</Text>
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity onPress={() => console.log("Block User")}>
+                                <Text style={{paddingBottom: 10, fontSize: 18}}>BLOCK USER</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                <Text style={{color: 'red', fontSize: 18}}>CANCEL</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            )}
+        </View>
     );
 }
 

@@ -21,6 +21,7 @@ import FollowersScreen from '../screens/list-of-followers';
 import FollowingScreen from '../screens/list-of-following';
 import NotificationsScreen from '../screens/notifications-screen';
 import FollowRequestScreen from '../screens/follow-request-screen';
+import ContactUsScreen from '../screens/contact-us-screen';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const homeName = 'Home';
@@ -53,6 +54,7 @@ export function MainContainer() {
         <Stack.Screen name="Other Profile" options={{headerTitle: ''}} component={OtherProfileScreen}/>
         <Stack.Screen name="Notifications" component={NotificationsScreen}/>
         <Stack.Screen name="Follow Request" options={{headerTitle: ''}} component={FollowRequestScreen}/>
+        <Stack.Screen name="Contact Us" component={ContactUsScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

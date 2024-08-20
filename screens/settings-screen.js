@@ -46,21 +46,6 @@ const SettingsScreen = () => {
 
     const initialPrivacyIndex = privacyItems.findIndex(item => item.value === user.user_privacy);
 
-    // useEffect(() => {
-    //     // Set the left header component
-    //     navigation.setOptions({
-    //         headerLeft: () => (
-    //         <Ionicons
-    //             name="arrow-back"
-    //             size={28}
-    //             color="black"
-    //             onPress={() => navigation.goBack()}
-    //             style={{ marginLeft: 16 }}
-    //         />
-    //         ),
-    //     });
-    // }, [route.params]);
-
     const updateUserInDB = async (newPrivacy) => {
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${user.username}/`, {
@@ -139,7 +124,7 @@ const SettingsScreen = () => {
                 <TouchableOpacity onPress={() => navigation.navigate("About Here")}>
                     <Text style={styles.text}>About Here!</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("Contact Us")}>
+                <TouchableOpacity onPress={() => navigation.navigate("Contact Us")}>
                     <Text style={styles.text}>Contact Us</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={confirmLogOut}>
