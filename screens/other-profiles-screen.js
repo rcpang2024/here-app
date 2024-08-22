@@ -131,7 +131,7 @@ const OtherProfileScreen = ({ route }) => {
 
     const handleFollow = async () => {
         try {
-            if (isPrivateUser && !isFollowing) {
+            if (isPrivateUser && !followingStatus) {
                 const followRequestResponse = await fetch(`http://192.168.1.6:8000/api/request_to_follow_user/${user.username}/${profileUser.username}/`, {
                     method: 'POST',
                     headers: {
@@ -247,6 +247,28 @@ const OtherProfileScreen = ({ route }) => {
         }
     };
 
+    const handleBlockUser = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/blockuser/${user.username}/${profileUser.username}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                const updatedUser = {
+                    ...user,
+                    blocked_users: [...user.blocked_users, profileUser.id],
+                };
+                setFollowingStatus(false);
+                setIsRequested(false);
+                await updateUserContext(updatedUser);
+            }
+        } catch (e) {
+            console.error("Error blocking user: ", e);
+        }
+    };
+
     const checkFollowRequestState = async () => {
         try {
             const value = await AsyncStorage.getItem(`isRequested_${profileUser.username}`);
@@ -282,15 +304,8 @@ const OtherProfileScreen = ({ route }) => {
             "Unfollow",
             "Are you sure you want to unfollow this user?",
             [
-                {
-                    text: "No",
-                    onPress: () => {},
-                    style: "cancel"
-                },
-                {
-                    text: "Yes",
-                    onPress: handleUnfollow
-                }
+                {text: "No", onPress: () => {}, style: "cancel"},
+                {text: "Yes", onPress: handleUnfollow}
             ],
         );
     };
@@ -299,15 +314,21 @@ const OtherProfileScreen = ({ route }) => {
         Alert.alert(
             "Remove Follower", 
             "Are you sure you want to remove this user as a follower?", 
-            [{
-                text: "No",
-                onPress: () => {},
-                style: "cancel"
-            },
-            {
-                text: "Yes",
-                onPress: handleRemoveFollower
-            }]
+            [
+                {text: "No", onPress: () => {}, style: "cancel"},
+                {text: "Yes", onPress: handleRemoveFollower}
+            ]
+        );
+    };
+
+    const confirmBlockingUser = () => {
+        Alert.alert(
+            "Block User", 
+            "Are you sure you want to block this user?", 
+            [
+                {text: "No", onPress: () => {}, style: "cancel"},
+                {text: "Yes", onPress: handleBlockUser}
+            ]
         );
     };
 
@@ -357,6 +378,8 @@ const OtherProfileScreen = ({ route }) => {
                             <TouchableOpacity style={styles.requestUser} onPress={handleRemoveRequest}>
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>REQUESTED</Text>
                             </TouchableOpacity>
+                        ) : user.blocked_users.includes(profileUser.id) || profileUser.blocked_users.includes(user.id) ? (
+                            <Text style={{fontWeight: 'bold', color: '#abb4c2', fontSize: 24}}>BLOCKED</Text>
                         ) : (
                             <TouchableOpacity style={styles.followUser} onPress={handleFollow}>
                                 <Text style={{fontWeight: 'bold', color: 'white'}}>FOLLOW</Text>
@@ -423,6 +446,12 @@ const OtherProfileScreen = ({ route }) => {
                             PRIVATE - FOLLOW TO VIEW EVENTS
                         </Text>
                     </View>
+                ) : profileUser.blocked_users.includes(user.id) || user.blocked_users.includes(profileUser.id) ? (
+                    <View>
+                        <Text style={{fontSize: 16, alignSelf: 'center', fontWeight: 'bold', color: '#BD7979'}}>
+                            UNAVAILABLE
+                        </Text>
+                    </View>
                 ) : (
                     <TabBar 
                         {...props}
@@ -447,7 +476,7 @@ const OtherProfileScreen = ({ route }) => {
                 onIndexChange={onTabChange}
                 initialLayout={{ width: '90%' }}
                 renderTabBar={renderTabBar}
-                swipeEnabled={!isPrivateUser || isFollowing} // conditionally enable or disable swiping
+                swipeEnabled={(!isPrivateUser && followingStatus) || (!isPrivateUser && !profileUser.blocked_users.includes(user.id))}
                 style={{ marginTop: 4, padding: 10, color: 'black', justifyContent: 'center' }}
             />
              {modalVisible && (
@@ -467,9 +496,11 @@ const OtherProfileScreen = ({ route }) => {
                                     <Text style={{paddingBottom: 10, fontSize: 18}}>REMOVE FOLLOWER</Text>
                                 </TouchableOpacity>
                             )}
-                            <TouchableOpacity onPress={() => console.log("Block User")}>
-                                <Text style={{paddingBottom: 10, fontSize: 18}}>BLOCK USER</Text>
-                            </TouchableOpacity>
+                            {!user.blocked_users.includes(profileUser.id) && (
+                                <TouchableOpacity onPress={confirmBlockingUser}>
+                                    <Text style={{paddingBottom: 10, fontSize: 18}}>BLOCK USER</Text>
+                                </TouchableOpacity>
+                            )}
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
                                 <Text style={{color: 'red', fontSize: 18}}>CANCEL</Text>
                             </TouchableOpacity>

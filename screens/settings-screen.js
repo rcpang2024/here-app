@@ -89,15 +89,8 @@ const SettingsScreen = () => {
             "Log Out",
             "Are you sure you want to log out?",
             [
-                {
-                    text: "No",
-                    onPress: () => {},
-                    style: "cancel"
-                },
-                {
-                    text: "Yes",
-                    onPress: handleLogOut
-                }
+                {text: "No", onPress: () => {}, style: "cancel"},
+                {text: "Yes", onPress: handleLogOut}
             ],
         );
     };
@@ -120,6 +113,9 @@ const SettingsScreen = () => {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => console.log("Security")}>
                     <Text style={styles.text}>Security</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate("Blocked Users")}>
+                    <Text style={styles.text}>Blocked Users</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate("About Here")}>
                     <Text style={styles.text}>About Here!</Text>

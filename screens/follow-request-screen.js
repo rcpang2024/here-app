@@ -67,7 +67,6 @@ const FollowRequestScreen = () => {
 
     // ISSUE: Item is a username, but I need the ID of the user
     const handleAccept = async (item) => {
-        console.log("item: ", item);
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/followuser/${item.username}/${user.username}/`, {
                 method: 'POST',
@@ -100,7 +99,7 @@ const FollowRequestScreen = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ follower: user.username })
+                // body: JSON.stringify({ follower: user.username })
             });
             if (response.ok) {
                 const updatedUser = {
