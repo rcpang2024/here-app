@@ -189,6 +189,7 @@ const SearchScreen = () => {
                     value={index === 0 ? searchUser : searchEvent}
                     style={index === 0 ? styles.searchBarUser : styles.searchBarEvent}
                     clearIcon={{size: 28, borderRadius: 3, padding: 3}}
+                    autoCapitalize="none"
                 />
                 <TabView
                     lazy

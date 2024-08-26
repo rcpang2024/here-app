@@ -45,7 +45,6 @@ const ExploreScreen = () => {
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/nearby_events/${userLocation.latitude}/${userLocation.longitude}/`);
             const data = await response.json();
-            console.log("inside nearbyEvents: ", data);
             setNearbyEvents(data);
         } catch (e) {
             console.error("Error retrieving nearby events: ", e);

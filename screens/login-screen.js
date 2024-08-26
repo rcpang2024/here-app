@@ -72,6 +72,7 @@ const LogInScreen = () => {
                                     returnKeyType="next"
                                     onChangeText={(val) => setEmail(val)}
                                     value={email}
+                                    autoCapitalize="none"
                                 />
                             </View>
                             <View style={styles.container}>
@@ -83,6 +84,7 @@ const LogInScreen = () => {
                                     secureTextEntry={true}
                                     onChangeText={(val) => setPW(val)}
                                     value={pw}
+                                    autoCapitalize="none"
                                 />
                             </View>
                             <TouchableOpacity style={styles.signIn} onPress={signIn}>

@@ -121,6 +121,14 @@ const CreateEventScreen = () => {
     }
   };
 
+  const createdEventsNumMaxedOut = () => {
+    Alert.alert(
+      "Maximum number of events reached.",
+      "Delete an event or wait for an event to expire before creating a new one.",
+      [{text: "OK", onPress: () => {}, style: 'cancel'}]
+    )
+  };
+
   const handlePostEvent = () => {
     fetchPost().then((data) => {
       console.log("Inside handlePostEvent: ", data.id);
@@ -132,7 +140,8 @@ const CreateEventScreen = () => {
       setModalVisibility(true);
     })
     .catch((error) => {
-      console.error('Error in handlePostEvent:', error.message);
+      createdEventsNumMaxedOut();
+      console.log("error in handlePostEvent: ", error);
     })
     .finally(() => {
       dismissKeyboard();
