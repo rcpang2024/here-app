@@ -8,6 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
+import UploadImage from "../components/upload-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OtherProfileScreen = ({ route }) => {
@@ -348,7 +349,8 @@ const OtherProfileScreen = ({ route }) => {
                     }
                 >
                     <View style={styles.title}>
-                        <Image source={HereLogo} style={styles.profilePic}/>
+                        {/* <Image source={HereLogo} style={styles.profilePic}/> */}
+                        <UploadImage imageUri={currUser.profile_pic} isEditable={false}/>
                         <Text style={styles.name}>{currUser.name}</Text>
                         <Text style={styles.username}>{currUser.username}</Text>
                         <View style={styles.follow}>
