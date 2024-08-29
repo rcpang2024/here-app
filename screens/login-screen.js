@@ -5,7 +5,7 @@ import { useRef, useState, useContext } from "react";
 import { UserContext } from "../user-context";
 import HereLogo from '../assets/images/HereLogo.png';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LogInScreen = () => {
@@ -43,6 +43,10 @@ const LogInScreen = () => {
             const response = await signInWithEmailAndPassword(auth, email, pw);
             if (!response) {
                 alert("Invalid login credentials, please try again");
+            } 
+            if (!response.user.emailVerified) {
+                await sendEmailVerification(response.user);
+                alert("Email Sent", "Verify your email first before logging in.");
             } else {
                 const userData = await fetchUser();
                 if (userData) {

@@ -6,7 +6,7 @@ import RadioForm from "react-native-simple-radio-button";
 import HereLogo from '../assets/images/HereLogo.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 
 const CreateUserScreen = () => {
     const navigation = useNavigation();
@@ -103,10 +103,13 @@ const CreateUserScreen = () => {
             if (!response) {
                 alert("Error creating user");
             } else {
+                await sendEmailVerification(response.user);
+                alert("Email verification sent. Check your inbox.");
                 const userData = await createUser();
                 if (userData) {
                     dismissKeyboard();
-                    navigation.navigate("Confirm Email");
+                    navigation.navigate("Login");
+                    // navigation.navigate("Confirm Email");
                 }
             }
         } catch (e) {
@@ -138,74 +141,72 @@ const CreateUserScreen = () => {
     // };
 
     return (
-        <KeyboardAvoidingView>
-            <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                <ScrollView style={styles.title}>
-                    <Image source={HereLogo} style={styles.logo} resizeMode="contain"/>
-                    <View style={styles.textFields}>
-                        <TextInput
-                            ref={usernameRef}
-                            placeholder="Username"
-                            style={styles.input}
-                            returnKeyType="next"
-                            onChangeText={(val) => setUsername(val)}
-                        />
-                    </View>
-                    <View style={styles.textFields}>
-                        <TextInput
-                            ref={pwRef}
-                            placeholder="Password"
-                            style={styles.input}
-                            returnKeyType="next"
-                            secureTextEntry={true}
-                            onChangeText={(val) => setPW(val)}
-                        />
-                    </View>
-                    <View style={styles.textFields}>
-                        <TextInput
-                            ref={pwAgainRef}
-                            placeholder="Retype Password"
-                            style={styles.input}
-                            returnKeyType="next"
-                            onChangeText={(val) => setPWAgain(val)}
-                        />
-                    </View>
-                    <View style={styles.textFields}>
-                        <TextInput
-                            ref={nameRef}
-                            placeholder="Name"
-                            style={styles.input}
-                            returnKeyType="next"
-                            onChangeText={(val) => setName(val)}
-                        />
-                    </View>
-                    <View style={styles.textFields}>
-                        <TextInput
-                            ref={emailRef}
-                            placeholder="Email"
-                            style={styles.input}
-                            returnKeyType="next"
-                            onChangeText={(val) => setEmail(val)}
-                        />
-                    </View>
-                    <Text style={{paddingVertical: 5}}>Account Privacy - you can change this later</Text>
-                    <RadioForm
-                        radio_props={privacyItems}
-                        initial={userPrivacy}
-                        onPress={(val) => setUserPrivacy(val)}
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <ScrollView style={styles.title}>
+                <Image source={HereLogo} style={styles.logo} resizeMode="contain"/>
+                <View style={styles.textFields}>
+                    <TextInput
+                        ref={usernameRef}
+                        placeholder="Username"
+                        style={styles.input}
+                        returnKeyType="next"
+                        onChangeText={(val) => setUsername(val)}
                     />
-                    <Text style={{paddingVertical: 5}}>Account Type - you can change this later</Text>
-                    <RadioForm
-                        radio_props={userTypes}
-                        initial={userType}
-                        onPress={(val) => setUserType(val)}
+                </View>
+                <View style={styles.textFields}>
+                    <TextInput
+                        ref={pwRef}
+                        placeholder="Password"
+                        style={styles.input}
+                        returnKeyType="next"
+                        secureTextEntry={true}
+                        onChangeText={(val) => setPW(val)}
                     />
-                    <TouchableOpacity style={styles.createButton} onPress={signUp}>
-                        <Text style={styles.createText}>Create Account</Text>
-                    </TouchableOpacity>
-                </ScrollView>
-            </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
+                </View>
+                <View style={styles.textFields}>
+                    <TextInput
+                        ref={pwAgainRef}
+                        placeholder="Retype Password"
+                        style={styles.input}
+                        returnKeyType="next"
+                        onChangeText={(val) => setPWAgain(val)}
+                    />
+                </View>
+                <View style={styles.textFields}>
+                    <TextInput
+                        ref={nameRef}
+                        placeholder="Name"
+                        style={styles.input}
+                        returnKeyType="next"
+                        onChangeText={(val) => setName(val)}
+                    />
+                </View>
+                <View style={styles.textFields}>
+                    <TextInput
+                        ref={emailRef}
+                        placeholder="Email"
+                        style={styles.input}
+                        returnKeyType="next"
+                        onChangeText={(val) => setEmail(val)}
+                    />
+                </View>
+                <Text style={{paddingVertical: 5}}>Account Privacy - you can change this later</Text>
+                <RadioForm
+                    radio_props={privacyItems}
+                    initial={userPrivacy}
+                    onPress={(val) => setUserPrivacy(val)}
+                />
+                {/* <Text style={{paddingVertical: 5}}>Account Type - you can change this later</Text>
+                <RadioForm
+                    radio_props={userTypes}
+                    initial={userType}
+                    onPress={(val) => setUserType(val)}
+                /> */}
+                <TouchableOpacity style={styles.createButton} onPress={signUp}>
+                    <Text style={styles.createText}>Create Account</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </TouchableWithoutFeedback>
     );
 }
 
@@ -237,6 +238,7 @@ const styles = StyleSheet.create({
         width: '50%',
         height: '40%',
         alignSelf: 'center',
+        marginTop: 10
     },
     createButton: {
         backgroundColor: '#1c2120',

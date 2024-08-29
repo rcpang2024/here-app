@@ -1,23 +1,39 @@
-import { View, Image, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Image, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import { useState, useEffect } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 
 const UploadImage = ({ imageUri, isEditable}) => {
     const [image, setImage] = useState(imageUri || null);
+    const [modalVisibility, setModalVisibility] = useState(false);
 
     const cameraRollPermission = async () => {
         const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            alert("Please grant permissions in your device's settings.")
+            alert("Please grant permissions in your device's settings.");
         } else {
-            console.log('Camera roll permissions granted.')
+            console.log('Camera roll permissions granted.');
         }
     };
 
     // useEffect(() => {
     //     cameraRollPermission();
     // }, []);
+
+    const addImageByCamera = async () => {
+        if (!isEditable) return;
+        await ImagePicker.requestCameraPermissionsAsync();
+        let _image = await ImagePicker.launchCameraAsync({
+            cameraType: ImagePicker.CameraType.front,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1
+        });
+        console.log(JSON.stringify(_image.assets[0].uri));
+        if (!_image.canceled) {
+            setImage(_image.assets[0].uri);
+        }
+    };
 
     const addImage = async () => {
         if (!isEditable) return;
@@ -27,11 +43,15 @@ const UploadImage = ({ imageUri, isEditable}) => {
             aspect: [4, 3],
             quality: 1
         });
-        console.log(JSON.stringify(_image.assets[0].uri))
+        console.log(JSON.stringify(_image.assets[0].uri));
         if (!_image.canceled) {
             setImage(_image.assets[0].uri);
         }
     };
+
+    // const imagePickerModal = () => {
+
+    // };
 
     return (
         <View style={styles.container}>
@@ -48,6 +68,21 @@ const UploadImage = ({ imageUri, isEditable}) => {
                     </TouchableOpacity>
                 </View>
             )}
+            <Modal 
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibility}
+                onRequestClose={() => setModalVisibility(false)}
+            >
+                <View style={{flexDirection: 'row'}}>
+                    <TouchableOpacity onPress={() => console.log("Camera")}>
+                        <Text>Camera</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => console.log("Gallery")}>
+                        <Text>Gallery</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </View>
     );
 };
