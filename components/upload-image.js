@@ -58,7 +58,7 @@ const UploadImage = ({ imageUri, isEditable}) => {
             <Image source={{ uri: image }} style={{width: 180, height: 180}}/>
             {isEditable && (
                 <View style={styles.uploadBtnContainer}>
-                    <TouchableOpacity onPress={addImage} style={styles.uploadBtn}>
+                    <TouchableOpacity onPress={() => setModalVisibility(true)} style={styles.uploadBtn}>
                         {/* <Text>{image ? 'Edit' : 'Upload'} Image</Text> */}
                         <Ionicons 
                             name="camera"
@@ -68,21 +68,28 @@ const UploadImage = ({ imageUri, isEditable}) => {
                     </TouchableOpacity>
                 </View>
             )}
-            <Modal 
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibility}
-                onRequestClose={() => setModalVisibility(false)}
-            >
-                <View style={{flexDirection: 'row'}}>
-                    <TouchableOpacity onPress={() => console.log("Camera")}>
-                        <Text>Camera</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => console.log("Gallery")}>
-                        <Text>Gallery</Text>
-                    </TouchableOpacity>
-                </View>
-            </Modal>
+            {modalVisibility && (
+                <Modal 
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibility}
+                    onRequestClose={() => setModalVisibility(false)}
+                >
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+                        <View style={styles.modalStyling}>
+                            <TouchableOpacity onPress={addImageByCamera}>
+                                <Text style={{fontSize: 18}}>CAMERA</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={addImage}>
+                                <Text style={{fontSize: 18}}>GALLERY</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setModalVisibility(false)}>
+                                <Text style={{fontSize: 18, color: 'red'}}>CLOSE</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            )}
         </View>
     );
 };
@@ -116,6 +123,14 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    modalStyling: {
+        backgroundColor: 'white', 
+        padding: 30, 
+        borderRadius: 10, 
+        alignItems: 'center', 
+        flexDirection: 'row',
+        gap: 20
     }
 });
 

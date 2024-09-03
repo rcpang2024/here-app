@@ -1,12 +1,24 @@
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, TextInput, 
     TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import RadioForm from "react-native-simple-radio-button";
 import HereLogo from '../assets/images/HereLogo.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
 const CreateUserScreen = () => {
     const navigation = useNavigation();
@@ -21,12 +33,12 @@ const CreateUserScreen = () => {
     const auth = FIREBASE_AUTH;
 
     const [username, setUsername] = useState('');
+    const [usernameTaken, setUsernameTaken] = useState(false);
     const [pw, setPW] = useState('');
     const [pwAgain, setPWAgain] = useState('');
     const [email, setEmail] = useState('');
     // const [phone, setPhone] = useState('');
     const [name, setName] = useState('');
-
 
     const [userType, setUserType] = useState('individual');
     const [userPrivacy, setUserPrivacy] = useState('public');
@@ -37,6 +49,22 @@ const CreateUserScreen = () => {
     const emailRef = useRef();
     // const phoneRef = useRef();
     const nameRef = useRef();
+
+    const checkUsername = async (username) => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/checkusername?username=${username}`);
+            const data = await response.json();
+            console.log("data: ", data[0]);
+            setUsernameTaken(data[0]);
+        } catch (e) {
+            console.error("Error checking username: ", e);
+        }
+    };
+
+    const debouncedCheckUsername = useCallback(
+        debounce((username) => checkUsername(username), 500),
+        []
+    );
 
     useEffect(() => {
         // Set the left header component
@@ -150,15 +178,22 @@ const CreateUserScreen = () => {
                         placeholder="Username"
                         style={styles.input}
                         returnKeyType="next"
-                        onChangeText={(val) => setUsername(val)}
+                        autoCapitalize="none"
+                        onChangeText={(val) => {setUsername(val), debouncedCheckUsername(val)}}
                     />
                 </View>
+                {usernameTaken && (
+                    <View>
+                        <Text style={{color: 'red', paddingHorizontal: 3}}>Username is already taken</Text>
+                    </View>
+                )}
                 <View style={styles.textFields}>
                     <TextInput
                         ref={pwRef}
                         placeholder="Password"
                         style={styles.input}
                         returnKeyType="next"
+                        autoCapitalize="none"
                         secureTextEntry={true}
                         onChangeText={(val) => setPW(val)}
                     />
@@ -169,6 +204,7 @@ const CreateUserScreen = () => {
                         placeholder="Retype Password"
                         style={styles.input}
                         returnKeyType="next"
+                        autoCapitalize="none"
                         onChangeText={(val) => setPWAgain(val)}
                     />
                 </View>
@@ -178,6 +214,7 @@ const CreateUserScreen = () => {
                         placeholder="Name"
                         style={styles.input}
                         returnKeyType="next"
+                        autoCapitalize="none"
                         onChangeText={(val) => setName(val)}
                     />
                 </View>
@@ -187,6 +224,7 @@ const CreateUserScreen = () => {
                         placeholder="Email"
                         style={styles.input}
                         returnKeyType="next"
+                        autoCapitalize="none"
                         onChangeText={(val) => setEmail(val)}
                     />
                 </View>
