@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// PLACEHOLDER
 import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
@@ -23,7 +22,6 @@ const OtherProfileScreen = ({ route }) => {
 
     // For options modal
     const [modalVisible, setModalVisible] = useState(false);
-
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
 
@@ -200,6 +198,46 @@ const OtherProfileScreen = ({ route }) => {
             console.error('Error unfollowing user: ', err);
         }
     };
+
+    const handleSettingNotifications = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/setnotification/${user.username}/${profileUser.username}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                const updatedUser = {
+                    ...user,
+                    subscriptions: [...user.subscriptions, profileUser.id],
+                };
+                await updateUserContext(updatedUser);
+            }
+        } catch (e) {
+            console.error("Error setting notifications: ", e);
+        }
+    };
+
+    const handleRemoveNotifications = async () => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/removenotification/${user.username}/${profileUser.username}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                const updatedUser = {
+                    ...user,
+                    subscriptions: user.subscriptions.filter(id => id !== profileUser.id),
+                };
+                await updateUserContext(updatedUser);
+            }
+        } catch (e) {
+            console.error("Error setting notifications: ", e);
+        }
+    };
     
     const handleRemoveFollower = async () => {
         try {
@@ -304,10 +342,15 @@ const OtherProfileScreen = ({ route }) => {
         Alert.alert(
             "Unfollow",
             "Are you sure you want to unfollow this user?",
-            [
-                {text: "No", onPress: () => {}, style: "cancel"},
-                {text: "Yes", onPress: handleUnfollow}
-            ],
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: handleUnfollow}]
+        );
+    };
+
+    const confirmRemoveNotification = () => {
+        Alert.alert(
+            "Turn Off Notifications for this User", 
+            "Are you sure you want to turn off notifications for this user?", 
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: handleRemoveNotifications}]
         );
     };
 
@@ -315,10 +358,7 @@ const OtherProfileScreen = ({ route }) => {
         Alert.alert(
             "Remove Follower", 
             "Are you sure you want to remove this user as a follower?", 
-            [
-                {text: "No", onPress: () => {}, style: "cancel"},
-                {text: "Yes", onPress: handleRemoveFollower}
-            ]
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: handleRemoveFollower}]
         );
     };
 
@@ -326,10 +366,7 @@ const OtherProfileScreen = ({ route }) => {
         Alert.alert(
             "Block User", 
             "Are you sure you want to block this user?", 
-            [
-                {text: "No", onPress: () => {}, style: "cancel"},
-                {text: "Yes", onPress: handleBlockUser}
-            ]
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: handleBlockUser}]
         );
     };
 
@@ -490,9 +527,15 @@ const OtherProfileScreen = ({ route }) => {
                 >
                     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
                         <View style={{backgroundColor: 'white', padding: 30, borderRadius: 10, alignItems: 'center'}}>
-                            <TouchableOpacity onPress={() => console.log("Set Notifications")}>
-                                <Text style={{paddingBottom: 10, fontSize: 18}}>SET NOTIFICATIONS</Text>
-                            </TouchableOpacity>
+                            {(!user.subscriptions.includes(profileUser.id) && user.list_of_following.includes(profileUser.id)) ? (
+                                <TouchableOpacity onPress={() => handleSettingNotifications()}>
+                                    <Text style={{paddingBottom: 10, fontSize: 18}}>TURN ON NOTIFICATIONS</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity onPress={confirmRemoveNotification}>
+                                    <Text style={{paddingBottom: 10, fontSize: 18}}>TURN OFF NOTIFICATIONS</Text>
+                                </TouchableOpacity>
+                            )}
                             {user.list_of_followers.includes(profileUser.id) && (
                                 <TouchableOpacity onPress={confirmRemoveFollower}>
                                     <Text style={{paddingBottom: 10, fontSize: 18}}>REMOVE FOLLOWER</Text>
@@ -516,53 +559,31 @@ const OtherProfileScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
     title: {
-        paddingTop: 10,
-        alignItems: 'center',
+        paddingTop: 10, alignItems: 'center',
     },
     profilePic: {
-        borderRadius: 50,
-        width: 150,
-        height: 150,
-        marginBottom: 10,
+        borderRadius: 50, width: 150, height: 150, marginBottom: 10,
     },
     name: {
-        fontSize: 26,
-        fontWeight: 'bold',
+        fontSize: 26, fontWeight: 'bold',
     },
     username: {
-        fontSize: 18,
-        color: 'grey',
-        paddingBottom: 5,
+        fontSize: 18, color: 'grey', paddingBottom: 5,
     },
     bio: {
-        fontSize: 15,
-        paddingLeft: 10,
-        paddingRight: 10,
-        paddingTop: 15,
-        paddingBottom: 10,
-        alignItems: 'center',
+        fontSize: 15, paddingLeft: 10, paddingRight: 10, paddingTop: 15, paddingBottom: 10, alignItems: 'center',
     },
     text: {
-        borderWidth: 3,
-        borderColor: 'black',
-        borderRadius: 5,
-        padding: 7,
-        fontWeight: 'bold',
-        marginRight: 20,
-        alignItems: 'center',
+        borderWidth: 3, borderColor: 'black', borderRadius: 5, padding: 7, fontWeight: 'bold', marginRight: 20, alignItems: 'center',
     },
     follow: {
-        flexDirection: 'row',
-        marginTop: 10,
-        marginLeft: 10,
+        flexDirection: 'row', marginTop: 10, marginLeft: 10,
     },
     viewPager: {
-        width: '100%',
-        backgroundColor: 'red',
+        width: '100%', backgroundColor: 'red',
     },
     flatListContainer: {
-        flex: 1,
-        marginBottom: 10,
+        flex: 1, marginBottom: 10,
     },
     followUser: {
         borderColor: '#5ADAD8',

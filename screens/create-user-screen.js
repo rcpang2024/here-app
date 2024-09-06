@@ -127,6 +127,9 @@ const CreateUserScreen = () => {
             if (!username || !pw || !name || !email) {
                 alert('Please fill out all fields before proceeding.');
             }
+            if (pw !== pwAgain) {
+                alert('Passwords do not match.');
+            }
             const response = await createUserWithEmailAndPassword(auth, email, pw);
             if (!response) {
                 alert("Error creating user");

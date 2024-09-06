@@ -11,6 +11,7 @@ const SettingsScreen = () => {
     const route = useRoute();
     const { user, updateUserContext } = useContext(UserContext);
     const [userPrivacy, setUserPrivacy] = useState(null);
+
     useEffect(() => {
         if (!user) {
             navigation.navigate('Login');  // Navigate to login if no user is signed in
@@ -88,10 +89,7 @@ const SettingsScreen = () => {
         Alert.alert(
             "Log Out",
             "Are you sure you want to log out?",
-            [
-                {text: "No", onPress: () => {}, style: "cancel"},
-                {text: "Yes", onPress: handleLogOut}
-            ],
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: handleLogOut}],
         );
     };
 
@@ -108,10 +106,7 @@ const SettingsScreen = () => {
                     onPress={(val) => {setUserPrivacy(val); updateUserInDB(val)}}
                     style={{marginBottom: 15}}
                 />
-                <TouchableOpacity onPress={() => console.log("Account Information")}>
-                    <Text style={styles.text}>Account Information</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("Security")}>
+                <TouchableOpacity onPress={() => navigation.navigate("Security")}>
                     <Text style={styles.text}>Security</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate("Blocked Users")}>
@@ -131,22 +126,15 @@ const SettingsScreen = () => {
     );
 }
 
-function padding(a, b, c, d) {
-    return {
-      paddingTop: a,
-      paddingBottom: c !== undefined ? c : a,
-      paddingRight: b !== undefined ? b : a,
-      paddingLeft: d !== undefined ? d : (b !== undefined ? b : a)
-    }
-}
-
 const styles = StyleSheet.create({
     title: {
-        ...padding(10, 0, 0, 10),
+        paddingTop: 10,
+        paddingLeft: 10,
         fontSize: 32
     },
     buttons: {
-        ...padding(10, 0, 0, 10),
+        paddingTop: 10,
+        paddingLeft: 10,
         fontSize: 32,
         marginBottom: 5,
     },
