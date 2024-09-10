@@ -1,11 +1,16 @@
-import { View, Image, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
-import { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { useState, useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import { Image } from 'expo-image';
+import { UserContext } from "../user-context";
 
-const UploadImage = ({ imageUri, isEditable}) => {
-    const [image, setImage] = useState(imageUri || null);
+const UploadImage = ({ theURI, isEditable }) => {
+    // const [image, setImage] = useState(imageUri || null);
+    const [imageUri, setImageUri] = useState(theURI || null);
     const [modalVisibility, setModalVisibility] = useState(false);
+    const { user, updateUserContext } = useContext(UserContext);
 
     const cameraRollPermission = async () => {
         const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
@@ -31,7 +36,9 @@ const UploadImage = ({ imageUri, isEditable}) => {
         });
         console.log(JSON.stringify(_image.assets[0].uri));
         if (!_image.canceled) {
-            setImage(_image.assets[0].uri);
+            setImageUri(_image.assets[0].uri);
+            handleSetPicURI(_image.assets[0].uri);
+            // saveImageLocally(_image.assets[0].uri);
         }
     };
 
@@ -45,17 +52,53 @@ const UploadImage = ({ imageUri, isEditable}) => {
         });
         console.log(JSON.stringify(_image.assets[0].uri));
         if (!_image.canceled) {
-            setImage(_image.assets[0].uri);
+            setImageUri(_image.assets[0].uri);
+            handleSetPicURI(_image.assets[0].uri);
+            // saveImageLocally(_image.assets[0].uri);
         }
     };
 
-    // const imagePickerModal = () => {
+    const handleSetPicURI = async (uri) => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/set_picture/${user.username}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ uri: uri }),
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const updatedUser = {
+                    ...user,
+                    profile_pic: uri,
+                };
+                await updateUserContext(updatedUser);
+                console.log("Profile picture updated successfully:", data);
+            }
+        } catch (e) {
+            console.error("Error setting picture URI: ", e);
+        }
+    };
 
+    // const saveImageLocally = async (uri) => {
+    //     try {
+    //       const fileName = uri.split('/').pop();
+    //       const localUri = `${FileSystem.documentDirectory}${fileName}`;
+    //       await FileSystem.copyAsync({ from: uri, to: localUri });
+    //       setImageUri(localUri);
+    //     } catch (error) {
+    //       console.error('Error saving image locally:', error);
+    //     }
     // };
 
     return (
         <View style={styles.container}>
-            <Image source={{ uri: image }} style={{width: 180, height: 180}}/>
+            {imageUri ? (
+                <Image source={{ uri: imageUri }} style={{width: 180, height: 180}} cachePolicy="memory-disk"/>
+            ) : (
+                <Text style={{alignSelf: 'center'}}>No image selected.</Text>
+            )}
             {isEditable && (
                 <View style={styles.uploadBtnContainer}>
                     <TouchableOpacity onPress={() => setModalVisibility(true)} style={styles.uploadBtn}>

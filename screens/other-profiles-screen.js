@@ -387,7 +387,7 @@ const OtherProfileScreen = ({ route }) => {
                 >
                     <View style={styles.title}>
                         {/* <Image source={HereLogo} style={styles.profilePic}/> */}
-                        <UploadImage imageUri={currUser.profile_pic} isEditable={false}/>
+                        <UploadImage theURI={currUser.profile_pic} isEditable={false}/>
                         <Text style={styles.name}>{currUser.name}</Text>
                         <Text style={styles.username}>{currUser.username}</Text>
                         <View style={styles.follow}>
