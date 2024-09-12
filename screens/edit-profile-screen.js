@@ -15,7 +15,7 @@ const EditProfileScreen = () => {
     const currUsername = route.params.username;
     const currBio = route.params.bio;
     const currEmail = route.params.email;
-    const currPW = route.params.pw;
+    // const currPW = route.params.pw;
 
     // const [newPic, setNewPic] = useState(currPic);
     const [newName, setNewName] = useState(currName);
@@ -58,7 +58,7 @@ const EditProfileScreen = () => {
                     username: newUsername,
                     bio: newBio,
                     email: currEmail,
-                    password: currPW,
+                    // password: currPW,
                 }),
             });
             const userData = await response.json();

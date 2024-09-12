@@ -90,7 +90,7 @@ const CreateUserScreen = () => {
                 },
                 body: JSON.stringify({
                     username: username,
-                    password: pw,
+                    // password: pw,
                     name: name,
                     email: email,
                     // phone_number: phone,
