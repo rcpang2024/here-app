@@ -144,23 +144,13 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ccc',
     },
     buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingRight: 7
+        flexDirection: 'row', justifyContent: 'space-between', paddingRight: 7
     },
     text: {
-        fontWeight: 'bold',
-        paddingBottom: 5,
-        marginLeft: 8,
-        marginTop: 5,
-        fontSize: 24,
+        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 5, fontSize: 24,
     },
     unblock: {
-        paddingBottom: 5,
-        color: 'red',
-        marginLeft: 10,
-        marginTop: 8,
-        fontSize: 24,
+        paddingBottom: 5, color: 'red', marginLeft: 10, marginTop: 8, fontSize: 24,
     }
 })
 

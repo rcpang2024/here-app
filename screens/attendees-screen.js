@@ -86,22 +86,13 @@ const AttendeesScreen = () => {
     );
 }
 
-function padding(a, b, c, d) {
-    return {
-      paddingTop: a,
-      paddingBottom: c !== undefined ? c : a,
-      paddingRight: b !== undefined ? b : a,
-      paddingLeft: d !== undefined ? d : (b !== undefined ? b : a)
-    }
-}
-
 const styles = StyleSheet.create({
     title: {
-        ...padding(10, 0, 0, 10),
-        fontSize: 32
+        paddingTop: 10, paddingLeft: 10, fontSize: 32
     },
     text: {
-        ...padding(25, 0, 0, 10),
+        paddingTop: 25,
+        paddingLeft: 10,
         fontSize: 20,
         color: 'darkblue',
         borderStyle: 'solid',

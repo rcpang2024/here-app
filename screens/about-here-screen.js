@@ -31,37 +31,19 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     buttonBorder: {
-        borderColor: 'black',
-        borderRadius: 2,
-        borderWidth: 2,
-        paddingVertical: 5,
-        paddingHorizontal: 5,
-        alignItems: 'center',
-        marginRight: 250,
+        borderColor: 'black', borderRadius: 2, borderWidth: 2, paddingVertical: 5, paddingHorizontal: 5, alignItems: 'center', marginRight: 250,
     },
     buttonContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'row', alignItems: 'center',
     },
     herePic: {
-        borderRadius: 50,
-        width: 150,
-        height: 150,
-        marginBottom: 10,
-        alignSelf: 'center',
-        marginTop: 10,
+        borderRadius: 50, width: 150, height: 150, marginBottom: 10, alignSelf: 'center', marginTop: 10,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginTop: 10,
-        alignSelf: 'center',
+        fontSize: 24, fontWeight: 'bold', marginTop: 10, alignSelf: 'center',
     },
     body: {
-        fontSize: 18,
-        color: 'black',
-        marginTop: 5,
-        padding: 10,
+        fontSize: 18, color: 'black', marginTop: 5, padding: 10,
     },
 })
 

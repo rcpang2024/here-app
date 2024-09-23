@@ -1,10 +1,10 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Pressable, RefreshControl, ScrollView,
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable, RefreshControl, ScrollView,
     Modal, Alert } from "react-native";
 import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import HereLogo from '../assets/images/HereLogo.png';
+// import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
@@ -36,7 +36,6 @@ const OtherProfileScreen = ({ route }) => {
 
     // Checks to see if the context user follows the other user
     const isPrivateUser = currUser.user_privacy === "private";
-    const isFollowing = currUser.list_of_followers.includes(user.id);
 
     const routes = useMemo(() => ([
         { key: 'first', title: 'PROFILE' },
@@ -559,31 +558,31 @@ const OtherProfileScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
     title: {
-        paddingTop: 10, alignItems: 'center',
+        paddingTop: 10, alignItems: 'center'
     },
     profilePic: {
-        borderRadius: 50, width: 150, height: 150, marginBottom: 10,
+        borderRadius: 50, width: 150, height: 150, marginBottom: 10
     },
     name: {
-        fontSize: 26, fontWeight: 'bold',
+        fontSize: 26, fontWeight: 'bold'
     },
     username: {
-        fontSize: 18, color: 'grey', paddingBottom: 5,
+        fontSize: 18, color: 'grey', paddingBottom: 5
     },
     bio: {
-        fontSize: 15, paddingLeft: 10, paddingRight: 10, paddingTop: 15, paddingBottom: 10, alignItems: 'center',
+        fontSize: 15, paddingLeft: 10, paddingRight: 10, paddingTop: 15, paddingBottom: 10, alignItems: 'center'
     },
     text: {
-        borderWidth: 3, borderColor: 'black', borderRadius: 5, padding: 7, fontWeight: 'bold', marginRight: 20, alignItems: 'center',
+        borderWidth: 3, borderColor: 'black', borderRadius: 5, padding: 7, fontWeight: 'bold', marginRight: 20, alignItems: 'center'
     },
     follow: {
-        flexDirection: 'row', marginTop: 10, marginLeft: 10,
+        flexDirection: 'row', marginTop: 10, marginLeft: 10
     },
     viewPager: {
-        width: '100%', backgroundColor: 'red',
+        width: '100%', backgroundColor: 'red'
     },
     flatListContainer: {
-        flex: 1, marginBottom: 10,
+        flex: 1, marginBottom: 10
     },
     followUser: {
         borderColor: '#5ADAD8',
@@ -594,7 +593,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 10,
         marginRight: 10,
-        backgroundColor: '#5ADAD8',
+        backgroundColor: '#5ADAD8'
     },
     requestUser: {
         borderColor: '#abb4c2',
@@ -605,7 +604,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 10,
         marginRight: 10,
-        backgroundColor: '#abb4c2',
+        backgroundColor: '#abb4c2'
     },
     unfollowUser: {
         borderColor: '#EC6C6C',
@@ -616,7 +615,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 10,
         marginRight: 10,
-        backgroundColor: '#EC6C6C',
+        backgroundColor: '#EC6C6C'
     }
 })
 

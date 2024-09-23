@@ -5,7 +5,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
-import uuid from 'react-native-uuid';
+// import uuid from 'react-native-uuid';
 
 const EditEventScreen = () => {
     const navigation = useNavigation();

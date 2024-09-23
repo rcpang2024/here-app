@@ -1,11 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
-import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from "react-native";
+import { useEffect } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
 
 const ContactUsScreen = () => {
     const navigation = useNavigation();
-    const [msg, setMsg] = useState('');
 
     useEffect(() => {
         navigation.setOptions({
@@ -21,22 +20,32 @@ const ContactUsScreen = () => {
         });
     });
 
+    const handleEmailPress = () => {
+        // PLACEHOLDER
+        const email = 'raypang02@gmail.com';
+        const emailURL = `mailto:${email}`;
+
+        Linking.openURL(emailURL).catch((e) => {
+            alert("Failed to open email app: ", e);
+        });
+    };
+
     return (
         <View>
             <View style={styles.container}>
-                <TextInput
-                    // ref={pwRef}
-                    placeholder="Type your message here"
-                    style={styles.input}
-                    returnKeyType="next"
-                    secureTextEntry={true}
-                    onChangeText={(val) => setMsg(val)}
-                    value={msg}
-                />
+                <Text style={{paddingTop: 10, paddingBottom: 10, fontSize: 20}}>
+                    Email us if you have any questions or technical issues and we will try to
+                    resolve it as soon as possible.
+                </Text>
+                <Text style={{paddingBottom: 10, fontSize: 20}}>
+                    Please include your username, email, and other necessary information to help us 
+                    pinpoint the problem quicker.
+                </Text>
+                <Text style={{paddingBottom: 10, fontSize: 20}}>Thank you!</Text>
+                <TouchableOpacity onPress={handleEmailPress}>
+                    <Text style={styles.emailText}>raypang02@gmail.com</Text>
+                </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.button} onPress={() => console.log("Send Email")}>
-                <Text style={styles.buttonText}>SEND</Text>
-            </TouchableOpacity>
         </View>
     );
 }
@@ -54,27 +63,17 @@ const styles = StyleSheet.create({
         borderWidth: 3,
       },
     buttonText: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginLeft: 5,
+        fontWeight: 'bold', fontSize: 16, marginLeft: 5,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginTop: 10,
-        alignSelf: 'center',
+        fontSize: 24, fontWeight: 'bold', marginTop: 10, alignSelf: 'center',
     },
     body: {
-        fontSize: 18,
-        color: 'black',
-        marginTop: 5,
-        padding: 10,
+        fontSize: 18, color: 'black', marginTop: 5, padding: 10,
     },
-    input: {
-        fontSize: 20,
-        paddingVertical: 4,
-        paddingHorizontal: 2,
-    },
+    emailText: {
+        fontSize: 18, color: 'blue', textDecorationLine: 'underline'
+    }
 })
 
 export default ContactUsScreen;

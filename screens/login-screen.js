@@ -6,7 +6,7 @@ import { UserContext } from "../user-context";
 import HereLogo from '../assets/images/HereLogo.png';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LogInScreen = () => {
     const navigation = useNavigation();
@@ -109,7 +109,7 @@ const LogInScreen = () => {
 
 const styles = StyleSheet.create({
     title: {
-        alignItems: 'center',
+        alignItems: 'center'
     },
     container: {
         backgroundColor: 'white',
@@ -117,32 +117,22 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         marginVertical: 5,
-        paddingHorizontal: 5,
+        paddingHorizontal: 5
     },
     logo: {
-        width: '65%',
-        height: '50%',
-        marginTop: 35
+        width: '65%', height: '50%', marginTop: 35
     },
     input: {
-        fontSize: 20,
-        paddingVertical: 4,
-        paddingHorizontal: 2,
+        fontSize: 20, paddingVertical: 4, paddingHorizontal: 2
     },
     signIn: {
-        backgroundColor: '#1c2120',
-        marginBottom: 10,
-        marginTop: 10,
-        alignItems: 'center',
-        padding: 10,
-        borderRadius: 5,
+        backgroundColor: '#1c2120', marginBottom: 10, marginTop: 10, alignItems: 'center', padding: 10, borderRadius: 5
     },
     signInText: {
-        fontWeight: 'bold',
-        color: 'white',
+        fontWeight: 'bold', color: 'white'
     },
     otherText: {
-        paddingTop: 15,
+        paddingTop: 15
     },
 })
 

@@ -51,22 +51,13 @@ const ForgotScreen = () => {
 
 const styles = StyleSheet.create({
     title: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flex: 1
+        alignItems: 'center', justifyContent: 'center', flex: 1
     },
     container: {
-        // backgroundColor: 'white',
-        // borderColor: '#e8e8e8',
-        borderWidth: 1,
-        borderRadius: 5,
-        marginVertical: 10,
-        paddingHorizontal: 5,
+        borderWidth: 1, borderRadius: 5, marginVertical: 10, paddingHorizontal: 5
     },
     input: {
-        fontSize: 24,
-        paddingVertical: 3,
-        paddingHorizontal: 2,
+        fontSize: 24, paddingVertical: 3, paddingHorizontal: 2
     },
     signIn: {
         backgroundColor: '#1c2120',
@@ -77,8 +68,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     signInText: {
-        fontWeight: 'bold',
-        color: 'white',
+        fontWeight: 'bold', color: 'white'
     },
 })
 

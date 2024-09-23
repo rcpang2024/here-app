@@ -235,9 +235,7 @@ const CreateEventScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingHorizontal: 18,
-    paddingTop: 20,
+    flex: 1, paddingHorizontal: 18, paddingTop: 20
   },
   placeholderText: {
     color: 'black'
@@ -250,7 +248,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     paddingHorizontal: 12,
     marginLeft: 1,
-    marginRight: 1,
+    marginRight: 1
   },
   input: {
     marginBottom: 15,
@@ -260,7 +258,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     fontSize: 16,
     paddingHorizontal: 10,
-    paddingVertical: 25,
+    paddingVertical: 25
   },
   button: {
     paddingVertical: 8,
@@ -268,12 +266,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     borderColor: 'black',
-    borderWidth: 3,
+    borderWidth: 3
   },
   buttonText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginLeft: 5,
+    fontWeight: 'bold', fontSize: 16, marginLeft: 5
   },
   modalView: {
     justifyContent: 'center',
@@ -292,9 +288,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1, justifyContent: 'center', alignItems: 'center'
   },
 });
 

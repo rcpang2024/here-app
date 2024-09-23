@@ -1,4 +1,4 @@
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/home-screen';
@@ -15,7 +15,6 @@ import CreateUserScreen from '../screens/create-user-screen';
 import EditProfileScreen from '../screens/edit-profile-screen';
 import EditEventScreen from '../screens/edit-event-screen';
 import AboutHereScreen from '../screens/about-here-screen';
-import ConfirmEmailScreen from '../screens/confirm-email-screen';
 import ForgotScreen from '../screens/forgot-pw-screen';
 import FollowersScreen from '../screens/list-of-followers';
 import FollowingScreen from '../screens/list-of-following';
@@ -42,7 +41,6 @@ export function MainContainer() {
       <Stack.Navigator>
         <Stack.Screen name="Login" options={{ headerShown: false }} component={LogInScreen} />
         <Stack.Screen name="Create Account" component={CreateUserScreen} />
-        <Stack.Screen name="Confirm Email" options={{ headerShown: false }} component={ConfirmEmailScreen} />
         <Stack.Screen name="Forgot" options={{ headerShown: false }} component={ForgotScreen} />
         <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Event Details" component={EventDetailScreen} />

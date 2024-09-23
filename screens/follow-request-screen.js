@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { useEffect, useContext, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -147,15 +147,10 @@ const FollowRequestScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        padding: 12
+        flex: 1, padding: 12
     },
     text: {
-        fontWeight: 'bold',
-        paddingBottom: 5,
-        marginLeft: 8,
-        marginTop: 5,
-        fontSize: 24,
+        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 5, fontSize: 24
     },
     requestItem: {
         flexDirection: 'row',
@@ -163,12 +158,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        borderBottomColor: '#ccc'
     },
     buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: 150,
+        flexDirection: 'row', justifyContent: 'space-between', width: 150
     },
 });
 

@@ -83,11 +83,7 @@ const FollowersScreen = () => {
 
 const styles = StyleSheet.create({
     text: {
-        fontWeight: 'bold',
-        paddingBottom: 5,
-        marginLeft: 8,
-        marginTop: 5,
-        fontSize: 24,
+        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 5, fontSize: 24
     },
 })
 

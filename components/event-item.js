@@ -10,11 +10,13 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   const navigation = useNavigation();
   const { user, updateUserContext } = useContext(UserContext);
 
+  // Variable to set if user is going to the event
   const [isGoing, setIsGoing] = useState(false);
 
   const formattedDate = format(new Date(date), 'MM-dd-yyyy');
   const formattedTime = format(new Date(date), 'h:mm a');
 
+  // Saves the user's registration status for the event
   const saveRegistrationStatus = async (event_id, status) => {
     try {
       await AsyncStorage.setItem(`event_${event_id}_status`, JSON.stringify(status));
@@ -23,7 +25,7 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
     }
   };
   
-
+  // Registers user to the event
   const handleRegister = async () => {
     try {
       const response = await fetch(`http://192.168.1.6:8000/api/registeruser/${event_id}/${user.username}/`, {
@@ -32,7 +34,6 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
           'Content-Type': 'application/json',
         },
       });
-
       if (response.ok) {
         setIsGoing(true);
         saveRegistrationStatus(event_id, true); // Save registration status
@@ -82,6 +83,7 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
     loadRegistrationStatus();
   }, []);
 
+// Delete event
 const handleDelete = async () => {
   Alert.alert(
     "Delete Event",
@@ -166,15 +168,10 @@ const handleDelete = async () => {
 
 const styles = StyleSheet.create({
   card: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'c5c5c5',
-    borderRadius: 10,
-    marginBottom: 10,
-    marginRight: 10,
+    padding: 10, borderWidth: 1, borderColor: 'c5c5c5', borderRadius: 10, marginBottom: 10, marginRight: 10
   },
   buttonContainer: {
-    marginTop: 10,
+    marginTop: 10
   },
   button: {
     flexDirection: 'row',
@@ -183,7 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   editButton: {
     flexDirection: 'row',
@@ -212,12 +209,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   buttonText: {
-    color: 'white',
-    marginLeft: 5,
-    fontWeight: 'bold'
+    color: 'white', marginLeft: 5, fontWeight: 'bold'
   },
 });
 

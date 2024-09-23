@@ -1,7 +1,7 @@
 import { MainContainer } from './navigation/MainContainer';
 // import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { useState, useEffect, useRef, useContext } from 'react';
+import { Platform, StatusBar } from 'react-native';
 import { UserProvider } from './user-context';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
@@ -88,11 +88,32 @@ export default function App() {
   const [notification, setNotification] = useState(undefined);
   const notificationListener = useRef(null);
   const responseListener = useRef(null);
+  // const { user } = useContext(UserContext);
+
+  // const saveExpoPushToken = async (expoToken) => {
+  //   try {
+  //     const response = await fetch(`http://192.168.1.6:8000/api/set_push_token/`, {
+  //       method: 'POST',
+  //       headers: {
+  //           'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //           username: user.username, 
+  //           expo_push_token: expoToken
+  //       }),
+  //     });
+  //     if (response.ok) {
+  //       console.log("Expo push token successfully set");
+  //     }
+  //   } catch (e) {
+  //     console.error("Error saving expo push token: ", e);
+  //   }
+  // };
 
   useEffect(() => {
     registerForPushNotificationsAsync()
-      .then(token => setExpoPushToken(token ?? ''))
-      .catch((error) => setExpoPushToken(`${error}`));
+    .then(token => setExpoPushToken(token))
+    .catch((e) => console.error("Error in useEffect saving token: ", e));
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       setNotification(notification);
@@ -111,41 +132,11 @@ export default function App() {
   }, []);
 
   return (
-    <UserProvider>
-      <MainContainer/>
-    </UserProvider>
+    <>
+      <StatusBar barStyle="dark-content"/>
+      <UserProvider>
+        <MainContainer />
+      </UserProvider>
+    </>
   );
-
-  // use this function to ask for user permission and get the push token
-// async function registerForPushNotificationsAsync() {
-//   let token;
-
-//   if (Constants.isDevice) {
-//     const { status: existingStatus } = await Notifications.getPermissionsAsync();
-//     let finalStatus = existingStatus;
-//     if (existingStatus !== 'granted') {
-//         const { status } = await Notifications.requestPermissionsAsync();
-//         finalStatus = status;
-//     }
-//     if (finalStatus !== 'granted') {
-//         alert('Failed to get push token for push notification!');
-//         return;
-//     }
-//     token = (await Notifications.getExpoPushTokenAsync()).data;
-//     console.log(token);
-//   } else {
-//       alert('Must use physical device for Push Notifications');
-//   }
-
-//   if (Platform.OS === 'android') {
-//     Notifications.setNotificationChannelAsync('default', {
-//         name: 'default',
-//         importance: Notifications.AndroidImportance.MAX,
-//         vibrationPattern: [0, 250, 250, 250],
-//         lightColor: '#FF231F7C',
-//     });
-//   }
-
-//   return token;
-// }
 }

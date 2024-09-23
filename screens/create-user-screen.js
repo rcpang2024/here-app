@@ -148,29 +148,6 @@ const CreateUserScreen = () => {
         }
     };
 
-    // const handleClick = () => {
-    //     // Verifies that all fields are filled out
-    //     if (!username || !pw || !name || !email) {
-    //         alert('Please fill out all fields before proceeding.');
-    //         return;
-    //     }
-    //     if (pw != pwAgain) {
-    //         alert('Passwords do not match');
-    //         return;
-    //     }
-    //     fetchPost().then((data) => {
-    //         console.log("Inside handleClick: ", data);
-    //     })
-    //     .catch((error) => {
-    //         console.error('Error in Creating User:', error.message);
-    //     })
-    //     .finally(() => {
-    //         dismissKeyboard();
-    //         // PROBLEM - NOT SURE WHY THO
-    //         // navigation.navigate("Confirm Email");
-    //     });
-    // };
-
     return (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
             <ScrollView style={styles.title}>
@@ -253,14 +230,10 @@ const CreateUserScreen = () => {
 
 const styles = StyleSheet.create({
     title: {
-        alignContent: 'center',
-        marginLeft: 12,
-        marginRight: 12,
+        alignContent: 'center', marginLeft: 12, marginRight: 12
     },
     container: {
-        flex: 1,
-        paddingHorizontal: 15,
-        // paddingTop: 20,
+        flex: 1, paddingHorizontal: 15
     },
     textFields: {
         backgroundColor: 'white',
@@ -268,35 +241,28 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         marginVertical: 9,
-        paddingHorizontal: 5,
+        paddingHorizontal: 5
     },
     input: {
-        fontSize: 18,
-        paddingVertical: 3,
-        paddingHorizontal: 2,
+        fontSize: 18, paddingVertical: 3, paddingHorizontal: 2
     },
     logo: {
-        width: '50%',
-        height: '40%',
-        alignSelf: 'center',
-        marginTop: 10
+        width: '50%', height: '40%', alignSelf: 'center', marginTop: 10
     },
     createButton: {
         backgroundColor: '#1c2120',
-        // backgroundColor: 'white',
         marginTop: 10,
         marginLeft: 10,
         marginRight: 10,
         alignItems: 'center',
         padding: 12,
-        borderRadius: 5,
+        borderRadius: 5
     },
     createText: {
-        fontWeight: 'bold',
-        color: 'white',
+        fontWeight: 'bold', color: 'white'
     },
     bottomPadding: {
-        marginBottom: 25,
+        marginBottom: 25
     }
 })
 

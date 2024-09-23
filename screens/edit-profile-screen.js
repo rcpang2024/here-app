@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, TouchableWithoutFeedback, Keyboard,
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard,
         Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef, useContext } from "react";
@@ -15,9 +15,7 @@ const EditProfileScreen = () => {
     const currUsername = route.params.username;
     const currBio = route.params.bio;
     const currEmail = route.params.email;
-    // const currPW = route.params.pw;
 
-    // const [newPic, setNewPic] = useState(currPic);
     const [newName, setNewName] = useState(currName);
     const [newUsername, setNewUsername] = useState(currUsername);
     const [newBio, setNewBio] = useState(currBio);
@@ -58,7 +56,6 @@ const EditProfileScreen = () => {
                     username: newUsername,
                     bio: newBio,
                     email: currEmail,
-                    // password: currPW,
                 }),
             });
             const userData = await response.json();
@@ -153,7 +150,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignItems: 'center',
         marginLeft: 10,
-        marginRight: 10,
+        marginRight: 10
     },
     cancel: {
         borderColor: 'red',
@@ -163,7 +160,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignItems: 'center',
         marginLeft: 10,
-        marginRight: 10,
+        marginRight: 10
     },
     container: {
         backgroundColor: 'white',
@@ -171,12 +168,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         marginVertical: 10,
-        paddingHorizontal: 5,
+        paddingHorizontal: 5
     },
     input: {
-        fontSize: 18,
-        paddingVertical: 3,
-        paddingHorizontal: 2,
+        fontSize: 18, paddingVertical: 3, paddingHorizontal: 2
     },
 })
 

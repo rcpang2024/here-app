@@ -11,7 +11,7 @@ const ExploreScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const [nearbyEvents, setNearbyEvents] = useState([]);
-    const { user, userLocation } = useContext(UserContext); // Access user from context
+    const { user, userLocation } = useContext(UserContext); 
 
     const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},
@@ -142,29 +142,19 @@ const ExploreScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex: 1
     },
     map: {
-        width: '100%',
-        height: '60%',
+        width: '100%', height: '60%'
     },
     search: {
-        backgroundColor: 'FFF',
-        width: 250,
-        height: 60,
-        borderWidth: 1,
-        borderColor: '#C0C0C0',
-        // borderTopLeftRadius: 40,
-        // borderBottomLeftRadius: 40,
+        backgroundColor: 'FFF', width: 250, height: 60, borderWidth: 1, borderColor: '#C0C0C0'
     },
     searchInput: {
-        marginLeft: 10,
-        marginTop: 5,
-        fontSize: 16,
+        marginLeft: 10, marginTop: 5, fontSize: 16
     },
     searchButton: {
-        flexDirection: 'row',
-        color: 'grey',
+        flexDirection: 'row', color: 'grey'
     },
 })
 

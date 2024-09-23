@@ -210,22 +210,16 @@ const styles = StyleSheet.create({
         flex: 1
     },
     resultText: {
-        fontSize: 20,
-        padding: 10
+        fontSize: 20, padding: 10
     },
     searchBarUser: {
-        backgroundColor: '#f0f0f0',
-        borderRadius: 5,
-        padding: 5,
+        backgroundColor: '#f0f0f0', borderRadius: 5, padding: 5
     },
     searchBarEvent: {
-        backgroundColor: '#E68D8D',
-        borderRadius: 5,
-        padding: 5
+        backgroundColor: '#E68D8D', borderRadius: 5, padding: 5
     },
     searchBarInput: {
-        fontSize: 18,
-        color: 'black',
+        fontSize: 18, color: 'black'
     }
 })
 

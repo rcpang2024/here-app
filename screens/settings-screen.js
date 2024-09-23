@@ -128,23 +128,16 @@ const SettingsScreen = () => {
 
 const styles = StyleSheet.create({
     title: {
-        paddingTop: 10,
-        paddingLeft: 10,
-        fontSize: 32
+        paddingTop: 10, paddingLeft: 10, fontSize: 32
     },
     buttons: {
-        paddingTop: 10,
-        paddingLeft: 10,
-        fontSize: 32,
-        marginBottom: 5,
+        paddingTop: 10, paddingLeft: 10, fontSize: 32, marginBottom: 5
     },
     text: {
-        fontSize: 26,
-        marginBottom: 25,
+        fontSize: 26, marginBottom: 25
     },
     logOut: {
-        fontSize: 26,
-        color: "red",
+        fontSize: 26, color: "red" 
     },
 })
 

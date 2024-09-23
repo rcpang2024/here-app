@@ -93,19 +93,13 @@ const HomeScreen = () => {
 
 const styles = StyleSheet.create({
     title: {
-        paddingTop: 10,
-        paddingLeft: 10,
-        fontSize: 32
+        paddingTop: 10, paddingLeft: 10, fontSize: 32
     },
     format: {
-        padding: 7,
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#BD7979',
+        padding: 7, fontSize: 20, fontWeight: 'bold', color: '#BD7979'
     },
     flatListContainer: {
-        flex: 1,
-        marginBottom: 10,
+        flex: 1, marginBottom: 10
     },
 })
 

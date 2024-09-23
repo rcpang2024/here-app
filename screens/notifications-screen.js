@@ -174,30 +174,16 @@ const NotificationsScreen = () => {
 
 const styles = StyleSheet.create({
     headers: {
-        fontSize: 21,
-        fontWeight: 'bold',
-        paddingLeft: 10,
-        paddingTop: 8,
-        paddingBottom: 15
+        fontSize: 21, fontWeight: 'bold', paddingLeft: 10, paddingTop: 8, paddingBottom: 15
     },
     userText: {
-        paddingLeft: 10,
-        paddingBottom: 5,
-        paddingTop: 5,
-        fontSize: 20,
-        color: '#BD7979'
+        paddingLeft: 10, paddingBottom: 5, paddingTop: 5, fontSize: 20, color: '#BD7979'
     },
     text: {
-        paddingBottom: 3,
-        paddingTop: 5,
-        fontSize: 20
+        paddingBottom: 3, paddingTop: 5, fontSize: 20
     }, 
     event_name_text: {
-        paddingLeft: 10,
-        paddingTop: 2,
-        paddingBottom: 5,
-        fontSize: 20,
-        color: '#2da7a6'
+        paddingLeft: 10, paddingTop: 2, paddingBottom: 5, fontSize: 20, color: '#2da7a6'
     }
 })
 

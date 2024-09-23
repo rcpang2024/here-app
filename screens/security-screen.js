@@ -44,9 +44,7 @@ const SecurityScreen = () => {
 
 const styles = StyleSheet.create({
     title: {
-        paddingTop: 10,
-        paddingLeft: 10,
-        fontSize: 32
+        paddingTop: 10, paddingLeft: 10, fontSize: 32
     },
     button: {
         paddingVertical: 8,
@@ -58,13 +56,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     buttonText: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginLeft: 5,
+        fontWeight: 'bold', fontSize: 16, marginLeft: 5
     },
     text: {
-        fontSize: 26,
-        marginBottom: 25,
+        fontSize: 26, marginBottom: 25
     },
 })
 

@@ -139,10 +139,7 @@ const UploadImage = ({ theURI, isEditable }) => {
 
 const styles = StyleSheet.create({
     profilePic: {
-        borderRadius: 50,
-        width: 100,
-        height: 100,
-        marginBottom: 10,
+        borderRadius: 50, width: 100, height: 100, marginBottom: 10
     },
     container: {
         elevation: 2,
@@ -163,9 +160,7 @@ const styles = StyleSheet.create({
         height: '16%'
     },
     uploadBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
     },
     modalStyling: {
         backgroundColor: 'white', 

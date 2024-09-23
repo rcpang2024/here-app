@@ -1,11 +1,10 @@
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Pressable, 
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable, 
     RefreshControl, ScrollView } from "react-native";
 import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// PLACEHOLDER
-import HereLogo from '../assets/images/HereLogo.png';
+// import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
@@ -276,23 +275,16 @@ const ProfileScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
     title: {
-        paddingTop: 10,
-        alignItems: 'center',
+        paddingTop: 10, alignItems: 'center'
     },
     profilePic: {
-        borderRadius: 50,
-        width: 150,
-        height: 150,
-        marginBottom: 10,
+        borderRadius: 50, width: 150, height: 150, marginBottom: 10
     },
     name: {
-        fontSize: 26,
-        fontWeight: 'bold',
+        fontSize: 26, fontWeight: 'bold'
     },
     username: {
-        fontSize: 18,
-        color: 'grey',
-        paddingBottom: 5,
+        fontSize: 18, color: 'grey', paddingBottom: 5
     },
     bio: {
         fontSize: 15,
@@ -312,9 +304,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     follow: {
-        flexDirection: 'row',
-        marginTop: 10,
-        marginLeft: 10,
+        flexDirection: 'row', marginTop: 10, marginLeft: 10
     },
     editProfile: {
         borderColor: 'black',
@@ -324,12 +314,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     viewPager: {
-        width: '100%',
-        backgroundColor: 'red',
+        width: '100%', backgroundColor: 'red'
     },
     flatListContainer: {
-        flex: 1,
-        marginBottom: 10,
+        flex: 1, marginBottom: 10
     },
     followUser: {
         borderColor: '#5ADAD8',
