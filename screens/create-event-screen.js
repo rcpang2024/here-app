@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import uuid from 'react-native-uuid';
 import { UserContext } from "../user-context";
 import * as Location from 'expo-location';
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const CreateEventScreen = () => {
   const [eventName, setEventName] = useState("");
@@ -92,10 +93,16 @@ const CreateEventScreen = () => {
   const fetchPost = async () => {
     try {
       const { latitude, longitude } = await geocode(eventLocation);
+      const auth = FIREBASE_AUTH;
+      if (!auth.currentUser) {
+        throw new Error("User is not authenticated.");
+      }
+      const idToken = await auth.currentUser.getIdToken();
       const response = await fetch('http://192.168.1.6:8000/api/createevent/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}` 
         },
         body: JSON.stringify({
           id: uuid.v4(),

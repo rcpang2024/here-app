@@ -38,6 +38,28 @@ const LogInScreen = () => {
         }
     }; 
 
+    const sendTokenToBackend = async () => {
+        const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
+    
+        try {
+            const response = await fetch('http://192.168.1.6:8000/api/authenticate/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                // body: JSON.stringify({ idToken }),  // Sending idToken in the request body
+            });
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error("Error sending token to backend: ", error);
+        }
+    };
+
+    // Response features the Firebase login info such as uid and token
+    // TODO
+    // Send token to the backend via HTTPS securely to verify user identity
     const signIn = async () => {
         try {
             const response = await signInWithEmailAndPassword(auth, email, pw);
@@ -48,6 +70,7 @@ const LogInScreen = () => {
                 await sendEmailVerification(response.user);
                 alert("Email Sent", "Verify your email first before logging in.");
             } else {
+                await sendTokenToBackend();
                 const userData = await fetchUser();
                 if (userData) {
                     setUser(userData);
@@ -65,43 +88,43 @@ const LogInScreen = () => {
     return (
         <KeyboardAvoidingView>
             <View style={styles.title}>
-                    <Image source={HereLogo} style={styles.logo} resizeMode="contain"/>
-                    <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                        <View>
-                            <View style={styles.container}>
-                                <TextInput
-                                    ref={emailRef}
-                                    placeholder="Email"
-                                    style={styles.input}
-                                    returnKeyType="next"
-                                    onChangeText={(val) => setEmail(val)}
-                                    value={email}
-                                    autoCapitalize="none"
-                                />
-                            </View>
-                            <View style={styles.container}>
-                                <TextInput
-                                    ref={pwRef}
-                                    placeholder="Password"
-                                    style={styles.input}
-                                    returnKeyType="next"
-                                    secureTextEntry={true}
-                                    onChangeText={(val) => setPW(val)}
-                                    value={pw}
-                                    autoCapitalize="none"
-                                />
-                            </View>
-                            <TouchableOpacity style={styles.signIn} onPress={signIn}>
-                                <Text style={styles.signInText}>Sign In</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
-                                <Text style={styles.otherText} >Forgot your username or password?</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate("Create Account")}>
-                                <Text style={styles.otherText} >Don't have an account? Get started Here!</Text>
-                            </TouchableOpacity>
+                <Image source={HereLogo} style={styles.logo} resizeMode="contain"/>
+                <TouchableWithoutFeedback onPress={dismissKeyboard}>
+                    <View>
+                        <View style={styles.container}>
+                            <TextInput
+                                ref={emailRef}
+                                placeholder="Email"
+                                style={styles.input}
+                                returnKeyType="next"
+                                onChangeText={(val) => setEmail(val)}
+                                value={email}
+                                autoCapitalize="none"
+                            />
                         </View>
-                    </TouchableWithoutFeedback>
+                        <View style={styles.container}>
+                            <TextInput
+                                ref={pwRef}
+                                placeholder="Password"
+                                style={styles.input}
+                                returnKeyType="next"
+                                secureTextEntry={true}
+                                onChangeText={(val) => setPW(val)}
+                                value={pw}
+                                autoCapitalize="none"
+                            />
+                        </View>
+                        <TouchableOpacity style={styles.signIn} onPress={signIn}>
+                            <Text style={styles.signInText}>Sign In</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
+                            <Text style={styles.otherText} >Forgot your username or password?</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate("Create Account")}>
+                            <Text style={styles.otherText} >Don't have an account? Get started Here!</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableWithoutFeedback>
             </View>
         </KeyboardAvoidingView>
     );
