@@ -25,8 +25,15 @@ const LogInScreen = () => {
     };
 
     const fetchUser = async () => {
+        const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/email/${email}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/email/${email}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             if (!response.ok) {
                 throw new Error('Network response for user data was not ok');
             }
@@ -34,28 +41,27 @@ const LogInScreen = () => {
             return userData;
         }
         catch (error) {
-            alert("Please type in a valid username and password")
+            alert("Please type in a valid username and password: ");
         }
     }; 
 
-    const sendTokenToBackend = async () => {
-        const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
-    
-        try {
-            const response = await fetch('http://192.168.1.6:8000/api/authenticate/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
-                },
-                // body: JSON.stringify({ idToken }),  // Sending idToken in the request body
-            });
-            const data = await response.json();
-            console.log(data);
-        } catch (error) {
-            console.error("Error sending token to backend: ", error);
-        }
-    };
+    // const sendTokenToBackend = async () => {
+    //     const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
+    //     console.log('Sending ID Token:', idToken);  // Debug log
+    //     try {
+    //         const response = await fetch('http://192.168.1.6:8000/api/authenticate/', {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': `Bearer ${idToken}`
+    //             },
+    //         });
+    //         const data = await response.json();
+    //         console.log("inside sendTokenToBackend", data);
+    //     } catch (error) {
+    //         console.error("Error sending token to backend: ", error);
+    //     }
+    // };
 
     // Response features the Firebase login info such as uid and token
     // TODO
@@ -70,7 +76,7 @@ const LogInScreen = () => {
                 await sendEmailVerification(response.user);
                 alert("Email Sent", "Verify your email first before logging in.");
             } else {
-                await sendTokenToBackend();
+                // await sendTokenToBackend();
                 const userData = await fetchUser();
                 if (userData) {
                     setUser(userData);

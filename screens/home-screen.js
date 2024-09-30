@@ -4,6 +4,7 @@ import EventItem from "../components/event-item";
 import { UserContext } from "../user-context";
 import * as Location from 'expo-location';
 import { useNavigation } from "@react-navigation/native";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const HomeScreen = () => {
@@ -11,6 +12,7 @@ const HomeScreen = () => {
     const [data, setData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
     const { user, updateUserLocation } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
 
     useEffect(() => {
         navigation.setOptions({
@@ -40,7 +42,14 @@ const HomeScreen = () => {
     }, []);
 
     const fetchData = async () => {
-        const response = await fetch(`http://192.168.1.6:8000/api/friendsevents/${user.username}/`);
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch(`http://192.168.1.6:8000/api/friendsevents/${user.username}/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            }
+        });
         const data = await response.json();
         // console.log("data", data);
         // const filteredEvents = data.filter(event => followedUserIDs.includes(event.creation_user));
