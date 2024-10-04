@@ -3,11 +3,14 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const FollowersScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
 
     const list_of_followers = route.params.followers;
     const [followers, setFollowers] = useState([]);
@@ -16,7 +19,13 @@ const FollowersScreen = () => {
         try {
             const followersWithUsernames = await Promise.all(
                 list_of_followers.map(async (followerID) => {
-                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${followerID}/`);
+                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${followerID}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Network response for user data was not ok');
                 }
@@ -32,7 +41,13 @@ const FollowersScreen = () => {
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const userData = response.json();
             return userData;
         } catch (err) {
@@ -64,6 +79,12 @@ const FollowersScreen = () => {
             />
             ),
         });
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("idToken set in follower screen");
+        };
+        fetchToken();
         fetchFollowers();
     }, []);
 

@@ -4,11 +4,13 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef, useContext } from "react";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const EditProfileScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user, updateUserContext } = useContext(UserContext); // Access updateUser from context
+    const auth = FIREBASE_AUTH;
 
     // const currPic = route.params.pic;
     const currName = route.params.name;
@@ -45,11 +47,13 @@ const EditProfileScreen = () => {
     };
 
     const updateUserInDB = async () => {
+        const idToken = auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${currUsername}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
                     name: newName,

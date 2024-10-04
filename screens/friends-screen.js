@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, useWindowDimensions, FlatList, RefreshControl }
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const ExploreScreen = () => {
     const layout = useWindowDimensions();
@@ -12,6 +13,8 @@ const ExploreScreen = () => {
 
     const [nearbyEvents, setNearbyEvents] = useState([]);
     const { user, userLocation } = useContext(UserContext); 
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
 
     const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},
@@ -22,6 +25,12 @@ const ExploreScreen = () => {
         if (user) {
             fetchFriendsAttending();
         }
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("idToken set in friends screen");
+        };
+        fetchToken();
     }, [user]);
 
     const onTabChange = (newIndex) => {
@@ -33,7 +42,13 @@ const ExploreScreen = () => {
 
     const fetchFriendsAttending = async () => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/friends_attending_events/${user.username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/friends_attending_events/${user.username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const data = await response.json();
             setFriendsEvents(data);
         } catch (e) {
@@ -43,7 +58,13 @@ const ExploreScreen = () => {
 
     const fetchNearbyEvents = async () => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/nearby_events/${userLocation.latitude}/${userLocation.longitude}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/nearby_events/${userLocation.latitude}/${userLocation.longitude}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const data = await response.json();
             setNearbyEvents(data);
         } catch (e) {

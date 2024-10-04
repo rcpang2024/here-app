@@ -9,6 +9,7 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const OtherProfileScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -16,6 +17,8 @@ const OtherProfileScreen = ({ route }) => {
     const { user, updateUserContext } = useContext(UserContext); 
     const { profileUser } = route.params || {};
     const currUser = profileUser;
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
 
     const [isRequested, setIsRequested] = useState(user.requesting_users.includes(profileUser.id));
     const [followingStatus, setFollowingStatus] = useState(user.list_of_following.includes(profileUser.id));
@@ -45,7 +48,13 @@ const OtherProfileScreen = ({ route }) => {
 
     const fetchEvent = async (eventId) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             if (!response.ok) {
                 throw new Error('Network response for event data was not ok');
             }
@@ -115,6 +124,12 @@ const OtherProfileScreen = ({ route }) => {
                 />
             ),
         });
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("IdToken set in otherprofilescreen");
+        };
+        fetchToken();
     }, [route.params, profileUser]);
 
     const onTabChange = (newIndex) => {
@@ -134,6 +149,7 @@ const OtherProfileScreen = ({ route }) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
                     },
                     body: JSON.stringify({ follower: user.username }),
                 });
@@ -153,6 +169,7 @@ const OtherProfileScreen = ({ route }) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
                     },
                     body: JSON.stringify({ follower: user.username }),
                 });
@@ -179,6 +196,7 @@ const OtherProfileScreen = ({ route }) => {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
             });
             if (response.ok) {
@@ -204,6 +222,7 @@ const OtherProfileScreen = ({ route }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
             });
             if (response.ok) {
@@ -224,6 +243,7 @@ const OtherProfileScreen = ({ route }) => {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
             });
             if (response.ok) {
@@ -244,6 +264,7 @@ const OtherProfileScreen = ({ route }) => {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
             });
             if (response.ok) {
@@ -265,7 +286,8 @@ const OtherProfileScreen = ({ route }) => {
             const removeRequestResponse = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
             });
             if (removeRequestResponse.ok) {
@@ -291,6 +313,7 @@ const OtherProfileScreen = ({ route }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
             });
             if (response.ok) {

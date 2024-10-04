@@ -3,11 +3,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const AttendeesScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
 
     const list_of_attendees = route.params.attendees;
     const [attendeesWithUsernames, setAttendeesWithUsernames] = useState([]);
@@ -16,7 +19,13 @@ const AttendeesScreen = () => {
         try {
             const attendeesWithUsernames = await Promise.all(
                 list_of_attendees.map(async (attendeeID) => {
-                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${attendeeID}/`);
+                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${attendeeID}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Network response for user data was not ok');
                 }
@@ -43,12 +52,24 @@ const AttendeesScreen = () => {
             />
             ),
         });
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("idToken set in attendees screen");
+        };
+        fetchToken();
         fetchUsernamesForAttendees();
     }, []);
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const userData = response.json();
             return userData;
         } catch (err) {

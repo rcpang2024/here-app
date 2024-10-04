@@ -11,13 +11,13 @@ const SettingsScreen = () => {
     const route = useRoute();
     const { user, updateUserContext } = useContext(UserContext);
     const [userPrivacy, setUserPrivacy] = useState(null);
+    const auth = FIREBASE_AUTH;
 
     useEffect(() => {
         if (!user) {
             navigation.navigate('Login');  // Navigate to login if no user is signed in
             return;
         }
-
         // Set the left header component
         navigation.setOptions({
             headerLeft: () => (
@@ -30,6 +30,7 @@ const SettingsScreen = () => {
                 />
             ),
         });
+        fetchToken();
     }, [user, route.params, navigation]);
 
     if (!user) {
@@ -48,11 +49,13 @@ const SettingsScreen = () => {
     const initialPrivacyIndex = privacyItems.findIndex(item => item.value === user.user_privacy);
 
     const updateUserInDB = async (newPrivacy) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${user.username}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authentication': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
                     user_privacy: newPrivacy

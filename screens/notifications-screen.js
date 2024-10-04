@@ -3,10 +3,14 @@ import { useEffect, useContext, useState, useMemo } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const NotificationsScreen = () => {
     const navigation = useNavigation();
     const { user } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
+
     const [notifications, setNotifications] = useState({
         follow_notifications: [],
         event_registrations: []
@@ -24,6 +28,12 @@ const NotificationsScreen = () => {
                 />
             )
         });
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("idToken set in notifications screen");
+        };
+        fetchToken();
         if (user) {
             retrieveFollowerNotification();
             retrieveEventNotification();
@@ -32,7 +42,13 @@ const NotificationsScreen = () => {
 
     const retrieveFollowerNotification = async () => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/follower_notifications/${user.id}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/follower_notifications/${user.id}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 // const follower_arr = [data]
@@ -51,7 +67,13 @@ const NotificationsScreen = () => {
 
     const retrieveEventNotification = async () => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/event_notifications/${user.id}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/event_notifications/${user.id}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 const events_arr = [...data];
@@ -71,7 +93,13 @@ const NotificationsScreen = () => {
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const userData = await response.json();
             return userData;
         } catch (err) {
@@ -92,7 +120,13 @@ const NotificationsScreen = () => {
 
     const fetchEvent = async (eventID) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventID}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventID}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const data = await response.json()
             return data;
         } catch (e) {

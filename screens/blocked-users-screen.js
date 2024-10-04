@@ -3,10 +3,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const BlockedUsersScreen = () => {
     const navigation = useNavigation();
     const { user, updateUserContext } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
 
     const [blockedUserUsernames, setBlockedUserUsernames] = useState([]);
 
@@ -15,7 +18,13 @@ const BlockedUsersScreen = () => {
             if (user.blocked_users) {
                 const blockedUsersWithUsernames = await Promise.all(
                     user.blocked_users.map(async (userID) => {
-                    const response = await fetch(`http://192.168.1.6:8000/api/users/id/${userID}/`);
+                    const response = await fetch(`http://192.168.1.6:8000/api/users/id/${userID}/`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        }
+                    });
                     if (!response.ok) {
                         throw new Error('Network response for user data was not ok');
                     }
@@ -46,12 +55,24 @@ const BlockedUsersScreen = () => {
             />
             ),
         });
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("idToken set in blocked users screen");
+        };
+        fetchToken();
         fetchUsernamesForBlockedUsers();
     }, []);
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const userData = response.json();
             return userData;
         } catch (err) {
@@ -75,7 +96,8 @@ const BlockedUsersScreen = () => {
             const response = await fetch(`http://192.168.1.6:8000/api/unblockuser/${user.username}/${item.username}/`, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
                 // body: JSON.stringify({ follower: user.username })
             });

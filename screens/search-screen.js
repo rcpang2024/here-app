@@ -5,12 +5,14 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { useNavigation } from "@react-navigation/native";
 import EventItem from "../components/event-item";
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SearchScreen = () => {
     const navigation = useNavigation();
     const [searchUser, setUserSearch] = useState('');
     const [searchEvent, setEventSearch] = useState('');
     const { user } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
 
     // For Users
     const [results, setResults] = useState([]);
@@ -37,7 +39,12 @@ const SearchScreen = () => {
         }
         try {
             // Placeholder 
-            const response = await fetch(`http://192.168.1.6:8000/api/searchusers?query=${query}`);
+            const response = await fetch(`http://192.168.1.6:8000/api/searchusers?query=${query}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
             const data = await response.json();
             setUserSearchCache((prevCache) => ({ ...prevCache, [query]: data }));
             setResults(data);
@@ -53,7 +60,12 @@ const SearchScreen = () => {
         }
         try {
             // Placeholder
-            const eventResponse = await fetch(`http://192.168.1.6:8000/api/searchevents?query=${query}`);
+            const eventResponse = await fetch(`http://192.168.1.6:8000/api/searchevents?query=${query}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
             const eventData = await eventResponse.json();
             setEventSearchCache((prevCache) => ({ ...prevCache, [query]: eventData }));
             setEventResults(eventData);
@@ -64,7 +76,14 @@ const SearchScreen = () => {
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
+            const idToken = await auth.currentUser.getIdToken();
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const userData = response.json();
             return userData;
         } catch (err) {

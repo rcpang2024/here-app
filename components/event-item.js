@@ -5,10 +5,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import format from "date-fns/format";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const EventItem = ({ event_id, creation_user, creation_user_username, event_name, event_description, location_addr, date, list_of_attendees }) => {
   const navigation = useNavigation();
   const { user, updateUserContext } = useContext(UserContext);
+  const auth = FIREBASE_AUTH;
+  const [idToken, setIdToken] = useState(null);
 
   // Variable to set if user is going to the event
   const [isGoing, setIsGoing] = useState(false);
@@ -32,6 +35,7 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
         },
       });
       if (response.ok) {
@@ -63,6 +67,7 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
         },
       });
 
@@ -80,6 +85,12 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   };
   
   useEffect(() => {
+    const fetchToken = async () => {
+      const token = await auth.currentUser.getIdToken();
+      setIdToken(token);
+      console.log("idToken set in event item");
+    };
+    fetchToken();
     loadRegistrationStatus();
   }, []);
 
@@ -96,6 +107,7 @@ const handleDelete = async () => {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
               },
             });
 

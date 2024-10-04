@@ -45,24 +45,6 @@ const LogInScreen = () => {
         }
     }; 
 
-    // const sendTokenToBackend = async () => {
-    //     const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
-    //     console.log('Sending ID Token:', idToken);  // Debug log
-    //     try {
-    //         const response = await fetch('http://192.168.1.6:8000/api/authenticate/', {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': `Bearer ${idToken}`
-    //             },
-    //         });
-    //         const data = await response.json();
-    //         console.log("inside sendTokenToBackend", data);
-    //     } catch (error) {
-    //         console.error("Error sending token to backend: ", error);
-    //     }
-    // };
-
     // Response features the Firebase login info such as uid and token
     // TODO
     // Send token to the backend via HTTPS securely to verify user identity

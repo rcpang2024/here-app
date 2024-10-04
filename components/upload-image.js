@@ -5,12 +5,14 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { Image } from 'expo-image';
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const UploadImage = ({ theURI, isEditable }) => {
     // const [image, setImage] = useState(imageUri || null);
     const [imageUri, setImageUri] = useState(theURI || null);
     const [modalVisibility, setModalVisibility] = useState(false);
     const { user, updateUserContext } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
 
     const cameraRollPermission = async () => {
         const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
@@ -59,11 +61,13 @@ const UploadImage = ({ theURI, isEditable }) => {
     };
 
     const handleSetPicURI = async (uri) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/set_picture/${user.username}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authentication': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({ uri: uri }),
             });

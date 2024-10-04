@@ -3,18 +3,27 @@ import { useEffect, useContext, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const FollowRequestScreen = () => {
     const navigation = useNavigation();
 
     const [followRequests, setFollowRequests] = useState([]);
     const { user, updateUserContext } = useContext(UserContext);
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
 
     const fetchListOfFollowRequests = async () => {
         try {
             const requestersWithUsernames = await Promise.all(
                 user.follow_requests.map(async (followerID) => {
-                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${followerID}/`);
+                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${followerID}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Network response for user data was not ok');
                 }
@@ -41,12 +50,24 @@ const FollowRequestScreen = () => {
                 />
             )
         });
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("idToken set in follow request screen");
+        };
+        fetchToken();
         fetchListOfFollowRequests();
     }, []);
 
     const fetchUserProfile = async (username) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const userData = response.json();
             return userData;
         } catch (err) {
@@ -72,6 +93,7 @@ const FollowRequestScreen = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({ follower: user.username }),
             });
@@ -97,7 +119,8 @@ const FollowRequestScreen = () => {
             const response = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${item.username}/`, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 },
                 // body: JSON.stringify({ follower: user.username })
             });

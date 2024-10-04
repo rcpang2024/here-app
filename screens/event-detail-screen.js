@@ -4,10 +4,13 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useContext } from "react";
 import format from "date-fns/format";
 import { UserContext } from "../user-context";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const EventDetailScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    const auth = FIREBASE_AUTH;
+
     const event_id = route.params.eventID;
     const creation_user = route.params.creationUser;
     const event_name = route.params.eventName;
@@ -44,8 +47,15 @@ const EventDetailScreen = () => {
     }, [route.params]);
 
     const fetchUserProfile = async (username) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             const userData = response.json();
             return userData;
         } catch (err) {

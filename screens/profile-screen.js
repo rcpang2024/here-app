@@ -8,6 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
+import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const ProfileScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -15,6 +16,8 @@ const ProfileScreen = ({ route }) => {
     const { user, updateUserContext } = useContext(UserContext); // Access user from context
     const { profileUser } = route.params || {};
     const currUser = profileUser || user;
+    const auth = FIREBASE_AUTH;
+    const [idToken, setIdToken] = useState(null);
 
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
@@ -36,7 +39,13 @@ const ProfileScreen = ({ route }) => {
 
     const fetchEvent = async (eventId) => {
         try {
-            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`);
+            const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
             if (!response.ok) {
                 throw new Error('Network response for event data was not ok');
             }
@@ -109,6 +118,12 @@ const ProfileScreen = ({ route }) => {
                 ),
             });
         }
+        const fetchToken = async () => {
+            const token = await auth.currentUser.getIdToken();
+            setIdToken(token);
+            console.log("idToken set in profilescreen");
+        };
+        fetchToken();
     }, [route.params, currUser]);
 
     const onTabChange = (newIndex) => {
