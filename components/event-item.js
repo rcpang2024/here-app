@@ -11,7 +11,6 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   const navigation = useNavigation();
   const { user, updateUserContext } = useContext(UserContext);
   const auth = FIREBASE_AUTH;
-  const [idToken, setIdToken] = useState(null);
 
   // Variable to set if user is going to the event
   const [isGoing, setIsGoing] = useState(false);
@@ -30,6 +29,7 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   
   // Registers user to the event
   const handleRegister = async () => {
+    const idToken = await auth.currentUser.getIdToken();
     try {
       const response = await fetch(`http://192.168.1.6:8000/api/registeruser/${event_id}/${user.username}/`, {
         method: 'POST',
@@ -62,6 +62,7 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   };
 
   const handleUnregister = async () => {
+    const idToken = await auth.currentUser.getIdToken();
     try {
       const response = await fetch(`http://192.168.1.6:8000/api/unregisteruser/${event_id}/${user.username}/`, {
         method: 'DELETE',
@@ -85,12 +86,6 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   };
   
   useEffect(() => {
-    const fetchToken = async () => {
-      const token = await auth.currentUser.getIdToken();
-      setIdToken(token);
-      console.log("idToken set in event item");
-    };
-    fetchToken();
     loadRegistrationStatus();
   }, []);
 
@@ -102,6 +97,7 @@ const handleDelete = async () => {
     [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", onPress: async () => {
+          const idToken = await auth.currentUser.getIdToken();
           try {
             const response = await fetch(`http://192.168.1.6:8000/api/deleteevent/${event_id}/`, {
               method: 'DELETE',

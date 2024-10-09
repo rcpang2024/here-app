@@ -1,20 +1,47 @@
-import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, FlatList } from "react-native";
-import { useEffect, useContext, useState, useMemo } from "react";
+import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, FlatList, RefreshControl } from "react-native";
+import { useEffect, useContext, useState, useMemo, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NotificationsScreen = () => {
     const navigation = useNavigation();
     const { user } = useContext(UserContext);
     const auth = FIREBASE_AUTH;
-    const [idToken, setIdToken] = useState(null);
+    const [fetched, setFetched] = useState(false);
+    const [refresh, setRefresh] = useState(false);
+    // const fetchedRef = useRef(false);
 
     const [notifications, setNotifications] = useState({
         follow_notifications: [],
         event_registrations: []
     });
+
+    const storeNotifications = async (notificationsData) => {
+        try {
+            await AsyncStorage.setItem('notifications', JSON.stringify(notificationsData));
+        } catch (error) {
+            console.error("Error saving notifications: ", error);
+        }
+    };
+
+    // Retrieve data from AsyncStorage
+    const retrieveNotifications = async () => {
+        try {
+            const storedNotifications = await AsyncStorage.getItem('notifications');
+            if (storedNotifications) {
+                setNotifications(JSON.parse(storedNotifications));
+                setFetched(true); // Set fetched to true to avoid re-fetching
+            } else {
+                retrieveFollowerNotification(); // Fetch from the API if no saved data
+                retrieveEventNotification();
+            }
+        } catch (error) {
+            console.error("Error retrieving notifications: ", error);
+        }
+    };
 
     useEffect(() => {
         navigation.setOptions({
@@ -28,19 +55,29 @@ const NotificationsScreen = () => {
                 />
             )
         });
-        const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
-            setIdToken(token);
-            console.log("idToken set in notifications screen");
-        };
-        fetchToken();
-        if (user) {
-            retrieveFollowerNotification();
-            retrieveEventNotification();
+        if (!fetched) {
+            retrieveNotifications();
+            // console.log("fetched: ", fetched);
+            // retrieveFollowerNotification();
+            // retrieveEventNotification();
+            // setFetched(true);
+            // console.log("fetched 2: ", fetched);
         }
-    }, [user]);
+    }, [fetched]);
+
+    // useFocusEffect(
+    //     useCallback(() => {
+    //         if (user && !fetched) {
+    //             console.log("Fetching notifications...");
+    //             retrieveFollowerNotification();
+    //             retrieveEventNotification();
+    //             setFetched(true);  // The state will now persist after the first fetch.
+    //         }
+    //     }, [user, fetched])
+    // );
 
     const retrieveFollowerNotification = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/follower_notifications/${user.id}/`, {
                 method: 'GET',
@@ -51,12 +88,14 @@ const NotificationsScreen = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                // const follower_arr = [data]
-                // const sorted = follower_arr.sort((a ,b) => new Date(b.timestamp) - new Date(a.timestamp));
-                setNotifications(prevNotifications => ({
-                    ...prevNotifications,
-                    follow_notifications: data
-                }));
+                setNotifications(prevNotifications => {
+                    const updatedNotifications = {
+                        ...prevNotifications,
+                        follow_notifications: data
+                    };
+                    storeNotifications(updatedNotifications);  // Call storeNotifications inside this callback to ensure correct timing
+                    return updatedNotifications;
+                });
             } else {
                 console.error("Problem retrieving follower notifications");
             }
@@ -66,6 +105,7 @@ const NotificationsScreen = () => {
     };
 
     const retrieveEventNotification = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/event_notifications/${user.id}/`, {
                 method: 'GET',
@@ -76,13 +116,15 @@ const NotificationsScreen = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                const events_arr = [...data];
-                const sorted = events_arr.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                setNotifications(prevNotifications => ({
-                    ...prevNotifications,
-                    event_registrations: sorted
-                }));
-                console.log("notifications: ", notifications.event_registrations)
+                const sorted = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                setNotifications(prevNotifications => {
+                    const updatedNotifications = {
+                        ...prevNotifications,
+                        event_registrations: sorted
+                    };
+                    storeNotifications(updatedNotifications);  // Ensure to store the updated state here too
+                    return updatedNotifications;
+                });
             } else {
                 console.error("Problem retrieving event notifications");
             }
@@ -92,6 +134,7 @@ const NotificationsScreen = () => {
     };
 
     const fetchUserProfile = async (username) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -119,6 +162,7 @@ const NotificationsScreen = () => {
     };
 
     const fetchEvent = async (eventID) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/events/${eventID}/`, {
                 method: 'GET',
@@ -151,9 +195,17 @@ const NotificationsScreen = () => {
         }
     };
 
+    const onRefresh = useCallback(() => {
+        setFetched(false);
+        setRefresh(true);
+        retrieveFollowerNotification(); // Fetch from the API if no saved data
+        retrieveEventNotification();
+        setRefresh(false);
+    }, []);
+
     const memoizedFollowerNotification = useMemo(() => notifications.follow_notifications, [notifications.follow_notifications]);
     const memoizedEventNotifications = useMemo(() => notifications.event_registrations, [notifications.event_registrations]);
-
+    
     const renderFollowerNotifications = useMemo(() => ({ item }) => (
         <View>
             <View style={{flexDirection: 'row'}}>
@@ -191,7 +243,16 @@ const NotificationsScreen = () => {
                 <Text style={styles.headers}>Follow Requests</Text>
             </TouchableHighlight>
             <View style={{borderBottomColor: 'black', borderBottomWidth: StyleSheet.hairlineWidth}}/>
-            <Text style={styles.headers}>Events</Text>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Text style={styles.headers}>Events</Text>
+                <Ionicons 
+                    name="refresh"
+                    size={24}
+                    color="black"
+                    onPress={onRefresh}
+                    style={{ marginRight: 16 }}
+                />
+            </View>
             <FlatList
                 data={memoizedFollowerNotification}
                 keyExtractor={(item) => item.id.toString()}
@@ -208,7 +269,7 @@ const NotificationsScreen = () => {
 
 const styles = StyleSheet.create({
     headers: {
-        fontSize: 21, fontWeight: 'bold', paddingLeft: 10, paddingTop: 8, paddingBottom: 15
+        fontSize: 24, fontWeight: 'bold', paddingLeft: 10, paddingTop: 8, paddingBottom: 15
     },
     userText: {
         paddingLeft: 10, paddingBottom: 5, paddingTop: 5, fontSize: 20, color: '#BD7979'

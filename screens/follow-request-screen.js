@@ -11,9 +11,9 @@ const FollowRequestScreen = () => {
     const [followRequests, setFollowRequests] = useState([]);
     const { user, updateUserContext } = useContext(UserContext);
     const auth = FIREBASE_AUTH;
-    const [idToken, setIdToken] = useState(null);
 
     const fetchListOfFollowRequests = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const requestersWithUsernames = await Promise.all(
                 user.follow_requests.map(async (followerID) => {
@@ -50,16 +50,11 @@ const FollowRequestScreen = () => {
                 />
             )
         });
-        const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
-            setIdToken(token);
-            console.log("idToken set in follow request screen");
-        };
-        fetchToken();
         fetchListOfFollowRequests();
     }, []);
 
     const fetchUserProfile = async (username) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -88,6 +83,7 @@ const FollowRequestScreen = () => {
 
     // ISSUE: Item is a username, but I need the ID of the user
     const handleAccept = async (item) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/followuser/${item.username}/${user.username}/`, {
                 method: 'POST',
@@ -115,6 +111,7 @@ const FollowRequestScreen = () => {
     };
 
     const handleDeny = async (item) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${item.username}/`, {
                 method: 'DELETE',

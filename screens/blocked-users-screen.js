@@ -9,11 +9,10 @@ const BlockedUsersScreen = () => {
     const navigation = useNavigation();
     const { user, updateUserContext } = useContext(UserContext);
     const auth = FIREBASE_AUTH;
-    const [idToken, setIdToken] = useState(null);
 
     const [blockedUserUsernames, setBlockedUserUsernames] = useState([]);
 
-    const fetchUsernamesForBlockedUsers = async () => {
+    const fetchUsernamesForBlockedUsers = async (token) => {
         try {
             if (user.blocked_users) {
                 const blockedUsersWithUsernames = await Promise.all(
@@ -22,7 +21,7 @@ const BlockedUsersScreen = () => {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${idToken}`
+                            'Authorization': `Bearer ${token}`
                         }
                     });
                     if (!response.ok) {
@@ -57,20 +56,20 @@ const BlockedUsersScreen = () => {
         });
         const fetchToken = async () => {
             const token = await auth.currentUser.getIdToken();
-            setIdToken(token);
             console.log("idToken set in blocked users screen");
+            await fetchUsernamesForBlockedUsers(token);
         };
         fetchToken();
-        fetchUsernamesForBlockedUsers();
     }, []);
 
     const fetchUserProfile = async (username) => {
+        const token = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = response.json();
@@ -92,12 +91,13 @@ const BlockedUsersScreen = () => {
     };
 
     const handleUnblockUser = async (item) => {
+        const token = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unblockuser/${user.username}/${item.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 // body: JSON.stringify({ follower: user.username })
             });

@@ -30,7 +30,6 @@ const SettingsScreen = () => {
                 />
             ),
         });
-        fetchToken();
     }, [user, route.params, navigation]);
 
     if (!user) {

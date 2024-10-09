@@ -18,7 +18,7 @@ const OtherProfileScreen = ({ route }) => {
     const { profileUser } = route.params || {};
     const currUser = profileUser;
     const auth = FIREBASE_AUTH;
-    const [idToken, setIdToken] = useState(null);
+    // const [idToken, setIdToken] = useState(null);
 
     const [isRequested, setIsRequested] = useState(user.requesting_users.includes(profileUser.id));
     const [followingStatus, setFollowingStatus] = useState(user.list_of_following.includes(profileUser.id));
@@ -124,12 +124,12 @@ const OtherProfileScreen = ({ route }) => {
                 />
             ),
         });
-        const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
-            setIdToken(token);
-            console.log("IdToken set in otherprofilescreen");
-        };
-        fetchToken();
+        // const fetchToken = async () => {
+        //     const token = await auth.currentUser.getIdToken();
+        //     setIdToken(token);
+        //     console.log("IdToken set in otherprofilescreen");
+        // };
+        // fetchToken();
     }, [route.params, profileUser]);
 
     const onTabChange = (newIndex) => {
@@ -143,6 +143,7 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleFollow = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             if (isPrivateUser && !followingStatus) {
                 const followRequestResponse = await fetch(`http://192.168.1.6:8000/api/request_to_follow_user/${user.username}/${profileUser.username}/`, {
@@ -191,6 +192,7 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleUnfollow = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
@@ -217,6 +219,7 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleSettingNotifications = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/setnotification/${user.username}/${profileUser.username}/`, {
                 method: 'POST',
@@ -238,6 +241,7 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleRemoveNotifications = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/removenotification/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
@@ -259,6 +263,7 @@ const OtherProfileScreen = ({ route }) => {
     };
     
     const handleRemoveFollower = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${profileUser.username}/${user.username}/`, {
                 method: 'DELETE',
@@ -282,6 +287,7 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleRemoveRequest = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const removeRequestResponse = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
@@ -308,6 +314,7 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleBlockUser = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/blockuser/${user.username}/${profileUser.username}/`, {
                 method: 'POST',

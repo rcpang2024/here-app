@@ -123,7 +123,7 @@ const CreateEventScreen = () => {
       console.log("Event created:", data);
       return data;
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.log('Error creating event:', error);
       throw error;
     }
   };
