@@ -6,6 +6,7 @@ import { UserContext } from "../user-context";
 import HereLogo from '../assets/images/HereLogo.png';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import Ionicons from 'react-native-vector-icons/Ionicons';
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LogInScreen = () => {
@@ -16,6 +17,7 @@ const LogInScreen = () => {
     // Sets the email and password to whatever the user typed in
     const [email, setEmail] = useState('');
     const [pw, setPW] = useState('');
+    const [showPW, setShowPW] = useState(false);
 
     const emailRef = useRef();
     const pwRef = useRef();
@@ -78,7 +80,7 @@ const LogInScreen = () => {
             <View style={styles.title}>
                 <Image source={HereLogo} style={styles.logo} resizeMode="contain"/>
                 <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                    <View>
+                    <View style={styles.border}>
                         <View style={styles.container}>
                             <TextInput
                                 ref={emailRef}
@@ -96,23 +98,32 @@ const LogInScreen = () => {
                                 placeholder="Password"
                                 style={styles.input}
                                 returnKeyType="next"
-                                secureTextEntry={true}
+                                secureTextEntry={!showPW}
                                 onChangeText={(val) => setPW(val)}
                                 value={pw}
                                 autoCapitalize="none"
+                            />
+                            <Ionicons 
+                                name="eye"
+                                size={24}
+                                color="#BD7979"
+                                style={{alignSelf: 'center', paddingLeft: 10}}
+                                onPress={() => setShowPW(!showPW)}
                             />
                         </View>
                         <TouchableOpacity style={styles.signIn} onPress={signIn}>
                             <Text style={styles.signInText}>Sign In</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
-                            <Text style={styles.otherText} >Forgot your username or password?</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("Create Account")}>
-                            <Text style={styles.otherText} >Don't have an account? Get started Here!</Text>
-                        </TouchableOpacity>
                     </View>
                 </TouchableWithoutFeedback>
+                <View>
+                    <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
+                        <Text style={styles.otherText} >Forgot your username or password?</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate("Create Account")}>
+                        <Text style={styles.otherText} >Don't have an account? Get started Here!</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
@@ -122,28 +133,33 @@ const styles = StyleSheet.create({
     title: {
         alignItems: 'center'
     },
+    border: {
+        borderWidth: 2, borderRadius: 2, paddingHorizontal: 20, paddingVertical: 15, borderColor: 'gray'
+    },
     container: {
         backgroundColor: 'white',
         borderColor: '#e8e8e8',
-        borderWidth: 1,
+        borderWidth: 2,
         borderRadius: 5,
         marginVertical: 5,
-        paddingHorizontal: 5
+        paddingHorizontal: 5,
+        width: 250,
+        flexDirection: 'row'
     },
     logo: {
-        width: '65%', height: '50%', marginTop: 35
+        width: '100%', height: '50%'
     },
     input: {
-        fontSize: 20, paddingVertical: 4, paddingHorizontal: 2
+        fontSize: 20, paddingVertical: 4, paddingHorizontal: 2, flex: 1
     },
     signIn: {
         backgroundColor: '#1c2120', marginBottom: 10, marginTop: 10, alignItems: 'center', padding: 10, borderRadius: 5
     },
     signInText: {
-        fontWeight: 'bold', color: 'white'
+        fontWeight: 'bold', color: '#BD7979'
     },
     otherText: {
-        paddingTop: 15
+        paddingTop: 15, alignSelf: 'center'
     },
 })
 

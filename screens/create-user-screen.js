@@ -208,9 +208,13 @@ const CreateUserScreen = () => {
                         onChangeText={(val) => setEmail(val)}
                     />
                 </View>
-                <Text style={{paddingVertical: 5}}>Account Privacy - you can change this later</Text>
+                <Text style={{paddingVertical: 5, fontSize: 15}}>Account Privacy - you can change this later</Text>
                 <RadioForm
                     radio_props={privacyItems}
+                    buttonColor={'#BD7979'}
+                    selectedButtonColor={'#BD7979'}
+                    labelStyle={{fontSize: 18}}
+                    style={{flexDirection: 'row', justifyContent: 'space-around'}}
                     initial={userPrivacy}
                     onPress={(val) => setUserPrivacy(val)}
                 />
@@ -238,20 +242,20 @@ const styles = StyleSheet.create({
     textFields: {
         backgroundColor: 'white',
         borderColor: '#e8e8e8',
-        borderWidth: 1,
-        borderRadius: 5,
-        marginVertical: 9,
+        borderWidth: 2,
+        borderRadius: 4,
+        marginVertical: 12,
         paddingHorizontal: 5
     },
     input: {
         fontSize: 18, paddingVertical: 3, paddingHorizontal: 2
     },
     logo: {
-        width: '50%', height: '40%', alignSelf: 'center', marginTop: 10
+        width: '100%', height: '40%', alignSelf: 'center', marginTop: 10
     },
     createButton: {
         backgroundColor: '#1c2120',
-        marginTop: 10,
+        marginTop: 18,
         marginLeft: 10,
         marginRight: 10,
         alignItems: 'center',
@@ -259,7 +263,7 @@ const styles = StyleSheet.create({
         borderRadius: 5
     },
     createText: {
-        fontWeight: 'bold', color: 'white'
+        fontWeight: 'bold', color: '#BD7979'
     },
     bottomPadding: {
         marginBottom: 25

@@ -322,39 +322,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row', marginTop: 10, marginLeft: 10
     },
     editProfile: {
-        borderColor: 'black',
-        borderRadius: 2,
-        borderWidth: 3,
-        padding: 10,
-        marginTop: 10,
-    },
-    viewPager: {
-        width: '100%', backgroundColor: 'red'
-    },
-    flatListContainer: {
-        flex: 1, marginBottom: 10
-    },
-    followUser: {
-        borderColor: '#5ADAD8',
-        borderRadius: 2,
-        borderWidth: 3,
-        padding: 10,
-        marginTop: 10,
-        alignItems: 'center',
-        marginLeft: 10,
-        marginRight: 10,
-        backgroundColor: '#5ADAD8',
-    },
-    unfollowUser: {
-        borderColor: '#EC6C6C',
-        borderRadius: 2,
-        borderWidth: 3,
-        padding: 10,
-        marginTop: 10,
-        alignItems: 'center',
-        marginLeft: 10,
-        marginRight: 10,
-        backgroundColor: '#EC6C6C',
+        borderColor: 'black', borderRadius: 2, borderWidth: 3, padding: 10, marginTop: 10
     }
 })
 

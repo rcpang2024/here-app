@@ -105,8 +105,11 @@ const SettingsScreen = () => {
                 <RadioForm
                     radio_props={privacyItems}
                     initial={initialPrivacyIndex}
+                    buttonColor={'#BD7979'}
+                    selectedButtonColor={'#BD7979'}
+                    labelStyle={{fontSize: 18}}
                     onPress={(val) => {setUserPrivacy(val); updateUserInDB(val)}}
-                    style={{marginBottom: 15}}
+                    style={{marginBottom: 15, flexDirection: 'row', justifyContent: 'space-between', marginRight: 125}}
                 />
                 <TouchableOpacity onPress={() => navigation.navigate("Security")}>
                     <Text style={styles.text}>Security</Text>
