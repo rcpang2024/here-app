@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -10,36 +10,39 @@ const FollowingScreen = () => {
     const route = useRoute();
     const { user } = useContext(UserContext);
     const auth = FIREBASE_AUTH;
-    const [idToken, setIdToken] = useState(null);
 
-    const list_of_following = route.params.following;
+    const currUsername = route.params.username;
     const [following, setFollowing] = useState([]);
 
     const fetchFollowing = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
-            const followingWithUsernames = await Promise.all(
-                list_of_following.map(async (followingID) => {
-                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${followingID}/`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Network response for user data was not ok');
+            const response = await fetch(`http://192.168.1.6:8000/api/users/following/${currUsername}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 }
-                const userData = await response.json();
-                return userData.username;
-            })
-        );
-        setFollowing(followingWithUsernames);
+            });
+            if (!response.ok) {
+                throw new Error('Network response for user data was not ok');
+            }
+            const userData = await response.json();
+
+            const followingWithUsernames = userData.map(userData => ({
+                username: userData.username,
+                name: userData.name,
+                profile_pic: userData.profile_pic
+            }));
+            console.log("following: ", followingWithUsernames);
+            setFollowing(followingWithUsernames);
         } catch (error) {
             console.error('Error fetching following:', error);
         }
     };
 
     const fetchUserProfile = async (username) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -79,22 +82,25 @@ const FollowingScreen = () => {
             />
             ),
         });
-        const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
-            setIdToken(token);
-            console.log("idToken set in following screen");
-        };
-        fetchToken();
         fetchFollowing();
-    }, []);
+    }, [currUsername]);
 
     return (
         <View>
             <FlatList
                 data={following}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => <TouchableOpacity onPress={() => handleUserPress(item)}>
-                    <Text style={styles.text}>{item}</Text></TouchableOpacity>}
+                keyExtractor={(item) => item.username}
+                renderItem={({ item }) => 
+                    <TouchableOpacity onPress={() => handleUserPress(item.username)}>
+                        <View style={{flexDirection: 'row'}}>
+                            <Image source={item.profile_pic} style={styles.image}/>
+                            <View>
+                                <Text style={styles.text}>{item.username}</Text>
+                                <Text style={styles.name}>{item.name}</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                }
                 contentContainerStyle={{paddingBottom: 100}}
             />
         </View>
@@ -103,8 +109,20 @@ const FollowingScreen = () => {
 
 const styles = StyleSheet.create({
     text: {
-        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 5, fontSize: 24
+        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 15, fontSize: 20
     },
+    name: {
+        fontSize: 14, marginLeft: 8
+    },
+    image: {
+        marginLeft: 8,
+        marginTop: 5,
+        width: 70,
+        height: 70,
+        borderRadius: 70 / 2,
+        overflow: "hidden",
+        borderWidth: 2,
+    }
 })
 
 export default FollowingScreen;

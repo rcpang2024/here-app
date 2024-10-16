@@ -420,7 +420,7 @@ const OtherProfileScreen = ({ route }) => {
                         <Text style={styles.name}>{currUser.name}</Text>
                         <Text style={styles.username}>{currUser.username}</Text>
                         <View style={styles.follow}>
-                            <Pressable onPress={() => navigation.navigate("Followers", { followers: currUser.list_of_followers })}>
+                            <Pressable onPress={() => navigation.push("Followers", { username: currUser.username })}>
                                 {currUser.list_of_followers && (
                                     <View style={styles.text}>
                                         <Text style={{fontWeight:'bold'}}>FOLLOWERS</Text>
@@ -428,7 +428,7 @@ const OtherProfileScreen = ({ route }) => {
                                     </View>
                                 )}
                             </Pressable>
-                            <Pressable onPress={() => navigation.navigate("Following", { following: currUser.list_of_following })}>
+                            <Pressable onPress={() => navigation.push("Following", { username: currUser.username })}>
                                 {currUser.list_of_following && (
                                     <View style={styles.text}>
                                         <Text style={{fontWeight:'bold'}}>FOLLOWING</Text>
