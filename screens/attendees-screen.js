@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Image } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../user-context";
@@ -10,34 +11,66 @@ const AttendeesScreen = () => {
     const route = useRoute();
     const { user } = useContext(UserContext);
     const auth = FIREBASE_AUTH;
-    const [idToken, setIdToken] = useState(null);
 
     const list_of_attendees = route.params.attendees;
+    const event_id = route.params.idEvent;
     const [attendeesWithUsernames, setAttendeesWithUsernames] = useState([]);
 
-    const fetchUsernamesForAttendees = async () => {
+    const fetchAttendees = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
-            const attendeesWithUsernames = await Promise.all(
-                list_of_attendees.map(async (attendeeID) => {
-                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${attendeeID}/`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Network response for user data was not ok');
+            const response = await fetch(`http://192.168.1.6:8000/api/event_attendees/${event_id}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 }
-                const userData = await response.json();
-                return userData.username;
-            })
-        );
-        setAttendeesWithUsernames(attendeesWithUsernames);
-        } catch (error) {
-            console.error('Error fetching usernames for attendees:', error);
+            });
+            if (!response.ok) {
+                throw new Error('Network response for user data was not ok');
+            }
+            const userData = await response.json();
+            const attendees = userData.map(userData => ({
+                username: userData.username,
+                name: userData.name,
+                profile_pic: userData.profile_pic
+            }));
+            console.log("attendees: ", attendees);
+            setAttendeesWithUsernames(attendees);
+        } catch (e) {
+            console.error('Error fetching usernames for attendees:', e);
         }
     };
+
+    // const fetchUsernamesForAttendees = async () => {
+    //     const idToken = await auth.currentUser.getIdToken();
+    //     try {
+    //         const attendeesWithUsernames = await Promise.all(
+    //             list_of_attendees.map(async (attendeeID) => {
+    //             const response = await fetch(`http://192.168.1.6:8000/api/users/id/${attendeeID}/`, {
+    //                 method: 'GET',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'Authorization': `Bearer ${idToken}`
+    //                 }
+    //             });
+    //             if (!response.ok) {
+    //                 throw new Error('Network response for user data was not ok');
+    //             }
+    //             const userData = await response.json();
+    //             // const attendeesInfo = userData.map(userData => ({
+    //             //     username: userData.username,
+    //             //     name: userData.name,
+    //             //     profile_pic: userData.profile_pic
+    //             // }));
+    //             return userData.username;
+    //         })
+    //     );
+    //     setAttendeesWithUsernames(attendeesWithUsernames);
+    //     } catch (error) {
+    //         console.error('Error fetching usernames for attendees:', error);
+    //     }
+    // };
 
     useEffect(() => {
         // Set the left header component
@@ -52,16 +85,11 @@ const AttendeesScreen = () => {
             />
             ),
         });
-        const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
-            setIdToken(token);
-            console.log("idToken set in attendees screen");
-        };
-        fetchToken();
-        fetchUsernamesForAttendees();
+        fetchAttendees();
     }, []);
 
     const fetchUserProfile = async (username) => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -92,9 +120,18 @@ const AttendeesScreen = () => {
         <View style={styles.title}>
             <FlatList
                 data={attendeesWithUsernames}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => <TouchableOpacity onPress={() => handleUserPress(item)}>
-                    <Text style={styles.text}>{item}</Text></TouchableOpacity>}
+                keyExtractor={(item) => item.username}
+                renderItem={({ item }) => 
+                    <TouchableOpacity onPress={() => handleUserPress(item.username)}>
+                    <View style={{flexDirection: 'row'}}>
+                        <Image source={item.profile_pic ? {uri: item.profile_pic} : FallbackPhoto} style={styles.image}/>
+                        <View>
+                            <Text style={styles.text}>{item.username}</Text>
+                            <Text style={styles.name}>{item.name}</Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+                }
                 refreshControl = {
                     <RefreshControl
                         refreshing={false}
@@ -109,16 +146,22 @@ const AttendeesScreen = () => {
 
 const styles = StyleSheet.create({
     title: {
-        paddingTop: 10, paddingLeft: 10, fontSize: 32
+        paddingTop: 10, paddingLeft: 2, fontSize: 32
     },
     text: {
-        paddingTop: 25,
-        paddingLeft: 10,
-        fontSize: 20,
-        color: 'darkblue',
-        borderStyle: 'solid',
-        borderRadius: 2,
-        borderColor: 'black',
+        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 15, fontSize: 20
+    },
+    name: {
+        fontSize: 14, marginLeft: 8
+    },
+    image: {
+        marginLeft: 8,
+        marginTop: 5,
+        width: 70,
+        height: 70,
+        borderRadius: 70 / 2,
+        overflow: "hidden",
+        borderWidth: 2,
     }
 })
 

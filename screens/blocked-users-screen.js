@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Alert, Image } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../user-context";
@@ -127,9 +128,12 @@ const BlockedUsersScreen = () => {
 
     const renderItem = ({ item }) => (
         <View style={styles.requestItem}>
-            <TouchableOpacity onPress={() => handleUserPress(item.username)}>
-                <Text style={styles.text}>{item.username}</Text>
-            </TouchableOpacity>
+            <View style={styles.userContainer}>
+                <Image source={item.profile_pic ? {uri: item.profile_pic} : FallbackPhoto} style={styles.image}/>
+                <TouchableOpacity onPress={() => handleUserPress(item.username)}>
+                    <Text style={styles.text}>{item.username}</Text>
+                </TouchableOpacity>
+            </View>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity onPress={() => confirmUnblock(item)}>
                     <Text style={{fontSize: 18}}>UNBLOCK</Text>
@@ -165,14 +169,23 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
     },
+    userContainer: {
+        flexDirection: 'row', alignItems: 'center'
+    },
     buttonContainer: {
         flexDirection: 'row', justifyContent: 'space-between', paddingRight: 7
     },
     text: {
-        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 5, fontSize: 24,
+        fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 5, fontSize: 20,
     },
-    unblock: {
-        paddingBottom: 5, color: 'red', marginLeft: 10, marginTop: 8, fontSize: 24,
+    image: {
+        marginLeft: 8,
+        marginTop: 5,
+        width: 60,
+        height: 60,
+        borderRadius: 60 / 2,
+        overflow: "hidden",
+        borderWidth: 2,
     }
 })
 

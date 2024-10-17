@@ -1,9 +1,11 @@
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, FlatList, 
+    TouchableOpacity, Image } from "react-native";
 import { useState, useMemo, useCallback, useContext } from "react";
 import { SearchBar } from "react-native-elements";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { useNavigation } from "@react-navigation/native";
 import EventItem from "../components/event-item";
+import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
@@ -104,10 +106,22 @@ const SearchScreen = () => {
 
     const renderUserItem = ({ item }) => {
         return (
-            <View>
-                <TouchableOpacity onPress={() => handleUserPress(item.username)}>
-                    <Text style={styles.resultText}>{item.username}</Text>
-                </TouchableOpacity>
+            <View style={{paddingBottom: 5}}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity 
+                        onPress={() => handleUserPress(item.username)} 
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                        <Image 
+                            source={item.profile_pic ? { uri: item.profile_pic } : FallbackPhoto} 
+                            style={styles.image} 
+                        />
+                        <View>
+                            <Text style={styles.resultText}>{item.username}</Text>
+                            <Text style={{fontSize: 12, marginLeft: 10}}>{item.name}</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     };
@@ -229,7 +243,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     resultText: {
-        fontSize: 20, padding: 10
+        fontSize: 18, paddingBottom: 5, marginLeft: 10, fontWeight: 'bold'
     },
     searchBarUser: {
         backgroundColor: '#f0f0f0', borderRadius: 5, padding: 5
@@ -239,6 +253,15 @@ const styles = StyleSheet.create({
     },
     searchBarInput: {
         fontSize: 18, color: 'black'
+    },
+    image: {
+        marginLeft: 8,
+        marginTop: 5,
+        width: 50,
+        height: 50,
+        borderRadius: 50 / 2,
+        overflow: "hidden",
+        borderWidth: 2,
     }
 })
 

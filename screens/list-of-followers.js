@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from "react
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import HereLogo from '../assets/images/HereLogo.png';
+import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
@@ -95,7 +95,7 @@ const FollowersScreen = () => {
                 renderItem={({ item }) => 
                 <TouchableOpacity onPress={() => handleUserPress(item.username)}>
                     <View style={{flexDirection: 'row'}}>
-                        <Image source={item.profile_pic} style={styles.image}/>
+                        <Image source={item.profile_pic ? {uri: item.profile_pic} : FallbackPhoto} style={styles.image}/>
                         <View>
                             <Text style={styles.text}>{item.username}</Text>
                             <Text style={styles.name}>{item.name}</Text>
