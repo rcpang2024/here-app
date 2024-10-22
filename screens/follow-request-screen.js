@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from "react-native";
 import { useEffect, useContext, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
@@ -15,26 +16,26 @@ const FollowRequestScreen = () => {
     const fetchListOfFollowRequests = async () => {
         const idToken = await auth.currentUser.getIdToken();
         try {
-            const requestersWithUsernames = await Promise.all(
-                user.follow_requests.map(async (followerID) => {
-                const response = await fetch(`http://192.168.1.6:8000/api/users/id/${followerID}/`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Network response for user data was not ok');
+            const response = await fetch(`http://192.168.1.6:8000/api/users/follow_requests/${user.username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
                 }
-                const userData = await response.json();
-                // return userData.username;
-                return {username: userData.username, id: followerID};
-            })
-        );
-        setFollowRequests(requestersWithUsernames);
-        } catch (error) {
-            console.error('Error fetching follow requests:', error);
+            });
+            if (!response.ok) {
+                throw new Error('Network response for user data was not ok');
+            }
+            const userData = await response.json();
+            const requests = userData.map(userData => ({
+                username: userData.username,
+                name: userData.name,
+                profile_pic: userData.profile_pic
+            }));
+            console.log("requests: ", requests);
+            setFollowRequests(requests);
+        } catch (e) {
+            console.error('Error fetching usernames for attendees:', e);
         }
     };
 
@@ -140,7 +141,13 @@ const FollowRequestScreen = () => {
     const renderItem = ({ item }) => (
         <View style={styles.requestItem}>
             <TouchableOpacity onPress={() => handleUserPress(item.username)}>
-                <Text style={styles.text}>{item.username}</Text>
+                <View style={{flexDirection: 'row'}}>
+                    <Image source={item.profile_pic ? {uri: item.profile_pic} : FallbackPhoto} style={styles.image}/>
+                    <View>
+                        <Text style={styles.text}>{item.username}</Text>
+                        <Text style={styles.name}>{item.name}</Text>
+                    </View>
+                </View>
             </TouchableOpacity>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity onPress={() => handleAccept(item)}>
@@ -157,7 +164,7 @@ const FollowRequestScreen = () => {
         <View style={styles.container}>
             <FlatList 
                 data={followRequests}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.username}
                 renderItem={renderItem}
                 contentContainerStyle={{paddingBottom: 100}}
             />
@@ -172,6 +179,9 @@ const styles = StyleSheet.create({
     text: {
         fontWeight: 'bold', paddingBottom: 5, marginLeft: 8, marginTop: 5, fontSize: 24
     },
+    name: {
+        fontSize: 14, marginLeft: 8
+    },
     requestItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -183,6 +193,14 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row', justifyContent: 'space-between', width: 150
     },
+    image: {
+        marginTop: 5,
+        width: 50,
+        height: 50,
+        borderRadius: 50 / 2,
+        overflow: "hidden",
+        borderWidth: 2,
+    }
 });
 
 export default FollowRequestScreen

@@ -79,7 +79,7 @@ const EventDetailScreen = () => {
         <View style={styles.title}>
             <Text style={{fontSize:26, paddingBottom: 10, fontWeight: 'bold', color: '#BD7979'}}>{event_name}</Text>
             <View style={styles.details}>
-                <Text style={styles.headers}>Creation User</Text>
+                <Text style={styles.headers}>Created by:</Text>
                 <TouchableOpacity onPress={() => handleUserPress(creation_user)}>
                     <View style={{flexDirection:'row', alignItems:'center'}}>
                         <Image 
@@ -135,17 +135,28 @@ const styles = StyleSheet.create({
         fontWeight: 'bold', fontSize: 18
     },
     button: {
-        flexDirection: 'row',
-        backgroundColor: '#BD7979',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 10,
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        borderRadius: 5,
         alignItems: 'center',
-        justifyContent: 'center',
+        borderColor: '#BD7979',
+        borderWidth: 3
     },
     buttonText: {
-        color: 'white', marginLeft: 5, fontWeight: 'bold', fontSize: 16
+        fontWeight: 'bold', fontSize: 16, marginLeft: 5, color: '#BD7979'
     },
+    // button: {
+    //     flexDirection: 'row',
+    //     backgroundColor: '#BD7979',
+    //     paddingVertical: 10,
+    //     paddingHorizontal: 20,
+    //     borderRadius: 10,
+    //     alignItems: 'center',
+    //     justifyContent: 'center',
+    // },
+    // buttonText: {
+    //     color: 'white', marginLeft: 5, fontWeight: 'bold', fontSize: 16
+    // },
     map: {
         width: '100%', height: '30%'
     },

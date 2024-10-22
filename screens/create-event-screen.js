@@ -159,6 +159,7 @@ const CreateEventScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.container}>
+        <Text>NOTE: You can have a maximum of 3 active events at a time.</Text>
         <View style={styles.textEntry}>
           <TextInput
             ref={eventNameRef}
@@ -248,12 +249,12 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   textEntry: {
-    backgroundColor: '#F3B0B0',
+    // backgroundColor: '#F3B0B0',
     borderColor: 'black',
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: 5,
-    marginVertical: 8,
-    paddingHorizontal: 12,
+    marginVertical: 10,
+    paddingHorizontal: 15,
     marginLeft: 1,
     marginRight: 1
   },
@@ -261,22 +262,24 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginTop: 15,
     borderWidth: 2,
-    borderColor: 'black',
+    borderColor: 'gray',
     borderRadius: 3,
     fontSize: 16,
     paddingHorizontal: 10,
-    paddingVertical: 25
+    paddingVertical: 18,
+    color: '#BD7979'
   },
   button: {
     paddingVertical: 8,
     paddingHorizontal: 10,
+    marginTop: 12,
     borderRadius: 5,
     alignItems: 'center',
-    borderColor: 'black',
+    borderColor: '#BD7979',
     borderWidth: 3
   },
   buttonText: {
-    fontWeight: 'bold', fontSize: 16, marginLeft: 5
+    fontWeight: 'bold', fontSize: 16, marginLeft: 5, color: '#BD7979'
   },
   modalView: {
     justifyContent: 'center',

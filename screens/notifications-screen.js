@@ -1,7 +1,9 @@
-import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, FlatList, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, FlatList, 
+    RefreshControl, Image } from "react-native";
 import { useEffect, useContext, useState, useMemo, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -88,6 +90,7 @@ const NotificationsScreen = () => {
             });
             if (response.ok) {
                 const data = await response.json();
+                console.log("follower data: ", data);
                 setNotifications(prevNotifications => {
                     const updatedNotifications = {
                         ...prevNotifications,
@@ -208,9 +211,15 @@ const NotificationsScreen = () => {
     
     const renderFollowerNotifications = useMemo(() => ({ item }) => (
         <View>
-            <View style={{flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => handleUserPress(item.sender_username)}>
-                    <Text style={styles.userText}>{item.sender_username}</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Image 
+                            source={item.sender_photo ? {uri: item.sender_photo} : FallbackPhoto} 
+                            style={styles.image}
+                        />
+                        <Text style={styles.userText}>{item.sender_username}</Text>
+                    </View>
                 </TouchableOpacity>
                 <Text style={styles.text}> began following you.</Text>
             </View>
@@ -220,9 +229,15 @@ const NotificationsScreen = () => {
 
     const renderEventNotifications = useMemo(() => ({ item }) => (
         <View>
-            <View style={{flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => handleUserPress(item.sender_username)}>
-                    <Text style={styles.userText}>{item.sender_username}</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Image 
+                            source={item.sender_photo ? {uri: item.sender_photo} : FallbackPhoto} 
+                            style={styles.image}
+                        />  
+                        <Text style={styles.userText}>{item.sender_username}</Text>
+                    </View>
                 </TouchableOpacity>
                 <Text style={styles.text}> is going to your event:</Text>
             </View>
@@ -279,6 +294,16 @@ const styles = StyleSheet.create({
     }, 
     event_name_text: {
         paddingLeft: 10, paddingTop: 2, paddingBottom: 5, fontSize: 20, color: '#2da7a6'
+    },
+    image: {
+        marginTop: 5,
+        marginBottom: 5,
+        marginLeft: 8,
+        width: 40,
+        height: 40,
+        borderRadius: 40 / 2,
+        overflow: "hidden",
+        borderWidth: 2,
     }
 })
 
