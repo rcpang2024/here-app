@@ -42,36 +42,6 @@ const AttendeesScreen = () => {
         }
     };
 
-    // const fetchUsernamesForAttendees = async () => {
-    //     const idToken = await auth.currentUser.getIdToken();
-    //     try {
-    //         const attendeesWithUsernames = await Promise.all(
-    //             list_of_attendees.map(async (attendeeID) => {
-    //             const response = await fetch(`http://192.168.1.6:8000/api/users/id/${attendeeID}/`, {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     'Authorization': `Bearer ${idToken}`
-    //                 }
-    //             });
-    //             if (!response.ok) {
-    //                 throw new Error('Network response for user data was not ok');
-    //             }
-    //             const userData = await response.json();
-    //             // const attendeesInfo = userData.map(userData => ({
-    //             //     username: userData.username,
-    //             //     name: userData.name,
-    //             //     profile_pic: userData.profile_pic
-    //             // }));
-    //             return userData.username;
-    //         })
-    //     );
-    //     setAttendeesWithUsernames(attendeesWithUsernames);
-    //     } catch (error) {
-    //         console.error('Error fetching usernames for attendees:', error);
-    //     }
-    // };
-
     useEffect(() => {
         // Set the left header component
         navigation.setOptions({

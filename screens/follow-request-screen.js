@@ -30,7 +30,8 @@ const FollowRequestScreen = () => {
             const requests = userData.map(userData => ({
                 username: userData.username,
                 name: userData.name,
-                profile_pic: userData.profile_pic
+                profile_pic: userData.profile_pic,
+                id: userData.id
             }));
             console.log("requests: ", requests);
             setFollowRequests(requests);

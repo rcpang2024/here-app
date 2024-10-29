@@ -13,34 +13,61 @@ const BlockedUsersScreen = () => {
 
     const [blockedUserUsernames, setBlockedUserUsernames] = useState([]);
 
-    const fetchUsernamesForBlockedUsers = async (token) => {
+    const fetchUsernamesForBlockedUsers = async () => {
+        const idToken = await auth.currentUser.getIdToken();
         try {
-            if (user.blocked_users) {
-                const blockedUsersWithUsernames = await Promise.all(
-                    user.blocked_users.map(async (userID) => {
-                    const response = await fetch(`http://192.168.1.6:8000/api/users/id/${userID}/`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                    if (!response.ok) {
-                        throw new Error('Network response for user data was not ok');
-                    }
-                    const userData = await response.json();
-                    // return userData.username;
-                    return {username: userData.username, id: userID}
-                })
-                );
-                setBlockedUserUsernames(blockedUsersWithUsernames);
-            } else {
-                console.log("No blocked users present");
+            const response = await fetch(`http://192.168.1.6:8000/api/users/blocked/${user.username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Network response for user data was not ok');
             }
-        } catch (error) {
-            console.error('Error fetching usernames for blocked users:', error);
+            const userData = await response.json();
+            const blocked = userData.map(userData => ({
+                username: userData.username,
+                name: userData.name,
+                profile_pic: userData.profile_pic,
+                id: userData.id
+            }));
+            console.log("blocked: ", blocked);
+            setBlockedUserUsernames(blocked);
+        } catch (e) {
+            console.error("Error retrieving blocked users: ", e);
         }
     };
+
+    // const fetchUsernamesForBlockedUsers = async (token) => {
+    //     try {
+    //         if (user.blocked_users) {
+    //             const blockedUsersWithUsernames = await Promise.all(
+    //                 user.blocked_users.map(async (userID) => {
+    //                 const response = await fetch(`http://192.168.1.6:8000/api/users/id/${userID}/`, {
+    //                     method: 'GET',
+    //                     headers: {
+    //                         'Content-Type': 'application/json',
+    //                         'Authorization': `Bearer ${token}`
+    //                     }
+    //                 });
+    //                 if (!response.ok) {
+    //                     throw new Error('Network response for user data was not ok');
+    //                 }
+    //                 const userData = await response.json();
+    //                 // return userData.username;
+    //                 return {username: userData.username, id: userID}
+    //             })
+    //             );
+    //             setBlockedUserUsernames(blockedUsersWithUsernames);
+    //         } else {
+    //             console.log("No blocked users present");
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching usernames for blocked users:', error);
+    //     }
+    // };
 
     useEffect(() => {
         // Set the left header component
@@ -146,7 +173,7 @@ const BlockedUsersScreen = () => {
         <View>
             <FlatList
                 data={blockedUserUsernames}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.username}
                 renderItem={renderItem}
                 refreshControl = {
                     <RefreshControl

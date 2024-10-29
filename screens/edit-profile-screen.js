@@ -1,10 +1,22 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard,
         Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useContext, useCallback } from "react";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
 const EditProfileScreen = () => {
     const navigation = useNavigation();
@@ -20,6 +32,7 @@ const EditProfileScreen = () => {
 
     const [newName, setNewName] = useState(currName);
     const [newUsername, setNewUsername] = useState(currUsername);
+    const [usernameTaken, setUsernameTaken] = useState(false);
     const [newBio, setNewBio] = useState(currBio);
 
     // const picRef = useRef();
@@ -46,8 +59,24 @@ const EditProfileScreen = () => {
         Keyboard.dismiss();
     };
 
+    const checkUsername = async (username) => {
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/checkusername?username=${username}`);
+            const data = await response.json();
+            console.log("data: ", data.is_taken);
+            setUsernameTaken(data.is_taken);
+        } catch (e) {
+            console.error("Error checking username: ", e);
+        }
+    };
+
+    const debouncedCheckUsername = useCallback(
+        debounce((username) => checkUsername(username), 500),
+        []
+    );
+
     const updateUserInDB = async () => {
-        const idToken = auth.currentUser.getIdToken();
+        const idToken = await auth.currentUser.getIdToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${currUsername}/`, {
                 method: 'PUT',
@@ -69,13 +98,25 @@ const EditProfileScreen = () => {
         }
     };
 
-    const handleUpdate = () => {
-        updateUserInDB().then((updatedUser) => {
-            updateUserContext(updatedUser); // Update user data in context
+    const handleUpdate = async () => {
+        if (usernameTaken) {
+            print(usernameTaken);
+            Alert.alert("Username already taken", "Please choose another.");
+            return;
+        }
+        try {
+            const updated = await updateUserInDB();
+            updateUserContext(updated);
             navigation.goBack();
-        }).catch((error) => {
+        } catch (e) {
             console.error("Error in handleUpdate: ", error);
-        });
+        }
+        // updateUserInDB().then((updatedUser) => {
+        //     updateUserContext(updatedUser); // Update user data in context
+        //     navigation.goBack();
+        // }).catch((error) => {
+        //     console.error("Error in handleUpdate: ", error);
+        // });
     };
 
     const handleCancel = () => {
@@ -104,6 +145,7 @@ const EditProfileScreen = () => {
                             style={styles.input}
                             returnKeyType="next"
                             onChangeText={(val) => setNewName(val)}
+                            autoCapitalize="none"
                         />
                     </View>
                     <View style={styles.container}>
@@ -113,9 +155,15 @@ const EditProfileScreen = () => {
                             defaultValue={currUsername}
                             style={styles.input}
                             returnKeyType="next"
-                            onChangeText={(val) => setNewUsername(val)}
+                            onChangeText={(val) => {setNewUsername(val), debouncedCheckUsername(val)}}
+                            autoCapitalize="none"
                         />
                     </View>
+                    {usernameTaken && (
+                        <View>
+                            <Text style={{color: 'red', paddingHorizontal: 3}}>Username is already taken</Text>
+                        </View>
+                    )}
                     <View style={styles.container}>
                         <TextInput
                             ref={bioRef}
@@ -125,6 +173,7 @@ const EditProfileScreen = () => {
                             returnKeyType="next"
                             multiline={true}
                             onChangeText={(val) => setNewBio(val)}
+                            autoCapitalize="none"
                         />
                     </View>
                 </View>
@@ -168,8 +217,8 @@ const styles = StyleSheet.create({
     },
     container: {
         backgroundColor: 'white',
-        borderColor: '#e8e8e8',
-        borderWidth: 1,
+        borderColor: 'black',
+        borderWidth: 2,
         borderRadius: 5,
         marginVertical: 10,
         paddingHorizontal: 5
