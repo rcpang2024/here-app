@@ -7,6 +7,7 @@ import HereLogo from '../assets/images/HereLogo.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { supabase } from "../lib/supabase";
 
 function debounce(func, wait) {
     let timeout;
@@ -145,6 +146,62 @@ const CreateUserScreen = () => {
             }
         } catch (e) {
             console.error(e);
+        }
+    };
+
+    async function addUserData(authUserId) {
+        const { error } = await supabase
+            .from('users')
+            .insert({
+                id: authUserId,
+                username: username,
+                name: name,
+                email: email,
+                bio: '',  // default or user-provided
+                profile_pic: null,  // or a default value
+                user_type: userType || 'individual', // based on your logic
+                user_privacy: userPrivacy || 'public',
+                list_of_followers: [],  // default empty array or initialize as needed
+                list_of_following: [],
+                created_events: [],
+                attending_events: [],
+                follow_requests: [],
+                requesting_users: [],
+                blocked_users: [],
+                subscriptions: [],
+                expo_push_token: expoPushToken || null,
+                is_authenticated: false  // default value
+            });
+        if (error) {
+            console.error('Error adding user to users table: ', error.message);
+            throw error;
+        }
+    };
+
+    // Supabase sign up
+    async function signUpWithEmail() {
+        if (!username || !pw || !name || !email) {
+            alert('Please fill out all fields before proceeding.');
+            return;
+        }
+        if (pw !== pwAgain) {
+            Alert.alert('Passwords do not match.');
+            return;
+        }
+        const {
+            data: { session },
+            error,
+        } = await supabase.auth.signUp({
+            email: email,
+            password: pw
+        })
+        if (error) {
+            Alert.alert(error.message);
+            return;
+        }
+        if (!session) {
+            Alert.alert('Please check your inbox for email verification!');
+            return;
         }
     };
 

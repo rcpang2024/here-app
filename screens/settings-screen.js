@@ -98,9 +98,6 @@ const SettingsScreen = () => {
     return (
         <View style={styles.title}>
             <View style={styles.buttons}>
-                <TouchableOpacity onPress={() => console.log("Settings")}>
-                    <Text style={styles.text}>Settings</Text>
-                </TouchableOpacity>
                 <Text style={{fontSize: 26, marginBottom: 8}}>Account Privacy</Text>
                 <RadioForm
                     radio_props={privacyItems}
@@ -112,7 +109,7 @@ const SettingsScreen = () => {
                     style={{marginBottom: 15, flexDirection: 'row', justifyContent: 'space-between', marginRight: 125}}
                 />
                 <TouchableOpacity onPress={() => navigation.navigate("Security")}>
-                    <Text style={styles.text}>Security</Text>
+                    <Text style={styles.text}>Settings & Security</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate("Blocked Users")}>
                     <Text style={styles.text}>Blocked Users</Text>

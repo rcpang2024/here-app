@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system';
 import { Image } from 'expo-image';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
+import * as ImageManipulator from 'expo-image-manipulator';
 
 const UploadImage = ({ theURI, isEditable }) => {
     // const [image, setImage] = useState(imageUri || null);
@@ -27,6 +28,7 @@ const UploadImage = ({ theURI, isEditable }) => {
     //     cameraRollPermission();
     // }, []);
 
+    // NEED TO COMPRESS IMAGE BEFORE UPLOAD
     const addImageByCamera = async () => {
         if (!isEditable) return;
         await ImagePicker.requestCameraPermissionsAsync();
@@ -36,10 +38,14 @@ const UploadImage = ({ theURI, isEditable }) => {
             aspect: [1, 1],
             quality: 1
         });
-        console.log(JSON.stringify(_image.assets[0].uri));
+        const manipImage = await ImageManipulator.manipulateAsync(_image.assets[0].uri, 
+            [], {compress: 0.5, format: ImageManipulator.SaveFormat.JPEG});
+        console.log(JSON.stringify(manipImage.uri));
         if (!_image.canceled) {
-            setImageUri(_image.assets[0].uri);
-            handleSetPicURI(_image.assets[0].uri);
+            setImageUri(manipImage.uri);
+            handleSetPicURI(manipImage.uri);
+            // setImageUri(_image.assets[0].uri);
+            // handleSetPicURI(_image.assets[0].uri);
             // saveImageLocally(_image.assets[0].uri);
         }
     };
@@ -52,10 +58,14 @@ const UploadImage = ({ theURI, isEditable }) => {
             aspect: [4, 3],
             quality: 1
         });
-        console.log(JSON.stringify(_image.assets[0].uri));
+        const manipImage = await ImageManipulator.manipulateAsync(_image.assets[0].uri, 
+            [], {compress: 0.5, format: ImageManipulator.SaveFormat.JPEG});
+        console.log(JSON.stringify(manipImage.uri));
         if (!_image.canceled) {
-            setImageUri(_image.assets[0].uri);
-            handleSetPicURI(_image.assets[0].uri);
+            setImageUri(manipImage.uri);
+            handleSetPicURI(manipImage.uri);
+            // setImageUri(_image.assets[0].uri);
+            // handleSetPicURI(_image.assets[0].uri);
             // saveImageLocally(_image.assets[0].uri);
         }
     };

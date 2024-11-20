@@ -33,6 +33,9 @@
         "projectId": "460fe348-3482-4ef2-b5bf-7e8a236e2c3c"
       }
     },
-    "owner": "rcp23"
+    "owner": "rcp23",
+    "plugins": [
+      "react-native-compressor"
+    ]
   }
 }

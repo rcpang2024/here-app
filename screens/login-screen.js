@@ -1,5 +1,5 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, 
-    Keyboard, KeyboardAvoidingView } from "react-native";
+    Keyboard, KeyboardAvoidingView, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useContext } from "react";
 import { UserContext } from "../user-context";
@@ -7,6 +7,7 @@ import HereLogo from '../assets/images/HereLogo.png';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { supabase } from "../lib/supabase";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LogInScreen = () => {
@@ -17,6 +18,8 @@ const LogInScreen = () => {
     // Sets the email and password to whatever the user typed in
     const [email, setEmail] = useState('');
     const [pw, setPW] = useState('');
+
+    // Toggles whether password is shown or not on the screen
     const [showPW, setShowPW] = useState(false);
 
     const emailRef = useRef();
@@ -73,6 +76,15 @@ const LogInScreen = () => {
         } catch (e) {
             console.error("Error signing in: ", e);
         }
+    };
+
+    // Supabase login
+    async function signInWithEmail() {
+        const { error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: pw
+        })
+        if (error) Alert.alert(error.message);
     };
 
     return (
