@@ -29,8 +29,18 @@ const LogInScreen = () => {
         Keyboard.dismiss();
     };
 
+    const getAuthToken = async () => {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+            console.error('Error retrieving session:', error);
+            return null;
+        }
+        return data?.session?.access_token || null;
+    };
+
     const fetchUser = async () => {
         const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
+        // const idToken = await getAuthToken(); // Supabase ID token
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/email/${email}/`, {
                 method: 'GET',
@@ -80,11 +90,19 @@ const LogInScreen = () => {
 
     // Supabase login
     async function signInWithEmail() {
-        const { error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: pw
-        })
-        if (error) Alert.alert(error.message);
+        const { error } = await supabase.auth.signInWithPassword({email: email, password: pw});
+        if (error) {
+            Alert.alert(error.message);
+        } else {
+            const userData = await fetchUser();
+            if (userData) {
+                setUser(userData);
+                dismissKeyboard();
+                navigation.navigate("Tab");
+                setEmail('');
+                setPW('');
+            }
+        }
     };
 
     return (

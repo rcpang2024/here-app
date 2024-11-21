@@ -185,23 +185,33 @@ const CreateUserScreen = () => {
             return;
         }
         if (pw !== pwAgain) {
-            Alert.alert('Passwords do not match.');
+            alert('Passwords do not match.');
             return;
         }
-        const {
-            data: { session },
-            error,
-        } = await supabase.auth.signUp({
-            email: email,
-            password: pw
-        })
+        const {data: { user, session }, error} = await supabase.auth.signUp({email: email, password: pw});
+
         if (error) {
-            Alert.alert(error.message);
+            alert(error.message);
             return;
         }
-        if (!session) {
-            Alert.alert('Please check your inbox for email verification!');
+        
+        if (!user) {
+            alert('Sign-up failed. Please try again later.');
             return;
+        } else {
+            try {
+                const userData = await createUser();
+                if (userData) {
+                    dismissKeyboard();
+                    alert("Account created! Verify your email before logging in.");
+                    navigation.navigate("Login");
+                }
+            } catch (e) {
+                alert("Error creating user, try again later: ", e);
+            }
+            dismissKeyboard();
+            alert("Account created! Verify your email before logging in.");
+            navigation.navigate("Login");
         }
     };
 

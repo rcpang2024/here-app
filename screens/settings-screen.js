@@ -87,6 +87,13 @@ const SettingsScreen = () => {
         }
     };
 
+    const supabaseLogOut = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            Alert.alert("Error signing out: ", error);
+        }
+    };
+
     const confirmLogOut = () => {
         Alert.alert(
             "Log Out",
