@@ -4,17 +4,17 @@ import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { supabase } from "../lib/supabase";
 
 const FollowRequestScreen = () => {
     const navigation = useNavigation();
 
     const [followRequests, setFollowRequests] = useState([]);
     const { user, updateUserContext } = useContext(UserContext);
-    const auth = FIREBASE_AUTH;
 
     const fetchListOfFollowRequests = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { theData } = await supabase.auth.getSession();
+        const idToken = theData?.session.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/follow_requests/${user.username}/`, {
                 method: 'GET',
@@ -56,7 +56,8 @@ const FollowRequestScreen = () => {
     }, []);
 
     const fetchUserProfile = async (username) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { theData } = await supabase.auth.getSession();
+        const idToken = theData?.session.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -85,7 +86,8 @@ const FollowRequestScreen = () => {
 
     // ISSUE: Item is a username, but I need the ID of the user
     const handleAccept = async (item) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { theData } = await supabase.auth.getSession();
+        const idToken = theData?.session.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/followuser/${item.username}/${user.username}/`, {
                 method: 'POST',
@@ -113,7 +115,8 @@ const FollowRequestScreen = () => {
     };
 
     const handleDeny = async (item) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { theData } = await supabase.auth.getSession();
+        const idToken = theData?.session.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${item.username}/`, {
                 method: 'DELETE',

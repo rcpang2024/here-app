@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useContext, useCallback } from "react";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { supabase } from "../lib/supabase";
 
 function debounce(func, wait) {
     let timeout;
@@ -76,7 +77,9 @@ const EditProfileScreen = () => {
     );
 
     const updateUserInDB = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${currUsername}/`, {
                 method: 'PUT',
@@ -178,7 +181,7 @@ const EditProfileScreen = () => {
                     </View>
                 </View>
             </TouchableWithoutFeedback>
-            <View style={{flex: 'row'}}>
+            <View style={{flex: 3}}>
                 <Text style={{marginLeft: 10, marginRight: 5, marginTop: 10}}>
                     *You might have to refresh your profile screen once you click update
                     to see your changes.

@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import EventItem from "../components/event-item";
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
+import { supabase } from "../lib/supabase";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SearchScreen = () => {
@@ -78,7 +79,8 @@ const SearchScreen = () => {
 
     const fetchUserProfile = async (username) => {
         try {
-            const idToken = await auth.currentUser.getIdToken();
+            const { data } = await supabase.auth.getSession();
+            const idToken = data?.session?.access_token;
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {

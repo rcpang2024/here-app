@@ -5,12 +5,11 @@ import { useEffect, useContext } from "react";
 import format from "date-fns/format";
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { supabase } from "../lib/supabase";
 
 const EventDetailScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
-    const auth = FIREBASE_AUTH;
 
     const event_id = route.params.eventID;
     const creation_user = route.params.creationUser;
@@ -48,7 +47,8 @@ const EventDetailScreen = () => {
     }, [route.params]);
 
     const fetchUserProfile = async (username) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { theData } = await supabase.auth.getSession();
+        const idToken = theData?.session.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',

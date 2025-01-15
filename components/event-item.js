@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import format from "date-fns/format";
+import { supabase } from "../lib/supabase";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const EventItem = ({ event_id, creation_user, creation_user_username, event_name, event_description, location_addr, date, list_of_attendees }) => {
@@ -15,8 +16,15 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   // Variable to set if user is going to the event
   const [isGoing, setIsGoing] = useState(false);
 
-  const formattedDate = format(new Date(date), 'MM-dd-yyyy');
-  const formattedTime = format(new Date(date), 'h:mm a');
+  // const formattedDate = format(new Date(date), 'MM-dd-yyyy');
+  // const formattedTime = format(new Date(date), 'h:mm a');
+  const formattedDate = date && !isNaN(new Date(date))
+    ? format(new Date(date), 'MM-dd-yyyy')
+    : "Invalid Date";
+
+  const formattedTime = date && !isNaN(new Date(date))
+    ? format(new Date(date), 'h:mm a')
+    : "Invalid Time";
 
   // Saves the user's registration status for the event
   const saveRegistrationStatus = async (event_id, status) => {
@@ -29,7 +37,8 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   
   // Registers user to the event
   const handleRegister = async () => {
-    const idToken = await auth.currentUser.getIdToken();
+    const { data } = await supabase.auth.getSession();
+    const idToken = data?.session?.access_token;
     try {
       const response = await fetch(`http://192.168.1.6:8000/api/registeruser/${event_id}/${user.username}/`, {
         method: 'POST',
@@ -62,7 +71,8 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   };
 
   const handleUnregister = async () => {
-    const idToken = await auth.currentUser.getIdToken();
+    const { data } = await supabase.auth.getSession();
+    const idToken = data?.session?.access_token;
     try {
       const response = await fetch(`http://192.168.1.6:8000/api/unregisteruser/${event_id}/${user.username}/`, {
         method: 'DELETE',
@@ -97,7 +107,8 @@ const handleDelete = async () => {
     [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", onPress: async () => {
-          const idToken = await auth.currentUser.getIdToken();
+          const { data } = await supabase.auth.getSession();
+          const idToken = data?.session?.access_token;
           try {
             const response = await fetch(`http://192.168.1.6:8000/api/deleteevent/${event_id}/`, {
               method: 'DELETE',

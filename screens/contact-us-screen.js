@@ -20,6 +20,7 @@ const ContactUsScreen = () => {
         });
     });
 
+    // PLACEHOLDER: REPLACE WITH THE EVENTUAL SUPPORT EMAIL
     const handleEmailPress = () => {
         // PLACEHOLDER
         const email = 'raypang02@gmail.com';

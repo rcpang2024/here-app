@@ -5,13 +5,12 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { supabase } from "../lib/supabase";
 // import uuid from 'react-native-uuid';
 
 const EditEventScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
-    const auth = FIREBASE_AUTH;
 
     const event_id = route.params.eventID;
     const currEventName = route.params.eventName;
@@ -92,7 +91,8 @@ const EditEventScreen = () => {
     }, [route.params]);
 
     const updateEventInDB = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { theData } = await supabase.auth.getSession();
+        const idToken = theData?.session.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateevent/${event_id}/`, {
                 method: 'PUT',

@@ -4,6 +4,7 @@ import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../user-context";
+import { supabase } from "../lib/supabase";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const BlockedUsersScreen = () => {
@@ -14,7 +15,8 @@ const BlockedUsersScreen = () => {
     const [blockedUserUsernames, setBlockedUserUsernames] = useState([]);
 
     const fetchUsernamesForBlockedUsers = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/blocked/${user.username}/`, {
                 method: 'GET',
@@ -40,35 +42,6 @@ const BlockedUsersScreen = () => {
         }
     };
 
-    // const fetchUsernamesForBlockedUsers = async (token) => {
-    //     try {
-    //         if (user.blocked_users) {
-    //             const blockedUsersWithUsernames = await Promise.all(
-    //                 user.blocked_users.map(async (userID) => {
-    //                 const response = await fetch(`http://192.168.1.6:8000/api/users/id/${userID}/`, {
-    //                     method: 'GET',
-    //                     headers: {
-    //                         'Content-Type': 'application/json',
-    //                         'Authorization': `Bearer ${token}`
-    //                     }
-    //                 });
-    //                 if (!response.ok) {
-    //                     throw new Error('Network response for user data was not ok');
-    //                 }
-    //                 const userData = await response.json();
-    //                 // return userData.username;
-    //                 return {username: userData.username, id: userID}
-    //             })
-    //             );
-    //             setBlockedUserUsernames(blockedUsersWithUsernames);
-    //         } else {
-    //             console.log("No blocked users present");
-    //         }
-    //     } catch (error) {
-    //         console.error('Error fetching usernames for blocked users:', error);
-    //     }
-    // };
-
     useEffect(() => {
         // Set the left header component
         navigation.setOptions({
@@ -82,22 +55,18 @@ const BlockedUsersScreen = () => {
             />
             ),
         });
-        const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
-            console.log("idToken set in blocked users screen");
-            await fetchUsernamesForBlockedUsers(token);
-        };
-        fetchToken();
+        fetchUsernamesForBlockedUsers();
     }, []);
 
     const fetchUserProfile = async (username) => {
-        const token = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${idToken}`
                 }
             });
             const userData = response.json();
@@ -119,13 +88,14 @@ const BlockedUsersScreen = () => {
     };
 
     const handleUnblockUser = async (item) => {
-        const token = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unblockuser/${user.username}/${item.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${idToken}`
                 },
                 // body: JSON.stringify({ follower: user.username })
             });

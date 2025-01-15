@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import * as ImageManipulator from 'expo-image-manipulator';
+import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 
 const UploadImage = ({ theURI, isEditable }) => {
     // const [image, setImage] = useState(imageUri || null);
@@ -111,7 +112,7 @@ const UploadImage = ({ theURI, isEditable }) => {
             {imageUri ? (
                 <Image source={{ uri: imageUri }} style={{width: 180, height: 180}} cachePolicy="memory-disk"/>
             ) : (
-                <Text style={{alignSelf: 'center'}}>No image selected.</Text>
+                <Image source={FallbackPhoto}/>
             )}
             {isEditable && (
                 <View style={styles.uploadBtnContainer}>

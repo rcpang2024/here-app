@@ -6,10 +6,11 @@ import * as Location from 'expo-location';
 import { useNavigation } from "@react-navigation/native";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { supabase } from "../lib/supabase";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
-    const [data, setData] = useState([]);
+    const [eventData, setEventData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
     const { user, updateUserLocation } = useContext(UserContext);
     const auth = FIREBASE_AUTH;
@@ -42,7 +43,8 @@ const HomeScreen = () => {
     }, []);
 
     const fetchData = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         const response = await fetch(`http://192.168.1.6:8000/api/friendsevents/${user.username}/`, {
             method: 'GET',
             headers: {
@@ -50,10 +52,11 @@ const HomeScreen = () => {
                 'Authorization': `Bearer ${idToken}`
             }
         });
-        const data = await response.json();
+        const theData = await response.json();
         // console.log("data", data);
         // const filteredEvents = data.filter(event => followedUserIDs.includes(event.creation_user));
-        setData(data);
+        setEventData(theData);
+        console.log("eventData after setting: ", eventData);
     };
 
     const onRefresh = useCallback(() => {
@@ -84,18 +87,22 @@ const HomeScreen = () => {
     return (
         <View style={styles.title}>
             <Text style={styles.format}>Events by the people you follow!</Text>
-            <FlatList
-                data={data}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                refreshControl = {
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={() => onRefresh()}
-                    />
-                }
-                contentContainerStyle={{paddingTop: 10, paddingBottom: 100}}
-            />
+            {eventData && eventData.length > 0 ? (
+                <FlatList
+                    data={eventData}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    refreshControl = {
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => onRefresh()}
+                        />
+                    }
+                    contentContainerStyle={{paddingTop: 10, paddingBottom: 100}}
+                />
+            ) : (
+                <Text>No events to display.</Text> // Placeholder for empty state
+            )}
         </View>
     );
 }

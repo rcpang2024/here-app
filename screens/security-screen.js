@@ -4,6 +4,7 @@ import { useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { supabase } from "../lib/supabase";
 import { sendPasswordResetEmail } from "firebase/auth";
 
 const SecurityScreen = () => {
@@ -27,7 +28,8 @@ const SecurityScreen = () => {
     }, []);
 
     const handleDeleteAccount = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/deleteuser/${user.username}/`, {
                 method: 'DELETE',
@@ -45,6 +47,7 @@ const SecurityScreen = () => {
         }
     };
 
+    // CHANGE TO SUPABASE CHANGE PW
     const changePW = () => {
         sendPasswordResetEmail(auth, auth.currentUser.email)
         .then(() => {

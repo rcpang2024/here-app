@@ -4,6 +4,7 @@ import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../user-context";
+import { supabase } from "../lib/supabase";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const AttendeesScreen = () => {
@@ -17,7 +18,8 @@ const AttendeesScreen = () => {
     const [attendeesWithUsernames, setAttendeesWithUsernames] = useState([]);
 
     const fetchAttendees = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/event_attendees/${event_id}/`, {
                 method: 'GET',
@@ -59,7 +61,8 @@ const AttendeesScreen = () => {
     }, []);
 
     const fetchUserProfile = async (username) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',

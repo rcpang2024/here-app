@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
+import { supabase } from "../lib/supabase";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const FollowersScreen = () => {
@@ -16,7 +17,8 @@ const FollowersScreen = () => {
     const [followers, setFollowers] = useState([]);
 
     const fetchFollowers = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/followers/${currUsername}/`, {
                 method: 'GET',
@@ -42,7 +44,8 @@ const FollowersScreen = () => {
     };
 
     const fetchUserProfile = async (username) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',

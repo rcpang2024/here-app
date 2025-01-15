@@ -31,6 +31,7 @@ const LogInScreen = () => {
 
     const getAuthToken = async () => {
         const { data, error } = await supabase.auth.getSession();
+        // console.log("data - getAuthToken: ", data);
         if (error) {
             console.error('Error retrieving session:', error);
             return null;
@@ -39,8 +40,9 @@ const LogInScreen = () => {
     };
 
     const fetchUser = async () => {
-        const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
-        // const idToken = await getAuthToken(); // Supabase ID token
+        // const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
+        const idToken = await getAuthToken();
+        // console.log("idToken: ", idToken);
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/email/${email}/`, {
                 method: 'GET',
@@ -57,6 +59,7 @@ const LogInScreen = () => {
         }
         catch (error) {
             alert("Please type in a valid username and password: ");
+            console.log("Error in fetchUser: ", error);
         }
     }; 
 
@@ -90,12 +93,16 @@ const LogInScreen = () => {
 
     // Supabase login
     async function signInWithEmail() {
-        const { error } = await supabase.auth.signInWithPassword({email: email, password: pw});
+        const { data, error } = await supabase.auth.signInWithPassword({email: email, password: pw});
+        if (!data) {
+            alert("Invalid login credentials, please try again");
+        } 
         if (error) {
             Alert.alert(error.message);
         } else {
             const userData = await fetchUser();
             if (userData) {
+                console.log("In signInWithEmail");
                 setUser(userData);
                 dismissKeyboard();
                 navigation.navigate("Tab");
@@ -141,7 +148,7 @@ const LogInScreen = () => {
                                 onPress={() => setShowPW(!showPW)}
                             />
                         </View>
-                        <TouchableOpacity style={styles.signIn} onPress={signIn}>
+                        <TouchableOpacity style={styles.signIn} onPress={signInWithEmail}>
                             <Text style={styles.signInText}>Sign In</Text>
                         </TouchableOpacity>
                     </View>

@@ -123,60 +123,32 @@ const CreateUserScreen = () => {
         Keyboard.dismiss();
     };
 
-    const signUp = async () => {
-        try {
-            if (!username || !pw || !name || !email) {
-                alert('Please fill out all fields before proceeding.');
-            }
-            if (pw !== pwAgain) {
-                alert('Passwords do not match.');
-            }
-            const response = await createUserWithEmailAndPassword(auth, email, pw);
-            if (!response) {
-                alert("Error creating user");
-            } else {
-                await sendEmailVerification(response.user);
-                alert("Email verification sent. Check your inbox.");
-                const userData = await createUser();
-                if (userData) {
-                    dismissKeyboard();
-                    navigation.navigate("Login");
-                    // navigation.navigate("Confirm Email");
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    async function addUserData(authUserId) {
-        const { error } = await supabase
-            .from('users')
-            .insert({
-                id: authUserId,
-                username: username,
-                name: name,
-                email: email,
-                bio: '',  // default or user-provided
-                profile_pic: null,  // or a default value
-                user_type: userType || 'individual', // based on your logic
-                user_privacy: userPrivacy || 'public',
-                list_of_followers: [],  // default empty array or initialize as needed
-                list_of_following: [],
-                created_events: [],
-                attending_events: [],
-                follow_requests: [],
-                requesting_users: [],
-                blocked_users: [],
-                subscriptions: [],
-                expo_push_token: expoPushToken || null,
-                is_authenticated: false  // default value
-            });
-        if (error) {
-            console.error('Error adding user to users table: ', error.message);
-            throw error;
-        }
-    };
+    // Firebase sign up - delete before going into production
+    // const signUp = async () => {
+    //     try {
+    //         if (!username || !pw || !name || !email) {
+    //             alert('Please fill out all fields before proceeding.');
+    //         }
+    //         if (pw !== pwAgain) {
+    //             alert('Passwords do not match.');
+    //         }
+    //         const response = await createUserWithEmailAndPassword(auth, email, pw);
+    //         if (!response) {
+    //             alert("Error creating user");
+    //         } else {
+    //             await sendEmailVerification(response.user);
+    //             alert("Email verification sent. Check your inbox.");
+    //             const userData = await createUser();
+    //             if (userData) {
+    //                 dismissKeyboard();
+    //                 navigation.navigate("Login");
+    //                 // navigation.navigate("Confirm Email");
+    //             }
+    //         }
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    // };
 
     // Supabase sign up
     async function signUpWithEmail() {
@@ -218,7 +190,7 @@ const CreateUserScreen = () => {
     return (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
             <ScrollView style={styles.title}>
-                <Image source={HereLogo} style={styles.logo} resizeMode="contain"/>
+                {/* <Image source={HereLogo} style={styles.logo} resizeMode="contain"/> */}
                 <View style={styles.textFields}>
                     <TextInput
                         ref={usernameRef}
@@ -291,7 +263,7 @@ const CreateUserScreen = () => {
                     initial={userType}
                     onPress={(val) => setUserType(val)}
                 /> */}
-                <TouchableOpacity style={styles.createButton} onPress={signUp}>
+                <TouchableOpacity style={styles.createButton} onPress={signUpWithEmail}>
                     <Text style={styles.createText}>Create Account</Text>
                 </TouchableOpacity>
             </ScrollView>

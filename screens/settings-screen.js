@@ -4,6 +4,7 @@ import { useEffect, useState, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import RadioForm from "react-native-simple-radio-button";
 import { UserContext } from "../user-context";
+import { supabase } from "../lib/supabase";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SettingsScreen = () => {
@@ -48,7 +49,8 @@ const SettingsScreen = () => {
     const initialPrivacyIndex = privacyItems.findIndex(item => item.value === user.user_privacy);
 
     const updateUserInDB = async (newPrivacy) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${user.username}/`, {
                 method: 'PUT',
@@ -77,16 +79,6 @@ const SettingsScreen = () => {
         }
     };
 
-    const handleLogOut = async () => {
-        try {
-            await FIREBASE_AUTH.signOut();
-            updateUserContext(null);
-            navigation.navigate('Login');
-        } catch (e) {
-            console.error("Error signing out: ", e);
-        }
-    };
-
     const supabaseLogOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
@@ -98,7 +90,7 @@ const SettingsScreen = () => {
         Alert.alert(
             "Log Out",
             "Are you sure you want to log out?",
-            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: handleLogOut}],
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: supabaseLogOut}],
         );
     };
 

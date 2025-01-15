@@ -9,6 +9,7 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { supabase } from "../lib/supabase";
 
 const ProfileScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -119,9 +120,17 @@ const ProfileScreen = ({ route }) => {
             });
         }
         const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
+            const { data, error } = await supabase.auth.getUser();
+            if (!user) {
+                console.log('No user is logged in.');
+                return;
+            }
+            if (error) {
+                alert("Error retrieving profile, please try again later: ", error);
+            }
+            const token = data?.session?.access_token;
             setIdToken(token);
-            console.log("idToken set in profilescreen");
+            console.log("token set in profilescreen");
         };
         fetchToken();
     }, [route.params, currUser]);

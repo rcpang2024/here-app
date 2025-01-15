@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, useWindowDimensions, FlatList, RefreshControl }
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
+import { supabase } from "../lib/supabase";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const ExploreScreen = () => {
@@ -14,7 +15,7 @@ const ExploreScreen = () => {
     const [nearbyEvents, setNearbyEvents] = useState([]);
     const { user, userLocation } = useContext(UserContext); 
     const auth = FIREBASE_AUTH;
-    const [idToken, setIdToken] = useState(null);
+    // const [idToken, setIdToken] = useState(null);
 
     const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},
@@ -22,15 +23,18 @@ const ExploreScreen = () => {
     ]), []);
 
     useEffect(() => {
+        // const fetchToken = async () => {
+        //     const { data, error } = await supabase.auth.getSession();
+        //     if (error) {
+        //         alert("Error fetching friends' events: ", error);
+        //     }
+        //     const token = data?.session?.access_token;
+        //     setIdToken(token);
+        // };
+        // fetchToken();
         if (user) {
             fetchFriendsAttending();
         }
-        const fetchToken = async () => {
-            const token = await auth.currentUser.getIdToken();
-            setIdToken(token);
-            console.log("idToken set in friends screen");
-        };
-        fetchToken();
     }, [user]);
 
     const onTabChange = (newIndex) => {
@@ -41,6 +45,9 @@ const ExploreScreen = () => {
     };
 
     const fetchFriendsAttending = async () => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        console.log("idToken in fetchFriendsAttending: ", idToken);
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/friends_attending_events/${user.username}/`, {
                 method: 'GET',
@@ -49,14 +56,17 @@ const ExploreScreen = () => {
                     'Authorization': `Bearer ${idToken}`
                 }
             });
-            const data = await response.json();
-            setFriendsEvents(data);
+            const theData = await response.json();
+            setFriendsEvents(theData);
         } catch (e) {
             console.error("Error retrieving friends' attending events: ", e);
         }
     };
 
     const fetchNearbyEvents = async () => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        console.log("idToken in fetchNearbyEvents: ", idToken);
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/nearby_events/${userLocation.latitude}/${userLocation.longitude}/`, {
                 method: 'GET',
@@ -65,8 +75,8 @@ const ExploreScreen = () => {
                     'Authorization': `Bearer ${idToken}`
                 }
             });
-            const data = await response.json();
-            setNearbyEvents(data);
+            const theData = await response.json();
+            setNearbyEvents(theData);
         } catch (e) {
             console.error("Error retrieving nearby events: ", e);
         }
