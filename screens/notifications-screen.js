@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
+import { supabase } from "../lib/supabase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NotificationsScreen = () => {
@@ -67,19 +68,9 @@ const NotificationsScreen = () => {
         }
     }, [fetched]);
 
-    // useFocusEffect(
-    //     useCallback(() => {
-    //         if (user && !fetched) {
-    //             console.log("Fetching notifications...");
-    //             retrieveFollowerNotification();
-    //             retrieveEventNotification();
-    //             setFetched(true);  // The state will now persist after the first fetch.
-    //         }
-    //     }, [user, fetched])
-    // );
-
     const retrieveFollowerNotification = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/follower_notifications/${user.id}/`, {
                 method: 'GET',
@@ -108,7 +99,9 @@ const NotificationsScreen = () => {
     };
 
     const retrieveEventNotification = async () => {
-        const idToken = await auth.currentUser.getIdToken();
+        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/event_notifications/${user.id}/`, {
                 method: 'GET',
@@ -137,7 +130,8 @@ const NotificationsScreen = () => {
     };
 
     const fetchUserProfile = async (username) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -165,7 +159,8 @@ const NotificationsScreen = () => {
     };
 
     const fetchEvent = async (eventID) => {
-        const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/events/${eventID}/`, {
                 method: 'GET',

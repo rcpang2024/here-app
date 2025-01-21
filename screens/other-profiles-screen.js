@@ -10,7 +10,7 @@ import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../lib/supabase";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const OtherProfileScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -18,7 +18,6 @@ const OtherProfileScreen = ({ route }) => {
     const { user, updateUserContext } = useContext(UserContext); 
     const { profileUser } = route.params || {};
     const currUser = profileUser;
-    const auth = FIREBASE_AUTH;
     const [idToken, setIdToken] = useState(null);
 
     const [isRequested, setIsRequested] = useState(user.requesting_users.includes(profileUser.id));

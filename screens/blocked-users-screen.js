@@ -10,7 +10,6 @@ import { FIREBASE_AUTH } from "../FirebaseConfig";
 const BlockedUsersScreen = () => {
     const navigation = useNavigation();
     const { user, updateUserContext } = useContext(UserContext);
-    const auth = FIREBASE_AUTH;
 
     const [blockedUserUsernames, setBlockedUserUsernames] = useState([]);
 

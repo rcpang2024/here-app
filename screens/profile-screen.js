@@ -8,7 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+// import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
 
 const ProfileScreen = ({ route }) => {
@@ -17,7 +17,6 @@ const ProfileScreen = ({ route }) => {
     const { user, updateUserContext } = useContext(UserContext); // Access user from context
     const { profileUser } = route.params || {};
     const currUser = profileUser || user;
-    const auth = FIREBASE_AUTH;
     const [idToken, setIdToken] = useState(null);
 
     const [refreshing, setRefreshing] = useState(false);

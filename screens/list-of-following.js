@@ -5,13 +5,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const FollowingScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = useContext(UserContext);
-    const auth = FIREBASE_AUTH;
 
     const currUsername = route.params.username;
     const [following, setFollowing] = useState([]);

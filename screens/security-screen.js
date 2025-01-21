@@ -12,6 +12,17 @@ const SecurityScreen = () => {
     const auth = FIREBASE_AUTH;    
     const { user } = useContext(UserContext);
 
+    // TEST THIS LATER
+    const changePWSupabase = () => {
+        const { data, error } = supabase.auth.resetPasswordForEmail(user.email)
+        .then(() => {
+            alert("Password reset email sent.");
+            setEmail('');
+        }).catch((e) => {
+            alert("Error sending reset email, try again later: ", e);
+        })
+    };
+
     useEffect(() => {
         // Set the left header component
         navigation.setOptions({
@@ -39,23 +50,14 @@ const SecurityScreen = () => {
                 },
             });
             if (response.ok) {
-                Alert.alert("Your account has been successfully deleted. We hope to see back soon!")
+                alert("Your account has been successfully deleted. We hope to see back soon!");
             }
         } catch (e) {
             console.log("Error in handleDeleteAccount: ", e);
-            Alert.alert("Error deleting account, try again later.");
+            alert("Error deleting account, try again later.");
         }
+        // const supabaseDelete = supabase.auth.admin.deleteUser();
     };
-
-    // CHANGE TO SUPABASE CHANGE PW
-    const changePW = () => {
-        sendPasswordResetEmail(auth, auth.currentUser.email)
-        .then(() => {
-            Alert.alert("Password reset email sent.");
-        }).catch((e) => {
-            Alert.alert("Error sending password reset email: ", e);
-        })
-    }
 
     const confirmDeleteAccount = () => {
         Alert.alert(
@@ -67,7 +69,7 @@ const SecurityScreen = () => {
 
     return (
         <View style={styles.title}>
-            <TouchableOpacity style={styles.button} onPress={changePW}>
+            <TouchableOpacity style={styles.button} onPress={changePWSupabase}>
                 <Text style={styles.buttonText}>Reset Password</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.delete} onPress={confirmDeleteAccount}>

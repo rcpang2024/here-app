@@ -23,7 +23,6 @@ const EditProfileScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user, updateUserContext } = useContext(UserContext); // Access updateUser from context
-    const auth = FIREBASE_AUTH;
 
     // const currPic = route.params.pic;
     const currName = route.params.name;

@@ -5,14 +5,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import RadioForm from "react-native-simple-radio-button";
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SettingsScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user, updateUserContext } = useContext(UserContext);
     const [userPrivacy, setUserPrivacy] = useState(null);
-    const auth = FIREBASE_AUTH;
 
     useEffect(() => {
         if (!user) {
@@ -84,6 +83,8 @@ const SettingsScreen = () => {
         if (error) {
             Alert.alert("Error signing out: ", error);
         }
+        updateUserContext(null);
+        navigation.navigate('Login');
     };
 
     const confirmLogOut = () => {

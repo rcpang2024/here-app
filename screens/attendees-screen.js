@@ -11,7 +11,6 @@ const AttendeesScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = useContext(UserContext);
-    const auth = FIREBASE_AUTH;
 
     const list_of_attendees = route.params.attendees;
     const event_id = route.params.idEvent;

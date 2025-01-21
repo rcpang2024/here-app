@@ -1,13 +1,12 @@
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, TextInput, 
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, 
     TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useEffect, useCallback } from "react";
 import RadioForm from "react-native-simple-radio-button";
-import HereLogo from '../assets/images/HereLogo.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FIREBASE_AUTH } from "../FirebaseConfig";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { supabase } from "../lib/supabase";
+import { scale, verticalScale } from 'react-native-size-matters';
 
 function debounce(func, wait) {
     let timeout;
@@ -27,10 +26,11 @@ const CreateUserScreen = () => {
         {label: 'Public', value: 'public'},
         {label: 'Private', value: 'private'}
     ];
-    const userTypes = [
-        {label: 'Individual', value: 'individual'},
-        {label: 'Organization', value: 'organization'}
-    ];
+    // FUTURE USE WHEN THERE ARE MULTIPLE TYPES
+    // const userTypes = [
+    //     {label: 'Individual', value: 'individual'},
+    //     {label: 'Organization', value: 'organization'}
+    // ];
     const auth = FIREBASE_AUTH;
 
     const [username, setUsername] = useState('');
@@ -123,33 +123,6 @@ const CreateUserScreen = () => {
         Keyboard.dismiss();
     };
 
-    // Firebase sign up - delete before going into production
-    // const signUp = async () => {
-    //     try {
-    //         if (!username || !pw || !name || !email) {
-    //             alert('Please fill out all fields before proceeding.');
-    //         }
-    //         if (pw !== pwAgain) {
-    //             alert('Passwords do not match.');
-    //         }
-    //         const response = await createUserWithEmailAndPassword(auth, email, pw);
-    //         if (!response) {
-    //             alert("Error creating user");
-    //         } else {
-    //             await sendEmailVerification(response.user);
-    //             alert("Email verification sent. Check your inbox.");
-    //             const userData = await createUser();
-    //             if (userData) {
-    //                 dismissKeyboard();
-    //                 navigation.navigate("Login");
-    //                 // navigation.navigate("Confirm Email");
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.error(e);
-    //     }
-    // };
-
     // Supabase sign up
     async function signUpWithEmail() {
         if (!username || !pw || !name || !email) {
@@ -189,105 +162,107 @@ const CreateUserScreen = () => {
 
     return (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
-            <ScrollView style={styles.title}>
-                {/* <Image source={HereLogo} style={styles.logo} resizeMode="contain"/> */}
-                <View style={styles.textFields}>
-                    <TextInput
-                        ref={usernameRef}
-                        placeholder="Username"
-                        style={styles.input}
-                        returnKeyType="next"
-                        autoCapitalize="none"
-                        onChangeText={(val) => {setUsername(val), debouncedCheckUsername(val)}}
-                    />
-                </View>
-                {usernameTaken && (
-                    <View>
-                        <Text style={{color: 'red', paddingHorizontal: 3}}>Username is already taken</Text>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+                <ScrollView style={styles.title}>
+                    <View style={styles.textFields}>
+                        <TextInput
+                            ref={usernameRef}
+                            placeholder="Username"
+                            style={styles.input}
+                            returnKeyType="next"
+                            autoCapitalize="none"
+                            onChangeText={(val) => {setUsername(val), debouncedCheckUsername(val)}}
+                        />
                     </View>
-                )}
-                <View style={styles.textFields}>
-                    <TextInput
-                        ref={pwRef}
-                        placeholder="Password"
-                        style={styles.input}
-                        returnKeyType="next"
-                        autoCapitalize="none"
-                        secureTextEntry={true}
-                        onChangeText={(val) => setPW(val)}
+                    {usernameTaken && (
+                        <View>
+                            <Text style={{color: 'red', paddingHorizontal: 3}}>Username is already taken</Text>
+                        </View>
+                    )}
+                    <View style={styles.textFields}>
+                        <TextInput
+                            ref={nameRef}
+                            placeholder="Name"
+                            style={styles.input}
+                            returnKeyType="next"
+                            autoCapitalize="none"
+                            onChangeText={(val) => setName(val)}
+                        />
+                    </View>
+                    <View style={styles.textFields}>
+                        <TextInput
+                            ref={emailRef}
+                            placeholder="Email"
+                            style={styles.input}
+                            returnKeyType="next"
+                            autoCapitalize="none"
+                            onChangeText={(val) => setEmail(val)}
+                        />
+                    </View>
+                    <View style={styles.textFields}>
+                        <TextInput
+                            ref={pwRef}
+                            placeholder="Password"
+                            style={styles.input}
+                            returnKeyType="next"
+                            autoCapitalize="none"
+                            secureTextEntry={true}
+                            onChangeText={(val) => setPW(val)}
+                        />
+                    </View>
+                    <View style={styles.textFields}>
+                        <TextInput
+                            ref={pwAgainRef}
+                            placeholder="Retype Password"
+                            style={styles.input}
+                            returnKeyType="next"
+                            autoCapitalize="none"
+                            secureTextEntry={true}
+                            onChangeText={(val) => setPWAgain(val)}
+                        />
+                    </View>
+                    <Text style={{paddingVertical: 5, fontSize: 15, alignSelf: 'center'}}>Account Privacy - you can change this later</Text>
+                    <RadioForm
+                        radio_props={privacyItems}
+                        buttonColor={'#BD7979'}
+                        selectedButtonColor={'#BD7979'}
+                        labelStyle={{fontSize: 18}}
+                        style={{flexDirection: 'row', justifyContent: 'space-around'}}
+                        initial={userPrivacy}
+                        onPress={(val) => setUserPrivacy(val)}
                     />
-                </View>
-                <View style={styles.textFields}>
-                    <TextInput
-                        ref={pwAgainRef}
-                        placeholder="Retype Password"
-                        style={styles.input}
-                        returnKeyType="next"
-                        autoCapitalize="none"
-                        onChangeText={(val) => setPWAgain(val)}
-                    />
-                </View>
-                <View style={styles.textFields}>
-                    <TextInput
-                        ref={nameRef}
-                        placeholder="Name"
-                        style={styles.input}
-                        returnKeyType="next"
-                        autoCapitalize="none"
-                        onChangeText={(val) => setName(val)}
-                    />
-                </View>
-                <View style={styles.textFields}>
-                    <TextInput
-                        ref={emailRef}
-                        placeholder="Email"
-                        style={styles.input}
-                        returnKeyType="next"
-                        autoCapitalize="none"
-                        onChangeText={(val) => setEmail(val)}
-                    />
-                </View>
-                <Text style={{paddingVertical: 5, fontSize: 15}}>Account Privacy - you can change this later</Text>
-                <RadioForm
-                    radio_props={privacyItems}
-                    buttonColor={'#BD7979'}
-                    selectedButtonColor={'#BD7979'}
-                    labelStyle={{fontSize: 18}}
-                    style={{flexDirection: 'row', justifyContent: 'space-around'}}
-                    initial={userPrivacy}
-                    onPress={(val) => setUserPrivacy(val)}
-                />
-                {/* <Text style={{paddingVertical: 5}}>Account Type - you can change this later</Text>
-                <RadioForm
-                    radio_props={userTypes}
-                    initial={userType}
-                    onPress={(val) => setUserType(val)}
-                /> */}
-                <TouchableOpacity style={styles.createButton} onPress={signUpWithEmail}>
-                    <Text style={styles.createText}>Create Account</Text>
-                </TouchableOpacity>
-            </ScrollView>
+                    {/* <Text style={{paddingVertical: 5}}>Account Type - you can change this later</Text>
+                    <RadioForm
+                        radio_props={userTypes}
+                        initial={userType}
+                        onPress={(val) => setUserType(val)}
+                    /> */}
+                    <TouchableOpacity style={styles.createButton} onPress={signUpWithEmail}>
+                        <Text style={styles.createText}>Create Account</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
     );
 }
 
 const styles = StyleSheet.create({
     title: {
-        alignContent: 'center', marginLeft: 12, marginRight: 12
+        alignContent: 'center', marginLeft: scale(12), marginRight: scale(12), flex: 1
     },
     container: {
-        flex: 1, paddingHorizontal: 15
+        flex: 1, paddingHorizontal: scale(15)
     },
     textFields: {
         backgroundColor: 'white',
         borderColor: '#e8e8e8',
         borderWidth: 2,
         borderRadius: 4,
-        marginVertical: 12,
-        paddingHorizontal: 5
+        marginVertical: verticalScale(12),
+        paddingHorizontal: scale(5)
     },
     input: {
-        fontSize: 18, paddingVertical: 3, paddingHorizontal: 2
+        fontSize: 18, paddingVertical: verticalScale(3), paddingHorizontal: scale(2)
     },
     logo: {
         width: '100%', height: '40%', alignSelf: 'center', marginTop: 10

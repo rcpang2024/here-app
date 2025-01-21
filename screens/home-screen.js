@@ -4,7 +4,7 @@ import EventItem from "../components/event-item";
 import { UserContext } from "../user-context";
 import * as Location from 'expo-location';
 import { useNavigation } from "@react-navigation/native";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+// import { FIREBASE_AUTH } from "../FirebaseConfig";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { supabase } from "../lib/supabase";
 
@@ -13,7 +13,6 @@ const HomeScreen = () => {
     const [eventData, setEventData] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
     const { user, updateUserLocation } = useContext(UserContext);
-    const auth = FIREBASE_AUTH;
 
     useEffect(() => {
         navigation.setOptions({

@@ -11,7 +11,6 @@ import { FIREBASE_AUTH } from "../FirebaseConfig";
 const EventItem = ({ event_id, creation_user, creation_user_username, event_name, event_description, location_addr, date, list_of_attendees }) => {
   const navigation = useNavigation();
   const { user, updateUserContext } = useContext(UserContext);
-  const auth = FIREBASE_AUTH;
 
   // Variable to set if user is going to the event
   const [isGoing, setIsGoing] = useState(false);

@@ -4,7 +4,7 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
 import { supabase } from "../lib/supabase";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const ExploreScreen = () => {
     const layout = useWindowDimensions();
@@ -14,7 +14,6 @@ const ExploreScreen = () => {
 
     const [nearbyEvents, setNearbyEvents] = useState([]);
     const { user, userLocation } = useContext(UserContext); 
-    const auth = FIREBASE_AUTH;
     // const [idToken, setIdToken] = useState(null);
 
     const routes = useMemo(() => ([
@@ -39,9 +38,9 @@ const ExploreScreen = () => {
 
     const onTabChange = (newIndex) => {
         setIndex(newIndex);
-        if (newIndex === 1) {
-            fetchNearbyEvents();
-        }
+        // if (newIndex === 1) {
+        //     fetchNearbyEvents();
+        // }
     };
 
     const fetchFriendsAttending = async () => {

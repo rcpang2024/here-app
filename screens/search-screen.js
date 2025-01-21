@@ -8,14 +8,13 @@ import EventItem from "../components/event-item";
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
+// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SearchScreen = () => {
     const navigation = useNavigation();
     const [searchUser, setUserSearch] = useState('');
     const [searchEvent, setEventSearch] = useState('');
     const { user } = useContext(UserContext);
-    const auth = FIREBASE_AUTH;
 
     // For Users
     const [results, setResults] = useState([]);
