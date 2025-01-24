@@ -10,6 +10,7 @@ import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
 // import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
+import { scale, verticalScale } from 'react-native-size-matters';
 
 const ProfileScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -119,7 +120,7 @@ const ProfileScreen = ({ route }) => {
             });
         }
         const fetchToken = async () => {
-            const { data, error } = await supabase.auth.getUser();
+            const { data, error } = await supabase.auth.getSession();
             if (!user) {
                 console.log('No user is logged in.');
                 return;
@@ -245,12 +246,12 @@ const ProfileScreen = ({ route }) => {
         return (
             <View>
                 {user.attending_events && (
-                    <View style={{marginLeft: 10, marginRight: 18}}>
+                    <View style={{marginLeft: scale(5), marginRight: scale(20)}}>
                         <FlatList 
                             data={event}
                             keyExtractor={(item) => item.id}
                             renderItem={renderEventItem}
-                            contentContainerStyle={{paddingTop: 5, paddingBottom: 15}}
+                            contentContainerStyle={{paddingTop: verticalScale(5), paddingBottom: verticalScale(15)}}
                         />
                     </View>
                 )}
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
         paddingTop: 10, alignItems: 'center'
     },
     profilePic: {
-        borderRadius: 50, width: 150, height: 150, marginBottom: 10
+        borderRadius: 30, width: scale(70), height: verticalScale(70), marginBottom: 10
     },
     name: {
         fontSize: 26, fontWeight: 'bold'

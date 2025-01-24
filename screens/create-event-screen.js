@@ -1,12 +1,13 @@
 import React, { useRef, useState, useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, 
-  Keyboard, Modal, Alert } from "react-native";
+  Keyboard, Modal, Alert, ScrollView } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
 import uuid from 'react-native-uuid';
 import { UserContext } from "../user-context";
 import * as Location from 'expo-location';
 import { supabase } from "../lib/supabase";
+import { scale, verticalScale } from 'react-native-size-matters';
 
 const CreateEventScreen = () => {
   const [eventName, setEventName] = useState("");
@@ -27,19 +28,47 @@ const CreateEventScreen = () => {
   const [showTime, setShowTime] = useState(false);
   const [dateText, setDateText] = useState('Choose a Date');
   const [timeText, setTimeText] = useState('Choose a Time');
+  const [selectedDate, setSelectedDate] = useState(null); // For the date
+  const [selectedTime, setSelectedTime] = useState(null); // For the time
   const today = new Date();
 
-  const onChange = (selectedDate) => {
-    setShowDate(false);
-    setShowTime(false);
-    if (selectedDate) {
-      setDate(selectedDate);
-      let tempDate = new Date(selectedDate);
-      let formattedDate = format(tempDate, 'MM/dd/yyyy');
-      let formattedTime = format(tempDate, 'hh:mm a');
-      setDateText(formattedDate);
-      setTimeText(formattedTime);
+  // const onChange = (selectedDate) => {
+  //   setShowDate(false);
+  //   setShowTime(false);
+  //   if (selectedDate) {
+  //     setDate(selectedDate);
+  //     let tempDate = new Date(selectedDate);
+  //     let formattedDate = format(tempDate, 'MM/dd/yyyy');
+  //     let formattedTime = format(tempDate, 'hh:mm a');
+  //     setDateText(formattedDate);
+  //     setTimeText(formattedTime);
+  //   }
+  // };
+  const onChange = (selectedValue) => {
+    if (mode === 'date') {
+      setShowDate(false);
+      if (selectedValue) {
+        setSelectedDate(selectedValue);
+        const formattedDate = format(new Date(selectedValue), 'MM/dd/yyyy');
+        setDateText(formattedDate);
+      }
+    } else if (mode === 'time') {
+      setShowTime(false);
+      if (selectedValue) {
+        setSelectedTime(selectedValue);
+        const formattedTime = format(new Date(selectedValue), 'hh:mm a');
+        setTimeText(formattedTime);
+      }
     }
+  };
+
+  const combinedDateTime = () => {
+    if (selectedDate && selectedTime) {
+      const datePart = format(new Date(selectedDate), 'yyyy-MM-dd');
+      const timePart = format(new Date(selectedTime), 'HH:mm:ss');
+      return new Date(`${datePart}T${timePart}`);
+    }
+    return new Date(); // Default to the current date-time if no selection
   };
 
   const geocode = async (address) => {
@@ -92,12 +121,13 @@ const CreateEventScreen = () => {
 
   const fetchPost = async () => {
     try {
+      const eventDateTime = combinedDateTime();
       const { latitude, longitude } = await geocode(eventLocation);
-      if (!auth.currentUser) {
-        throw new Error("User is not authenticated.");
-      }
-      const { theData } = await supabase.auth.getSession();
-      const idToken = theData?.session.access_token;
+      // if (!auth.currentUser) {
+      //   throw new Error("User is not authenticated.");
+      // }
+      const { data } = await supabase.auth.getSession();
+      const idToken = data?.session.access_token;
       const response = await fetch('http://192.168.1.6:8000/api/createevent/', {
         method: 'POST',
         headers: {
@@ -111,7 +141,7 @@ const CreateEventScreen = () => {
           event_description: eventDesc,
           location_addr: eventLocation,
           location_point: {latitude, longitude},
-          date: date,
+          date: eventDateTime,
           list_of_attendees: [], 
         }),
       });
@@ -119,9 +149,9 @@ const CreateEventScreen = () => {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Unknown error');
       }
-      const data = await response.json();
-      console.log("Event created:", data);
-      return data;
+      const theData = await response.json();
+      console.log("Event created:", theData);
+      return theData;
     } catch (error) {
       console.log('Error creating event:', error);
       throw error;
@@ -130,8 +160,8 @@ const CreateEventScreen = () => {
 
   const createdEventsNumMaxedOut = () => {
     Alert.alert(
-      "Maximum number of events reached.",
-      "Delete an event or wait for an event to expire before creating a new one.",
+      "Error Creating Event",
+      "Make sure you have less than 3 active events or try again later.",
       [{text: "OK", onPress: () => {}, style: 'cancel'}]
     )
   };
@@ -158,13 +188,13 @@ const CreateEventScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
-      <View style={styles.container}>
-        <Text>NOTE: You can have a maximum of 3 active events at a time.</Text>
+      <ScrollView style={styles.container} contentContainerStyle={{flexGrow: 1, paddingBottom: 20}}>
+        <Text style={{fontSize: 10}}>NOTE: You can have a maximum of 3 active events at a time.</Text>
         <View style={styles.textEntry}>
           <TextInput
             ref={eventNameRef}
             placeholder="Event Name"
-            placeholderTextColor={"black"}
+            placeholderTextColor={"gray"}
             style={styles.input}
             returnKeyType="next"
             onChangeText={(val) => setEventName(val)}
@@ -172,7 +202,7 @@ const CreateEventScreen = () => {
           <TextInput
             ref={eventDescriptionRef}
             placeholder="Event Description"
-            placeholderTextColor={"black"}
+            placeholderTextColor={"gray"}
             style={styles.input}
             returnKeyType="next"
             onChangeText={(val) => setEventDesc(val)}
@@ -181,12 +211,12 @@ const CreateEventScreen = () => {
             ref={locationRef}
             style={styles.input}
             placeholder="Address"
-            placeholderTextColor={"black"}
+            placeholderTextColor={"gray"}
             returnKeyType="next"
             onChangeText={(val) => setEventLocation(val)}
           />
-           <TouchableOpacity style={styles.input} onPress={showDatePicker}>
-              <Text>{dateText}</Text>
+           <TouchableOpacity style={styles.dateInput} onPress={showDatePicker}>
+              <Text style={{color: 'gray', fontSize: 14}}>{dateText}</Text>
             </TouchableOpacity>
             {showDate && (
               <DateTimePickerModal
@@ -198,8 +228,8 @@ const CreateEventScreen = () => {
                 minimumDate={today}
               />
             )}
-            <TouchableOpacity style={styles.input} onPress={showTimePicker}>
-              <Text>{timeText}</Text>
+            <TouchableOpacity style={styles.dateInput} onPress={showTimePicker}>
+              <Text style={{color: 'gray', fontSize: 14}}>{timeText}</Text>
             </TouchableOpacity>
             {showTime && (
               <DateTimePickerModal
@@ -236,50 +266,60 @@ const CreateEventScreen = () => {
             </View>
           </View>
         </Modal>
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, paddingHorizontal: 18, paddingTop: 20
+    flex: 1, paddingHorizontal: scale(18), paddingTop: verticalScale(5)
   },
   placeholderText: {
     color: 'black'
   },
   textEntry: {
-    // backgroundColor: '#F3B0B0',
     borderColor: 'black',
     borderWidth: 2,
-    borderRadius: 5,
-    marginVertical: 10,
-    paddingHorizontal: 15,
-    marginLeft: 1,
-    marginRight: 1
+    borderRadius: 3,
+    marginVertical: verticalScale(10),
+    paddingHorizontal: scale(15),
+    marginLeft: scale(1),
+    marginRight: scale(1)
   },
   input: {
-    marginBottom: 15,
-    marginTop: 15,
+    marginBottom: verticalScale(15),
+    marginTop: verticalScale(15),
     borderWidth: 2,
     borderColor: 'gray',
     borderRadius: 3,
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 18,
-    color: '#BD7979'
+    fontSize: 14,
+    paddingHorizontal: scale(5),
+    paddingVertical: verticalScale(5),
+    color: 'black'
+  },
+  dateInput: {
+    marginBottom: verticalScale(15),
+    marginTop: verticalScale(15),
+    borderWidth: 2,
+    borderColor: 'gray',
+    borderRadius: 3,
+    fontSize: 14,
+    paddingHorizontal: scale(5),
+    paddingVertical: verticalScale(10),
+    color: 'black'
   },
   button: {
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    marginTop: 12,
+    paddingVertical: verticalScale(8),
+    paddingHorizontal: scale(10),
+    marginTop: verticalScale(12),
     borderRadius: 5,
     alignItems: 'center',
     borderColor: '#BD7979',
     borderWidth: 3
   },
   buttonText: {
-    fontWeight: 'bold', fontSize: 16, marginLeft: 5, color: '#BD7979'
+    fontWeight: 'bold', fontSize: 16, marginLeft: scale(5), color: '#BD7979'
   },
   modalView: {
     justifyContent: 'center',

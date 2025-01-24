@@ -100,7 +100,7 @@ const HomeScreen = () => {
                     contentContainerStyle={{paddingTop: 10, paddingBottom: 100}}
                 />
             ) : (
-                <Text>No events to display.</Text> // Placeholder for empty state
+                <Text style={{paddingLeft: 7}}>No events to display.</Text> // Placeholder for empty state
             )}
         </View>
     );

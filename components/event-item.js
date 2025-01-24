@@ -166,7 +166,7 @@ const handleDelete = async () => {
               eventID: event_id,
               eventName: event_name,
               eventDescription: event_description,
-              theLocation: location,
+              theLocation: location_addr,
               theDate: date,
               attendees: list_of_attendees
             })}>

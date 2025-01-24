@@ -1,11 +1,12 @@
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, 
-    Alert } from "react-native";
+    Alert, KeyboardAvoidingView } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
 import { supabase } from "../lib/supabase";
+import { scale, verticalScale } from 'react-native-size-matters';
 // import uuid from 'react-native-uuid';
 
 const EditEventScreen = () => {
@@ -91,14 +92,14 @@ const EditEventScreen = () => {
     }, [route.params]);
 
     const updateEventInDB = async () => {
-        const { theData } = await supabase.auth.getSession();
-        const idToken = theData?.session.access_token;
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateevent/${event_id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authentication': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
                     event_name: newEventName,
@@ -108,6 +109,7 @@ const EditEventScreen = () => {
                 }),
             });
             const eventData = await response.json();
+            console.log("eventData: ", eventData);
             return eventData;
         } catch (err) {
             console.error("Error updating event: ", err);
@@ -138,8 +140,9 @@ const EditEventScreen = () => {
     }
 
     return (
-        <View>
-            <TouchableWithoutFeedback onPress={dismissKeyboard}>
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+                <Text style={{paddingLeft: scale(10), fontSize: 10}}>NOTE: You may need to refresh to view changes after submitting.</Text>
                 <View>
                     <View style={styles.container}>
                         <TextInput
@@ -200,16 +203,16 @@ const EditEventScreen = () => {
                             )}
                     </View>
                 </View>
-            </TouchableWithoutFeedback>
-            <View>
-                <TouchableOpacity style={styles.editEvent} onPress={handleUpdate}>
-                    <Text style={{fontWeight: 'bold'}}>UPDATE EVENT</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.cancel} onPress={handleCancel}>
-                    <Text style={{fontWeight: 'bold', color: 'red'}}>CANCEL</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+                <View>
+                    <TouchableOpacity style={styles.editEvent} onPress={handleUpdate}>
+                        <Text style={{fontWeight: 'bold'}}>UPDATE EVENT</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.cancel} onPress={handleCancel}>
+                        <Text style={{fontWeight: 'bold', color: 'red'}}>CANCEL</Text>
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     );
 }
 
@@ -219,47 +222,47 @@ const styles = StyleSheet.create({
         borderColor: '#e8e8e8',
         borderWidth: 1,
         borderRadius: 5,
-        marginVertical: 10,
-        paddingHorizontal: 5,
-        paddingVertical: 5,
-        marginLeft: 10,
-        marginRight: 10
+        marginVertical: verticalScale(10),
+        paddingHorizontal: scale(5),
+        paddingVertical: verticalScale(5),
+        marginLeft: scale(10),
+        marginRight: scale(10)
     },
     input: {
         fontSize: 18,
-        paddingVertical: 3,
-        paddingHorizontal: 2,
+        paddingVertical: verticalScale(3),
+        paddingHorizontal: scale(2),
     },
     editEvent: {
         borderColor: 'black',
         borderRadius: 2,
         borderWidth: 3,
         padding: 10,
-        marginTop: 10,
+        marginTop: verticalScale(10),
         alignItems: 'center',
-        marginLeft: 10,
-        marginRight: 10,
+        marginLeft: scale(10),
+        marginRight: scale(10),
     },
     cancel: {
         borderColor: 'red',
         borderRadius: 2,
         borderWidth: 3,
         padding: 10,
-        marginTop: 10,
+        marginTop: verticalScale(10),
         alignItems: 'center',
-        marginLeft: 10,
-        marginRight: 10,
+        marginLeft: scale(10),
+        marginRight: scale(10),
     },
     dateInput: {
-        marginBottom: 15,
-        marginTop: 10,
-        marginLeft: 10,
-        marginRight: 10,
+        marginBottom: verticalScale(15),
+        marginTop: verticalScale(10),
+        marginLeft: scale(10),
+        marginRight: scale(10),
         borderWidth: 2,
         borderColor: 'black',
         borderRadius: 1,
-        paddingHorizontal: 8,
-        paddingVertical: 20,
+        paddingHorizontal: scale(8),
+        paddingVertical: verticalScale(20),
     }
 })
 
