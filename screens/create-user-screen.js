@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
         width: '100%', height: '40%', alignSelf: 'center', marginTop: 10
     },
     createButton: {
-        backgroundColor: '#1c2120',
+        backgroundColor: '#bd7979',
         marginTop: 18,
         marginLeft: 10,
         marginRight: 10,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
         borderRadius: 5
     },
     createText: {
-        fontWeight: 'bold', color: '#BD7979'
+        fontWeight: 'bold', color: 'white'
     },
     bottomPadding: {
         marginBottom: 25

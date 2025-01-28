@@ -71,6 +71,7 @@ const NotificationsScreen = () => {
     const retrieveFollowerNotification = async () => {
         const { data } = await supabase.auth.getSession();
         const idToken = data?.session?.access_token;
+        // console.log("idToken in retrieveFollower: ", idToken);
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/follower_notifications/${user.id}/`, {
                 method: 'GET',

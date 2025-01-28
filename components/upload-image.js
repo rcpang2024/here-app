@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 import { UserContext } from "../user-context";
 // import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
+import { scale, verticalScale } from 'react-native-size-matters';
 import * as ImageManipulator from 'expo-image-manipulator';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 
@@ -79,7 +80,7 @@ const UploadImage = ({ theURI, isEditable }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authentication': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({ uri: uri }),
             });
@@ -111,7 +112,7 @@ const UploadImage = ({ theURI, isEditable }) => {
     return (
         <View style={styles.container}>
             {imageUri ? (
-                <Image source={{ uri: imageUri }} style={{width: 180, height: 180}} cachePolicy="memory-disk"/>
+                <Image source={{ uri: imageUri }} style={styles.profilePic} cachePolicy="memory-disk"/>
             ) : (
                 <Image source={FallbackPhoto}/>
             )}
@@ -121,7 +122,7 @@ const UploadImage = ({ theURI, isEditable }) => {
                         {/* <Text>{image ? 'Edit' : 'Upload'} Image</Text> */}
                         <Ionicons 
                             name="camera"
-                            size={25}
+                            size={22}
                             color="black"
                         />
                     </TouchableOpacity>
@@ -155,25 +156,25 @@ const UploadImage = ({ theURI, isEditable }) => {
 
 const styles = StyleSheet.create({
     profilePic: {
-        borderRadius: 50, width: 100, height: 100, marginBottom: 10
+        borderRadius: 50, width: scale(110), height: verticalScale(110), marginBottom: 10
     },
     container: {
         elevation: 2,
-        height: 180,
-        width: 180,
+        height: verticalScale(110),
+        width: scale(110),
         backgroundColor: '#efefef',
         position: 'relative',
         borderRadius: 999,
         overflow: 'hidden'
     },
     uploadBtnContainer: {
-        opacity: 0.8,
+        opacity: 0.6,
         position: 'absolute',
         right: 0,
         bottom: 0,
         backgroundColor: 'gray',
         width: '100%',
-        height: '16%'
+        height: '24%'
     },
     uploadBtn: {
         display: 'flex', alignItems: 'center', justifyContent: 'center'

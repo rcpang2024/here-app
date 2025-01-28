@@ -105,6 +105,15 @@ const ProfileScreen = ({ route }) => {
                         style={{ marginRight: 14 }}
                     />
                 ),
+                headerLeft: () => (
+                    <Ionicons 
+                        name="create-outline" 
+                        size={26} 
+                        color="black" 
+                        onPress={() => console.log("DMs")}
+                        style={{marginLeft: 14}}
+                    />
+                )
             });
         } else {
             navigation.setOptions({

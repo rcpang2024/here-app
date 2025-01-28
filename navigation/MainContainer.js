@@ -92,8 +92,8 @@ function TabNavigator() {
       <Tab.Screen name={homeName} component={HomeScreen} />
       <Tab.Screen name={exploreName} component={ExploreScreen} />
       <Tab.Screen name={createEventName} component={CreateEventScreen} />
-      <Tab.Screen name={searchName} component={SearchScreen} />
-      <Tab.Screen name={profileName} component={ProfileScreen} />
+      <Tab.Screen name={searchName} component={SearchScreen} options={{headerShown: false}}/>
+      <Tab.Screen name={profileName} component={ProfileScreen} options={{headerTitle: ''}}/>
     </Tab.Navigator>
   );
 }

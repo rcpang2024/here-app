@@ -13,8 +13,8 @@ const FollowRequestScreen = () => {
     const { user, updateUserContext } = useContext(UserContext);
 
     const fetchListOfFollowRequests = async () => {
-        const { theData } = await supabase.auth.getSession();
-        const idToken = theData?.session.access_token;
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/follow_requests/${user.username}/`, {
                 method: 'GET',
@@ -56,8 +56,8 @@ const FollowRequestScreen = () => {
     }, []);
 
     const fetchUserProfile = async (username) => {
-        const { theData } = await supabase.auth.getSession();
-        const idToken = theData?.session.access_token;
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -86,8 +86,8 @@ const FollowRequestScreen = () => {
 
     // ISSUE: Item is a username, but I need the ID of the user
     const handleAccept = async (item) => {
-        const { theData } = await supabase.auth.getSession();
-        const idToken = theData?.session.access_token;
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/followuser/${item.username}/${user.username}/`, {
                 method: 'POST',
@@ -115,8 +115,8 @@ const FollowRequestScreen = () => {
     };
 
     const handleDeny = async (item) => {
-        const { theData } = await supabase.auth.getSession();
-        const idToken = theData?.session.access_token;
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${item.username}/`, {
                 method: 'DELETE',
