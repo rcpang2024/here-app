@@ -6,7 +6,6 @@ import { UserContext } from "../user-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import format from "date-fns/format";
 import { supabase } from "../lib/supabase";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const EventItem = ({ event_id, creation_user, creation_user_username, event_name, event_description, location_addr, date, list_of_attendees }) => {
   const navigation = useNavigation();

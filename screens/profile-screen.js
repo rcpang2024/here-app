@@ -8,7 +8,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
 

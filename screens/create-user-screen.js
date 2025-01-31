@@ -4,7 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useEffect, useCallback } from "react";
 import RadioForm from "react-native-simple-radio-button";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
 
@@ -31,7 +30,6 @@ const CreateUserScreen = () => {
     //     {label: 'Individual', value: 'individual'},
     //     {label: 'Organization', value: 'organization'}
     // ];
-    const auth = FIREBASE_AUTH;
 
     const [username, setUsername] = useState('');
     const [usernameTaken, setUsernameTaken] = useState(false);

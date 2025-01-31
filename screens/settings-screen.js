@@ -5,7 +5,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import RadioForm from "react-native-simple-radio-button";
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SettingsScreen = () => {
     const navigation = useNavigation();
@@ -55,7 +54,7 @@ const SettingsScreen = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authentication': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
                     user_privacy: newPrivacy

@@ -4,7 +4,6 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
 import { supabase } from "../lib/supabase";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const ExploreScreen = () => {
     const layout = useWindowDimensions();

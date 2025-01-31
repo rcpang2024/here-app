@@ -3,13 +3,10 @@ import { useNavigation } from "@react-navigation/native";
 import { useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
-import { sendPasswordResetEmail } from "firebase/auth";
 
 const SecurityScreen = () => {
     const navigation = useNavigation();
-    const auth = FIREBASE_AUTH;    
     const { user } = useContext(UserContext);
 
     // TEST THIS LATER

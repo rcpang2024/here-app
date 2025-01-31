@@ -4,7 +4,6 @@ import EventItem from "../components/event-item";
 import { UserContext } from "../user-context";
 import * as Location from 'expo-location';
 import { useNavigation } from "@react-navigation/native";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { supabase } from "../lib/supabase";
 

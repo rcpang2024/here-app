@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useContext, useState } from "react";
@@ -11,6 +11,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 const EventDetailScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    const { user } = useContext(UserContext);
 
     const event_id = route.params.eventID;
     const creation_user = route.params.creationUser;
@@ -24,8 +25,8 @@ const EventDetailScreen = () => {
     let formattedTime = 'Time not available';
 
     const [modalVisible, setModalVisible] = useState(false);
-    const [showComments, setShowComments] = useState(false);
-    const comments = ["Comment 1", "Comment 2", "Comment 3"];
+    const [comments, setComments] = useState(false);
+    const [msg, setMSG] = useState('');
 
     if (date) {
         const parsedDate = new Date(date);
@@ -34,26 +35,26 @@ const EventDetailScreen = () => {
             formattedTime = format(parsedDate, 'h:mm a');
         }
     }
-    const { user } = useContext(UserContext);
     
     useEffect(() => {
-    // Set the left header component
-    navigation.setOptions({
-        headerLeft: () => (
-        <Ionicons
-            name="arrow-back"
-            size={28}
-            color="black"
-            onPress={() => navigation.goBack()}
-            style={{ marginLeft: 16 }}
-        />
-        ),
-    });
+        // Set the left header component
+        navigation.setOptions({
+            headerLeft: () => (
+            <Ionicons
+                name="arrow-back"
+                size={28}
+                color="black"
+                onPress={() => navigation.goBack()}
+                style={{ marginLeft: 16 }}
+            />
+            ),
+        });
+        retrieveComments();
     }, [route.params]);
 
     const fetchUserProfile = async (username) => {
-        const { theData } = await supabase.auth.getSession();
-        const idToken = theData?.session.access_token;
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
@@ -66,6 +67,58 @@ const EventDetailScreen = () => {
             return userData;
         } catch (err) {
             console.log("Error fetching user profile: ", err);
+        }
+    };
+
+    const retrieveComments = async () => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/comments/${event_id}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+            if (response.ok) {
+                const commentData = await response.json();
+                setComments(commentData);
+            }
+        } catch (e) {
+            alert("Error retrieving comments, try again later: ", e);
+        }
+    };
+
+    const postComment = async () => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/addcomment/${event_id}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    author: user.id,
+                    event: event_id,
+                    message: msg,
+                    parent: null
+                })
+            });
+            if (response.ok) {
+                const commentData = await response.json();
+                console.log("commentData: ", commentData);
+                setMSG('');
+                setComments(commentData);
+            } else {
+                console.error("Error posting comment:", response.status);
+                const errorData = await response.json();
+                console.error("Backend response:", errorData);
+            }
+        } catch (e) {
+            alert("Error retrieving comments, try again later: ", e);
         }
     };
 
@@ -84,9 +137,20 @@ const EventDetailScreen = () => {
         setModalVisible(!modalVisible);
     };
 
-    const toggleComments = () => {
-        setShowComments(!showComments); 
-    };
+    const renderCommentItem = ({ item }) => (
+        <View>
+            <View style={{flexDirection: 'row'}}>
+                <Image 
+                    source={item.author_profilepic ? {uri: creation_user.profile_pic} : FallbackPhoto}
+                    style={styles.commentImage}
+                />
+                <View style={{paddingLeft: 5}}>
+                    <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
+                    <Text>{item.message}</Text>
+                </View>
+            </View>
+        </View>
+    );
 
     return (
         <View style={styles.title}>
@@ -149,15 +213,23 @@ const EventDetailScreen = () => {
                             </View>
                             <FlatList 
                                 data={comments}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={({item}) => {
-                                    return (
-                                        <View>
-                                            <Text style={{paddingTop: 15, paddingLeft: 5}}>{item}</Text>
-                                        </View>
-                                    )
-                                }}
+                                keyExtractor={(item) => item.id}
+                                renderItem={renderCommentItem}
+                                contentContainerStyle={{ paddingTop: 5, paddingBottom: 5 }}
                             />
+                            <View style={styles.commentInputContainer}>
+                                <TextInput 
+                                    placeholder="Post a comment" 
+                                    autoCapitalize="none"
+                                    returnKeyType="next"
+                                    onChangeText={(val) => setMSG(val)}
+                                    value={msg}
+                                    style={styles.commentInput}
+                                />
+                                <TouchableOpacity style={styles.postButton} onPress={postComment}>
+                                    <Text style={{justifyContent: 'center', alignSelf: 'center', color: 'white'}}>POST</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </Modal>
@@ -170,16 +242,13 @@ const styles = StyleSheet.create({
     title: {
         paddingTop: verticalScale(5),
         paddingRight: scale(10),
-        // paddingBottom: 8,
         paddingLeft: scale(10),
         fontSize: 26, 
         padding: 2, 
         fontWeight: 'bold'
     },
     modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(130, 129, 129, 0.1)", // Semi-transparent background
-        justifyContent: "flex-end", // Align content at the bottom
+        flex: 1, backgroundColor: "rgba(130, 129, 129, 0.1)", justifyContent: "flex-end"
     },
     modalContent: {
         backgroundColor: "white",
@@ -232,24 +301,38 @@ const styles = StyleSheet.create({
         paddingTop: verticalScale(10), paddingBottom: verticalScale(10)
     },
     image: {
-        marginTop: verticalScale(5),
-        width: scale(50),
-        height: verticalScale(50),
-        borderRadius: 50 / 2,
-        overflow: "hidden",
-        borderWidth: 2,
+        marginTop: verticalScale(5), width: scale(50), height: verticalScale(50), borderRadius: 50 / 2, overflow: "hidden", borderWidth: 2
+    },
+    commentImage: {
+        marginTop: verticalScale(5), width: scale(35), height: verticalScale(35), borderRadius: 35 / 2, overflow: "hidden", borderWidth: 1
     },
     closeButton: {
-        marginTop: 15,
-        padding: 10,
-        backgroundColor: "#1c2120",
-        borderRadius: 5,
-        alignItems: "center",
+        marginTop: 15, padding: 10, backgroundColor: "#1c2120", borderRadius: 5, alignItems: "center"
     },
     closeButtonText: {
-        color: "white",
-        fontWeight: "bold",
+        color: "white", fontWeight: "bold"
     },
+    commentInputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        borderTopWidth: 1,
+        borderTopColor: "#ccc",
+        backgroundColor: "#fff",
+    },
+    commentInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        fontSize: 16,
+        backgroundColor: "#f5f5f5",
+    },
+    postButton: {
+        backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10
+    }
 })
 
 export default EventDetailScreen;

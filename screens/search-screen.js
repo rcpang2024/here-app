@@ -8,7 +8,6 @@ import EventItem from "../components/event-item";
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const SearchScreen = () => {
     const navigation = useNavigation();

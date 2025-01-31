@@ -2,17 +2,14 @@ import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, TextInput,
     TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useEffect } from "react";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
-// import { sendPasswordResetEmail } from "firebase/auth";
 
 const ForgotScreen = () => {
     const navigation = useNavigation();
 
     const [email, setEmail] = useState('');
     const emailRef = useRef();
-    // const auth = FIREBASE_AUTH;
 
     // const changePW = () => {
     //     if (email === '') {

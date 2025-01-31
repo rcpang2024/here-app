@@ -4,7 +4,6 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef, useContext, useCallback } from "react";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
 
 function debounce(func, wait) {

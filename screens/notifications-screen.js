@@ -5,14 +5,12 @@ import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NotificationsScreen = () => {
     const navigation = useNavigation();
     const { user } = useContext(UserContext);
-    const auth = FIREBASE_AUTH;
     const [fetched, setFetched] = useState(false);
     const [refresh, setRefresh] = useState(false);
     // const fetchedRef = useRef(false);

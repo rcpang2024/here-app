@@ -10,7 +10,6 @@ import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../lib/supabase";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const OtherProfileScreen = ({ route }) => {
     const navigation = useNavigation();

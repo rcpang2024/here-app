@@ -5,7 +5,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const FollowingScreen = () => {
     const navigation = useNavigation();

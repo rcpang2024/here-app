@@ -5,7 +5,6 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
-import { FIREBASE_AUTH } from "../FirebaseConfig";
 
 const AttendeesScreen = () => {
     const navigation = useNavigation();

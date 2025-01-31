@@ -4,7 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useContext } from "react";
 import { UserContext } from "../user-context";
 import HereLogo from '../assets/images/HereLogo.png';
-// import { FIREBASE_AUTH } from "../FirebaseConfig";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -29,7 +28,6 @@ const LogInScreen = () => {
     };
 
     const fetchUser = async () => {
-        // const idToken = await auth.currentUser.getIdToken(true); // Get Firebase ID token
         const { data } = await supabase.auth.getSession();
         const idToken = data?.session?.access_token;
         // console.log("idToken: ", idToken);
