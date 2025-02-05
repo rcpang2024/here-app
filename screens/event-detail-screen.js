@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput, Alert } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState, useRef } from "react";
 import format from "date-fns/format";
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
@@ -26,7 +26,11 @@ const EventDetailScreen = () => {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [comments, setComments] = useState(false);
+    const [showReplies, setShowReplies] = useState({});
     const [msg, setMSG] = useState('');
+    const [replyingTo, setReplyingTo] = useState(null);
+
+    const inputRef = useRef(null);
 
     if (date) {
         const parsedDate = new Date(date);
@@ -90,7 +94,7 @@ const EventDetailScreen = () => {
         }
     };
 
-    const postComment = async () => {
+    const postComment = async (parentID = null, mentionedUser = null) => {
         const { data } = await supabase.auth.getSession();
         const idToken = data?.session?.access_token;
         try {
@@ -104,14 +108,15 @@ const EventDetailScreen = () => {
                     author: user.id,
                     event: event_id,
                     message: msg,
-                    parent: null
+                    parent: parentID,
+                    mentioned_user: mentionedUser
                 })
             });
             if (response.ok) {
                 const commentData = await response.json();
                 console.log("commentData: ", commentData);
+                setComments(prevComments => [...prevComments, commentData]);
                 setMSG('');
-                setComments(commentData);
             } else {
                 console.error("Error posting comment:", response.status);
                 const errorData = await response.json();
@@ -119,6 +124,26 @@ const EventDetailScreen = () => {
             }
         } catch (e) {
             alert("Error retrieving comments, try again later: ", e);
+        }
+    };
+
+    const deleteComment = async (commentID) => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/deletecomment/${commentID}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+            if (response.ok) {
+                console.log("Comment successfully deleted.")
+                setComments(comments.filter(comment => comment.id !== commentID));
+            }
+        } catch (e) {
+            alert("Error deleting, try again later: ", e);
         }
     };
 
@@ -137,6 +162,18 @@ const EventDetailScreen = () => {
         setModalVisible(!modalVisible);
     };
 
+    const toggleReplies = (commentID) => {
+        setShowReplies((prev) => ({...prev, [commentID] : !prev[commentID]}))
+    };
+
+    const confirmDeleteComment = (commentID) => {
+        Alert.alert(
+            "Delete",
+            "Are you sure you want to delete this comment?",
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: () => deleteComment(commentID)}]
+        );
+    };
+
     const renderCommentItem = ({ item }) => (
         <View>
             <View style={{flexDirection: 'row'}}>
@@ -149,6 +186,43 @@ const EventDetailScreen = () => {
                     <Text>{item.message}</Text>
                 </View>
             </View>
+            <View style={{flexDirection: 'row', justifyContent: 'space-evenly', padding: 5}}>
+                <TouchableOpacity onPress={() => {
+                    setReplyingTo(item.id);
+                    inputRef.current.focus();
+                }}>
+                    <Text style={{fontSize: 12}}>Reply</Text>
+                </TouchableOpacity>
+                {item.author_username == user.username && (
+                    <View>
+                        <TouchableOpacity onPress={() => confirmDeleteComment(item.id)}>
+                            <Text style={{fontSize: 12, color: 'red'}}>Delete</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
+            {item.replies.length > 0 && (
+                <View>
+                    <TouchableOpacity onPress={() => toggleReplies(item.id)} style={{alignSelf: 'center'}}>
+                        <Text style={{color: 'gray'}}>{showReplies[item.id] ? "Hide Replies" : "View Replies"}</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+            {showReplies[item.id] && (
+                <FlatList 
+                    data={item.replies}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({item}) => (
+                        <View style={{paddingLeft: 50, borderLeftWidth: 2, borderLeftColor: '#ccc', marginLeft: 10}}>
+                            <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
+                            <View style={{flexDirection: 'row'}}>
+                                <Text style={{color: 'blue', paddingRight: 5}}>@{item.mentioned_username}</Text>
+                                <Text>{item.message}</Text>
+                            </View>
+                        </View>
+                    )}
+                />
+            )}
         </View>
     );
 
@@ -219,14 +293,21 @@ const EventDetailScreen = () => {
                             />
                             <View style={styles.commentInputContainer}>
                                 <TextInput 
-                                    placeholder="Post a comment" 
+                                    ref={inputRef}
+                                    placeholder={replyingTo ? "Reply to comment" : "Post a comment"}
                                     autoCapitalize="none"
                                     returnKeyType="next"
                                     onChangeText={(val) => setMSG(val)}
                                     value={msg}
                                     style={styles.commentInput}
                                 />
-                                <TouchableOpacity style={styles.postButton} onPress={postComment}>
+                                <TouchableOpacity onPress={() => {
+                                    if (msg.trim() !== "") {  
+                                        postComment(replyingTo, null);
+                                        setReplyingTo(null); 
+                                        setMSG("");
+                                    }
+                                }}>
                                     <Text style={{justifyContent: 'center', alignSelf: 'center', color: 'white'}}>POST</Text>
                                 </TouchableOpacity>
                             </View>
