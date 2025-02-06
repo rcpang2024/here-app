@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput, 
+    Alert, ScrollView } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useContext, useState, useRef } from "react";
@@ -108,14 +109,23 @@ const EventDetailScreen = () => {
                     author: user.id,
                     event: event_id,
                     message: msg,
-                    parent: parentID,
-                    mentioned_user: mentionedUser
+                    parent: parentID ? parentID : null,
+                    mentioned_user: mentionedUser || null
                 })
             });
             if (response.ok) {
                 const commentData = await response.json();
                 console.log("commentData: ", commentData);
-                setComments(prevComments => [...prevComments, commentData]);
+                // setComments(prevComments => [...prevComments, commentData]);
+                setComments(prevComments => {
+                    if (parentID) {
+                        return prevComments.map(comment => 
+                            comment.id === parentID
+                                ? {...comment, replies: [...comment.replies, commentData]}
+                                : comment
+                        );
+                    }
+                })
                 setMSG('');
             } else {
                 console.error("Error posting comment:", response.status);
@@ -174,8 +184,9 @@ const EventDetailScreen = () => {
         );
     };
 
+    // set setReplyingTo(id) within Flatlist to the item.id that is first passed to renderCommentItem
     const renderCommentItem = ({ item }) => (
-        <View>
+        <View style={[!item.parent ? styles.replyContainer : {paddingVertical: 10, paddingLeft: 20}]}>
             <View style={{flexDirection: 'row'}}>
                 <Image 
                     source={item.author_profilepic ? {uri: creation_user.profile_pic} : FallbackPhoto}
@@ -183,14 +194,16 @@ const EventDetailScreen = () => {
                 />
                 <View style={{paddingLeft: 5}}>
                     <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
-                    <Text>{item.message}</Text>
+                    <View style={{flexDirection: 'row'}}>
+                        <TouchableOpacity onPress={() => handleUserPress(item.mentioned_username)}>
+                            <Text style={{color: 'blue', paddingRight: 5}}>@{item.mentioned_username ? item.mentioned_username : creation_user}</Text>
+                        </TouchableOpacity>
+                        <Text>{item.message}</Text>
+                    </View>
                 </View>
             </View>
             <View style={{flexDirection: 'row', justifyContent: 'space-evenly', padding: 5}}>
-                <TouchableOpacity onPress={() => {
-                    setReplyingTo(item.id);
-                    inputRef.current.focus();
-                }}>
+                <TouchableOpacity onPress={() => {setReplyingTo(item.id); setMSG(`@${item.author_username} `); inputRef.current.focus();}}>
                     <Text style={{fontSize: 12}}>Reply</Text>
                 </TouchableOpacity>
                 {item.author_username == user.username && (
@@ -201,7 +214,7 @@ const EventDetailScreen = () => {
                     </View>
                 )}
             </View>
-            {item.replies.length > 0 && (
+            {(item.replies.length > 0) && (
                 <View>
                     <TouchableOpacity onPress={() => toggleReplies(item.id)} style={{alignSelf: 'center'}}>
                         <Text style={{color: 'gray'}}>{showReplies[item.id] ? "Hide Replies" : "View Replies"}</Text>
@@ -212,12 +225,32 @@ const EventDetailScreen = () => {
                 <FlatList 
                     data={item.replies}
                     keyExtractor={(item) => item.id}
-                    renderItem={({item}) => (
-                        <View style={{paddingLeft: 50, borderLeftWidth: 2, borderLeftColor: '#ccc', marginLeft: 10}}>
-                            <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
-                            <View style={{flexDirection: 'row'}}>
-                                <Text style={{color: 'blue', paddingRight: 5}}>@{item.mentioned_username}</Text>
-                                <Text>{item.message}</Text>
+                    renderItem={({ item }) => (
+                        <View style={[styles.replyContainer, { paddingLeft: item.parent ? 30 : 0 }]}>
+                            <View style={{flexDirection: 'row', paddingTop: 5}}>
+                            <Image 
+                                source={item.author_profilepic ? {uri: creation_user.profile_pic} : FallbackPhoto}
+                                style={styles.commentImage}
+                            />
+                            <View style={{paddingLeft: 5}}>
+                                <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
+                                <View style={{flexDirection: 'row'}}>
+                                    <TouchableOpacity onPress={() => handleUserPress(item.mentioned_username)}>
+                                        <Text style={{color: 'blue', paddingRight: 5}}>@{item.mentioned_username ? item.mentioned_username : creation_user}</Text>
+                                    </TouchableOpacity>
+                                    <Text>{item.message}</Text>
+                                </View>
+                            </View>
+                        </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', paddingTop: 5 }}>
+                                <TouchableOpacity onPress={() => {setReplyingTo(item.id); setMSG(`@${item.author_username} `); inputRef.current.focus();}}>
+                                    <Text style={{ fontSize: 12 }}>Reply</Text>
+                                </TouchableOpacity>
+                                {item.author_username === user.username && (
+                                    <TouchableOpacity onPress={() => confirmDeleteComment(item.id)}>
+                                        <Text style={{ fontSize: 12, color: 'red' }}>Delete</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </View>
                     )}
@@ -303,11 +336,11 @@ const EventDetailScreen = () => {
                                 />
                                 <TouchableOpacity onPress={() => {
                                     if (msg.trim() !== "") {  
-                                        postComment(replyingTo, null);
+                                        postComment(replyingTo, replyingTo ? comments.find(c => c.id === replyingTo)?.author : null);
                                         setReplyingTo(null); 
                                         setMSG("");
                                     }
-                                }}>
+                                }} style={styles.postButton}>
                                     <Text style={{justifyContent: 'center', alignSelf: 'center', color: 'white'}}>POST</Text>
                                 </TouchableOpacity>
                             </View>
@@ -412,7 +445,17 @@ const styles = StyleSheet.create({
         backgroundColor: "#f5f5f5",
     },
     postButton: {
-        backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10
+        backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10,
+    commentContainer: {
+        paddingVertical: 10, 
+    },
+    replyContainer: {
+        paddingLeft: 20,  
+        borderLeftWidth: 2,
+        borderLeftColor: '#ccc',
+        marginLeft: 10,
+        paddingVertical: 10,
+    },
     }
 })
 
