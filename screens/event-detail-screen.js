@@ -186,19 +186,22 @@ const EventDetailScreen = () => {
 
     // set setReplyingTo(id) within Flatlist to the item.id that is first passed to renderCommentItem
     const renderCommentItem = ({ item }) => (
-        <View style={[!item.parent ? styles.replyContainer : {paddingVertical: 10, paddingLeft: 20}]}>
+        <View style={{ paddingLeft: item.parent && !item.parent.parent ? 30 : 0 }}>
             <View style={{flexDirection: 'row'}}>
                 <Image 
                     source={item.author_profilepic ? {uri: creation_user.profile_pic} : FallbackPhoto}
                     style={styles.commentImage}
                 />
                 <View style={{paddingLeft: 5}}>
-                    <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
+                    <View style={{flexDirection: 'row'}}>
+                        <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
+                        <Text style={{fontSize: 9, paddingLeft: 5, paddingTop: 4}}>{item.formatted_timestamp}</Text>
+                        </View>
                     <View style={{flexDirection: 'row'}}>
                         <TouchableOpacity onPress={() => handleUserPress(item.mentioned_username)}>
                             <Text style={{color: 'blue', paddingRight: 5}}>@{item.mentioned_username ? item.mentioned_username : creation_user}</Text>
                         </TouchableOpacity>
-                        <Text>{item.message}</Text>
+                        <Text style={{color: item.parent ? '#bd7979' : 'black'}}>{item.message}</Text>
                     </View>
                 </View>
             </View>
@@ -225,35 +228,7 @@ const EventDetailScreen = () => {
                 <FlatList 
                     data={item.replies}
                     keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <View style={[styles.replyContainer, { paddingLeft: item.parent ? 30 : 0 }]}>
-                            <View style={{flexDirection: 'row', paddingTop: 5}}>
-                            <Image 
-                                source={item.author_profilepic ? {uri: creation_user.profile_pic} : FallbackPhoto}
-                                style={styles.commentImage}
-                            />
-                            <View style={{paddingLeft: 5}}>
-                                <Text style={{fontWeight: 'bold'}}>{item.author_username}</Text>
-                                <View style={{flexDirection: 'row'}}>
-                                    <TouchableOpacity onPress={() => handleUserPress(item.mentioned_username)}>
-                                        <Text style={{color: 'blue', paddingRight: 5}}>@{item.mentioned_username ? item.mentioned_username : creation_user}</Text>
-                                    </TouchableOpacity>
-                                    <Text>{item.message}</Text>
-                                </View>
-                            </View>
-                        </View>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', paddingTop: 5 }}>
-                                <TouchableOpacity onPress={() => {setReplyingTo(item.id); setMSG(`@${item.author_username} `); inputRef.current.focus();}}>
-                                    <Text style={{ fontSize: 12 }}>Reply</Text>
-                                </TouchableOpacity>
-                                {item.author_username === user.username && (
-                                    <TouchableOpacity onPress={() => confirmDeleteComment(item.id)}>
-                                        <Text style={{ fontSize: 12, color: 'red' }}>Delete</Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                        </View>
-                    )}
+                    renderItem={({ item }) => renderCommentItem({item})}
                 />
             )}
         </View>
