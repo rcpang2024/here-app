@@ -109,7 +109,7 @@ const ProfileScreen = ({ route }) => {
                         name="create-outline" 
                         size={26} 
                         color="black" 
-                        onPress={() => console.log("DMs")}
+                        onPress={() => navigation.navigate("Message")}
                         style={{marginLeft: 14}}
                     />
                 )

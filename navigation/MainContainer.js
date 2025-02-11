@@ -24,6 +24,7 @@ import ContactUsScreen from '../screens/contact-us-screen';
 import { createStackNavigator } from '@react-navigation/stack';
 import BlockedUsersScreen from '../screens/blocked-users-screen';
 import SecurityScreen from '../screens/security-screen';
+import PrivateMessageScreen from '../screens/private-message-screen';
 
 const homeName = 'Home';
 const profileName = 'Profile';
@@ -57,6 +58,7 @@ export function MainContainer() {
         <Stack.Screen name="Blocked Users" component={BlockedUsersScreen}/>
         <Stack.Screen name="Contact Us" component={ContactUsScreen}/>
         <Stack.Screen name="Security" component={SecurityScreen}/>
+        <Stack.Screen name="Message" component={PrivateMessageScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

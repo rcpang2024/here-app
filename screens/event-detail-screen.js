@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput, 
-    Alert, ScrollView } from "react-native";
+    Alert } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useContext, useState, useRef } from "react";
@@ -185,8 +185,8 @@ const EventDetailScreen = () => {
     };
 
     // set setReplyingTo(id) within Flatlist to the item.id that is first passed to renderCommentItem
-    const renderCommentItem = ({ item }) => (
-        <View style={{ paddingLeft: item.parent && !item.parent.parent ? 30 : 0 }}>
+    const renderCommentItem = ({ item, level = 0 }) => (
+        <View style={level == 1 ? {paddingLeft: 20} : {}}>
             <View style={{flexDirection: 'row'}}>
                 <Image 
                     source={item.author_profilepic ? {uri: creation_user.profile_pic} : FallbackPhoto}
@@ -206,7 +206,14 @@ const EventDetailScreen = () => {
                 </View>
             </View>
             <View style={{flexDirection: 'row', justifyContent: 'space-evenly', padding: 5}}>
-                <TouchableOpacity onPress={() => {setReplyingTo(item.id); setMSG(`@${item.author_username} `); inputRef.current.focus();}}>
+                <TouchableOpacity onPress={() => {
+                    setReplyingTo(item.id); 
+                    const mention = `@${item.author_username} `;
+                    const currentMsg = msg.startsWith("@") ? msg.split(" ").slice(1).join(" ") : msg; // Remove existing mention if present
+                    setMSG(`${currentMsg}`); // Set new mention without duplicating
+                    inputRef.current.focus();
+                }
+                }>
                     <Text style={{fontSize: 12}}>Reply</Text>
                 </TouchableOpacity>
                 {item.author_username == user.username && (
@@ -217,18 +224,18 @@ const EventDetailScreen = () => {
                     </View>
                 )}
             </View>
-            {(item.replies.length > 0) && (
+            {(item.replies.length > 0 && !item.parent) && (
                 <View>
                     <TouchableOpacity onPress={() => toggleReplies(item.id)} style={{alignSelf: 'center'}}>
                         <Text style={{color: 'gray'}}>{showReplies[item.id] ? "Hide Replies" : "View Replies"}</Text>
                     </TouchableOpacity>
                 </View>
             )}
-            {showReplies[item.id] && (
+            {(showReplies[item.id] || item.parent) && (
                 <FlatList 
                     data={item.replies}
                     keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => renderCommentItem({item})}
+                    renderItem={({ item }) => renderCommentItem({ item: item, level: level + 1 })}
                 />
             )}
         </View>
@@ -421,6 +428,7 @@ const styles = StyleSheet.create({
     },
     postButton: {
         backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10,
+    },
     commentContainer: {
         paddingVertical: 10, 
     },
@@ -431,7 +439,6 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         paddingVertical: 10,
     },
-    }
 })
 
 export default EventDetailScreen;
