@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Modal } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, 
+    Modal, TextInput } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
@@ -12,6 +13,8 @@ const PrivateMessageScreen = () => {
     const { user } = useContext(UserContext);
 
     const [selectedItem, setSelectedItem] = useState(null);
+    const [msg, setMSG] = useState('');
+    const inputRef = useRef(null);
 
     const placeholderData = [
         {id: 1, name: 'bob'},
@@ -51,6 +54,7 @@ const PrivateMessageScreen = () => {
                                 <Text style={{fontWeight: 'bold', fontSize: 14, marginLeft: 10}}>{item.name}</Text>
                             </View>
                         </TouchableOpacity>
+                        <View style={{height: 1, backgroundColor: 'gray', marginTop: 5, opacity: 0.6}} />
                     </View>
                 )}
             />
@@ -68,6 +72,20 @@ const PrivateMessageScreen = () => {
                                     onPress={() => toggleModal(null)}
                                     style={{position: 'absolute', right: 10, paddingTop: 2}}
                                 />
+                            </View>
+                            <View style={styles.commentInputContainer}>
+                                <TextInput 
+                                    ref={inputRef}
+                                    placeholder="Type your message"
+                                    autoCapitalize="none"
+                                    returnKeyType="next"
+                                    onChangeText={(val) => setMSG(val)}
+                                    value={msg}
+                                    style={styles.commentInput}
+                                />
+                                <TouchableOpacity onPress={() => console.log("Message")} style={styles.postButton}>
+                                    <Text style={{justifyContent: 'center', alignSelf: 'center', color: 'white'}}>POST</Text>
+                                </TouchableOpacity>
                             </View> 
                         </View>
                     </View>
@@ -101,12 +119,35 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 15,
         borderTopRightRadius: 15,
         padding: 20,
-        height: "82%", 
+        height: "90%", 
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+    },
+    commentInputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        borderTopWidth: 1,
+        borderTopColor: "#ccc",
+        backgroundColor: "#fff",
+        flex: 1,
+        position: 'absolute', 
+        left: 0, 
+        right: 0, 
+        bottom: 15
+    },
+    commentInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        fontSize: 16,
+        backgroundColor: "#f5f5f5",
     },
     postButton: {
         backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10,

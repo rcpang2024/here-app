@@ -1,5 +1,5 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, TouchableWithoutFeedback, 
-    Keyboard, KeyboardAvoidingView, Alert } from "react-native";
+    Keyboard, KeyboardAvoidingView, Alert, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useContext } from "react";
 import { UserContext } from "../user-context";
@@ -19,6 +19,8 @@ const LogInScreen = () => {
 
     // Toggles whether password is shown or not on the screen
     const [showPW, setShowPW] = useState(false);
+
+    const [loading, setLoading] = useState(false);
 
     const emailRef = useRef();
     const pwRef = useRef();
@@ -55,12 +57,15 @@ const LogInScreen = () => {
     // Change to send token to the backend via HTTPS securely to verify user identity
     // Supabase login
     async function signInWithEmail() {
+        setLoading(true);
         const { data, error } = await supabase.auth.signInWithPassword({email: email, password: pw});
         if (!data) {
             alert("Invalid login credentials, please try again");
+            setLoading(false);
         } 
         if (error) {
             Alert.alert(error.message);
+            setLoading(false);
         } else {
             const userData = await fetchUser();
             if (userData) {
@@ -72,6 +77,7 @@ const LogInScreen = () => {
                 setPW('');
             }
         }
+        setLoading(false);
     };
 
     return (
@@ -111,7 +117,11 @@ const LogInScreen = () => {
                                 />
                             </View>
                             <TouchableOpacity style={styles.signIn} onPress={signInWithEmail}>
-                                <Text style={styles.signInText}>Sign In</Text>
+                                {loading ? (
+                                    <ActivityIndicator size="small" color="white"/>
+                                ) : (
+                                    <Text style={styles.signInText}>Sign In</Text>
+                                )}
                             </TouchableOpacity>
                         </View>
                     <View>

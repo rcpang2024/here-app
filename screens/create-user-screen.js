@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, 
-    TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from "react-native";
+    TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useEffect, useCallback } from "react";
 import RadioForm from "react-native-simple-radio-button";
@@ -146,15 +146,14 @@ const CreateUserScreen = () => {
                 const userData = await createUser();
                 if (userData) {
                     dismissKeyboard();
-                    alert("Account created! Verify your email before logging in.");
-                    navigation.navigate("Login");
+                    Alert.alert("Account created!", 
+                        "Verify your email before logging in.", 
+                        [{text: "OK", onPress: () => navigation.navigate("Login")}]
+                    );
                 }
             } catch (e) {
                 alert("Error creating user, try again later: ", e);
             }
-            dismissKeyboard();
-            alert("Account created! Verify your email before logging in.");
-            navigation.navigate("Login");
         }
     };
 
