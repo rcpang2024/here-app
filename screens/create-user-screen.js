@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, 
-    TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Alert } from "react-native";
+    TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Alert, 
+    ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState, useEffect, useCallback } from "react";
 import RadioForm from "react-native-simple-radio-button";
@@ -41,6 +42,8 @@ const CreateUserScreen = () => {
 
     const [userType, setUserType] = useState('individual');
     const [userPrivacy, setUserPrivacy] = useState('public');
+
+    const [loading, setLoading] = useState(false);
 
     const usernameRef = useRef();
     const pwRef = useRef();
@@ -125,21 +128,25 @@ const CreateUserScreen = () => {
     async function signUpWithEmail() {
         if (!username || !pw || !name || !email) {
             alert('Please fill out all fields before proceeding.');
+            setLoading(false);
             return;
         }
         if (pw !== pwAgain) {
             alert('Passwords do not match.');
+            setLoading(false);
             return;
         }
+        setLoading(true);
         const {data: { user, session }, error} = await supabase.auth.signUp({email: email, password: pw});
-
         if (error) {
             alert(error.message);
+            setLoading(false);
             return;
         }
         
         if (!user) {
             alert('Sign-up failed. Please try again later.');
+            setLoading(false);
             return;
         } else {
             try {
@@ -155,6 +162,7 @@ const CreateUserScreen = () => {
                 alert("Error creating user, try again later: ", e);
             }
         }
+        setLoading(false);
     };
 
     return (
@@ -235,7 +243,11 @@ const CreateUserScreen = () => {
                         onPress={(val) => setUserType(val)}
                     /> */}
                     <TouchableOpacity style={styles.createButton} onPress={signUpWithEmail}>
-                        <Text style={styles.createText}>Create Account</Text>
+                        {loading ? (
+                            <ActivityIndicator size="small" color="white"/>
+                        ) : (
+                            <Text style={styles.createText}>Create Account</Text>
+                        )}
                     </TouchableOpacity>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -275,9 +287,6 @@ const styles = StyleSheet.create({
     },
     createText: {
         fontWeight: 'bold', color: 'white'
-    },
-    bottomPadding: {
-        marginBottom: 25
     }
 })
 

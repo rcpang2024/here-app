@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, 
-    Modal, TextInput } from "react-native";
+    Modal, TextInput, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, useCallback, useMemo } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
+import { SearchBar } from "react-native-elements";
 import { supabase } from "../lib/supabase";
 
 const PrivateMessageScreen = () => {
@@ -12,9 +13,20 @@ const PrivateMessageScreen = () => {
     const route = useRoute();
     const { user } = useContext(UserContext);
 
+    // Modal for the conversations
     const [selectedItem, setSelectedItem] = useState(null);
     const [msg, setMSG] = useState('');
+
+    // Modal for the search modal
+    const [searchModalVisible, setSearchModalVisible] = useState(null);
+
+    // For users - taken from search-screen.js
+    const [searchUser, setUserSearch] = useState('');
+    const [results, setResults] = useState([]);
+    const [userSearchCache, setUserSearchCache] = useState({});
+
     const inputRef = useRef(null);
+    const searchBarRef = useRef(null);
 
     const placeholderData = [
         {id: 1, name: 'bob'},
@@ -34,12 +46,145 @@ const PrivateMessageScreen = () => {
                 style={{ marginLeft: 16 }}
             />
             ),
+            headerRight: () => (
+                <Ionicons 
+                    name="person-add" 
+                    size={28} 
+                    onPress={() => setSearchModalVisible(true)}
+                    style={{position: 'absolute', right: 15, paddingTop: 2}}
+                />
+            )
         });
     }, [route.params]);
+
+    const searchDatabase = async (query) => {
+        if (userSearchCache[query]) {
+            setResults(userSearchCache[query]);
+            return;
+        }
+        try {
+            // Placeholder 
+            const response = await fetch(`http://192.168.1.6:8000/api/searchusers?query=${query}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const data = await response.json();
+            setUserSearchCache((prevCache) => ({ ...prevCache, [query]: data }));
+            setResults(data);
+        } catch (error) {
+            console.error("Error searching the database: ", error);
+        }
+    };
+
+    const fetchUserProfile = async (username) => {
+        try {
+            const { data } = await supabase.auth.getSession();
+            const idToken = data?.session?.access_token;
+            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+            const userData = response.json();
+            return userData;
+        } catch (err) {
+            console.log("Error fetching user profile: ", err);
+        }
+    };
+
+    const handleUserPress = async (username) => {
+        const profileUser = await fetchUserProfile(username);
+        if (profileUser && profileUser.username !== user.username) {
+            navigation.navigate('Other Profile', { profileUser });
+        } else if (username === user.username) {
+            navigation.navigate('Profile');
+        } else {
+            console.error('Failed to fetch profile user');
+        }
+    };
+
+    const handleUserSearchChange = useCallback((text) => {
+        setUserSearch(text);
+        if (text.length > 0) {
+            searchDatabase(text);
+        } else {
+            setResults([]);
+        }
+    }, [userSearchCache]);
 
     const toggleModal = (item) => {
         setSelectedItem(item ? item.id : null); // Set to item's ID when opening, null when closing
     };
+
+    const handleCloseSearchModal = () => {
+        setSearchModalVisible(false);
+        setUserSearch('');
+        Keyboard.dismiss();
+        searchBarRef.current?.blur();
+    };
+
+    const renderUserItem = ({ item }) => {
+        return (
+            <View style={{paddingBottom: 5}}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity 
+                        onPress={() => handleUserPress(item.username)} 
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                        <Image 
+                            source={item.profile_pic ? { uri: item.profile_pic } : FallbackPhoto} 
+                            style={styles.image} 
+                        />
+                        <View>
+                            <Text style={styles.resultText}>{item.username}</Text>
+                            <Text style={{fontSize: 12, marginLeft: 10}}>{item.name}</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    };
+
+    const SearchUserRoute = useMemo(() => () => (
+        <View>
+            {searchUser !== '' && results.length === 0 ? (
+            <Text style={{fontSize: 20, padding: 5}}>No results found...</Text>
+            ) : (
+                <FlatList
+                    data={results}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderUserItem}
+                    contentContainerStyle={{ paddingTop: 5, paddingBottom: 15 }}
+                />
+            )}
+        </View>
+    ), [results]);
+
+    // const socket = new WebSocket(`ws://yourserver.com/ws/chat/${conversation_id}/`);
+
+    // socket.onopen = function() {
+    //     console.log("Websocket connection established");
+    // };
+
+    // socket.onmessage = function (event) {
+    //     const data = JSON.parse(event.data);
+    //     console.log(`Message from ${data.sender}: ${data.message}`);
+    // };
+
+    // socket.onclose = function() {
+    //     console.log("Websocket connection closed");
+    // };
+
+    // function sendMessage(message, sender_id) {
+    //     socket.send(JSON.stringify({
+    //         message: message,
+    //         sender_id: sender_id
+    //     }));
+    // }
 
     return (
         <View>
@@ -58,6 +203,35 @@ const PrivateMessageScreen = () => {
                     </View>
                 )}
             />
+            {searchModalVisible && (
+                <Modal animationType="slide" visible={searchModalVisible} onRequestClose={handleCloseSearchModal} transparent={true}>
+                    <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss(); searchBarRef.current?.blur();}}>
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.modalContent}>
+                                <SearchBar
+                                    placeholder="Search for friends"
+                                    placeholderTextColor="gray"
+                                    onChangeText={handleUserSearchChange}
+                                    value={searchUser}
+                                    inputStyle={styles.searchBarInput}
+                                    style={styles.searchBarUser}
+                                    clearIcon={{size: 28, borderRadius: 2, padding: 3}}
+                                    clearButtonMode="while-editing"
+                                    autoCapitalize="none"
+                                />
+                                <Ionicons 
+                                    name="close-outline" 
+                                    size={22} 
+                                    color="#bd7979"
+                                    onPress={handleCloseSearchModal}
+                                    style={{position: 'absolute', right: 5}}
+                                />
+                                <SearchUserRoute/>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            )}
             {selectedItem && (
                 <Modal animationType="slide" visible={!!selectedItem} onRequestClose={() => toggleModal(null)} transparent={true}> 
                     <View style={styles.modalOverlay}>
@@ -151,6 +325,15 @@ const styles = StyleSheet.create({
     },
     postButton: {
         backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10,
+    },
+    searchBarUser: {
+        backgroundColor: '#f0f0f0', borderRadius: 1, padding: 2
+    },
+    searchBarInput: {
+        fontSize: 16, color: 'black'
+    },
+    resultText: {
+        fontSize: 18, paddingBottom: 5, marginLeft: 10, fontWeight: 'bold'
     },
 })
 

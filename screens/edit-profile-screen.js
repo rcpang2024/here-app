@@ -204,7 +204,8 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignItems: 'center',
         marginLeft: 10,
-        marginRight: 10
+        marginRight: 10,
+        height: 45
     },
     cancel: {
         borderColor: 'red',
@@ -214,7 +215,8 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignItems: 'center',
         marginLeft: 10,
-        marginRight: 10
+        marginRight: 10,
+        height: 45
     },
     container: {
         backgroundColor: 'white',
