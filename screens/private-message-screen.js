@@ -7,6 +7,7 @@ import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { SearchBar } from "react-native-elements";
 import { supabase } from "../lib/supabase";
+import * as ImagePicker from 'expo-image-picker';
 
 const PrivateMessageScreen = () => {
     const navigation = useNavigation();
@@ -29,9 +30,9 @@ const PrivateMessageScreen = () => {
     const searchBarRef = useRef(null);
 
     const placeholderData = [
-        {id: 1, name: 'bob'},
-        {id: 2, name: 'jane'},
-        {id: 3, name: 'mary'}
+        {conversation_id: 0, id: 1, name: 'bob'},
+        {conversation_id: 1, id: 2, name: 'jane'},
+        {conversation_id: 2, id: 3, name: 'mary'}
     ];
 
     useEffect(() => {
@@ -56,6 +57,33 @@ const PrivateMessageScreen = () => {
             )
         });
     }, [route.params]);
+
+    const chooseMedia = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!status) {
+            alert("Permissions not granted for camera roll access");
+            return;
+        }
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: false,
+            quality: 1
+        });
+
+        if (!result) {
+            const selectedMedia = result.assets[0]; // First selected media
+            console.log("Selected media:", selectedMedia);
+
+            // Send to chat (Modify this to integrate with your chat function)
+            sendMediaToChat(selectedMedia.uri);
+        }
+    };
+
+    // Function to handle sending media in chat
+    const sendMediaToChat = (mediaUri) => {
+        console.log("Sending media:", mediaUri);
+        // Implement logic to upload the media and send it in the chat
+    };
 
     const searchDatabase = async (query) => {
         if (userSearchCache[query]) {
@@ -118,6 +146,7 @@ const PrivateMessageScreen = () => {
 
     const toggleModal = (item) => {
         setSelectedItem(item ? item.id : null); // Set to item's ID when opening, null when closing
+        connectToWebSocket(item.conversation_id);
     };
 
     const handleCloseSearchModal = () => {
@@ -164,27 +193,22 @@ const PrivateMessageScreen = () => {
         </View>
     ), [results]);
 
-    // const socket = new WebSocket(`ws://yourserver.com/ws/chat/${conversation_id}/`);
-
-    // socket.onopen = function() {
-    //     console.log("Websocket connection established");
-    // };
-
-    // socket.onmessage = function (event) {
-    //     const data = JSON.parse(event.data);
-    //     console.log(`Message from ${data.sender}: ${data.message}`);
-    // };
-
-    // socket.onclose = function() {
-    //     console.log("Websocket connection closed");
-    // };
-
-    // function sendMessage(message, sender_id) {
-    //     socket.send(JSON.stringify({
-    //         message: message,
-    //         sender_id: sender_id
-    //     }));
-    // }
+    const connectToWebSocket = (conversation_id) => {
+        const socket = new WebSocket(`ws://192.168.1.6:8000/ws/chat/${conversation_id}/`);
+    
+        socket.onopen = () => {
+            console.log(`Connected to chat room ${conversation_id}`);
+        };
+    
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log(`Message from ${data.sender}: ${data.message}`);
+        };
+    
+        socket.onclose = () => {
+            console.log("WebSocket closed");
+        };
+    };
 
     return (
         <View>
@@ -256,6 +280,12 @@ const PrivateMessageScreen = () => {
                                     onChangeText={(val) => setMSG(val)}
                                     value={msg}
                                     style={styles.commentInput}
+                                />
+                                <Ionicons 
+                                    name="add" 
+                                    size={28} 
+                                    onPress={chooseMedia}
+                                    style={{marginLeft: 7, paddingTop: 2}}
                                 />
                                 <TouchableOpacity onPress={() => console.log("Message")} style={styles.postButton}>
                                     <Text style={{justifyContent: 'center', alignSelf: 'center', color: 'white'}}>POST</Text>
