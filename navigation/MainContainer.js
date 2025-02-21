@@ -25,13 +25,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import BlockedUsersScreen from '../screens/blocked-users-screen';
 import SecurityScreen from '../screens/security-screen';
 import PrivateMessageScreen from '../screens/private-message-screen';
+import ChatScreen from '../screens/chat-screen';
 
-const homeName = 'Home';
-const profileName = 'Profile';
-const createEventName = 'Create Event';
-const exploreName = 'Explore';
-const searchName = 'Search';
-const loginName = 'Login';
 const Tab = createBottomTabNavigator();
 
 const Stack = createStackNavigator();
@@ -59,6 +54,7 @@ export function MainContainer() {
         <Stack.Screen name="Contact Us" component={ContactUsScreen}/>
         <Stack.Screen name="Security" component={SecurityScreen}/>
         <Stack.Screen name="Message" component={PrivateMessageScreen}/>
+        <Stack.Screen name="Chat Screen" options={{headerTitle: ''}} component={ChatScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -67,20 +63,20 @@ export function MainContainer() {
 function TabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName={loginName}
+      initialRouteName='Login'
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           let rn = route.name;
-          if (rn === homeName) {
+          if (rn === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
-          } else if (rn === profileName) {
+          } else if (rn === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
-          } else if (rn === createEventName) {
+          } else if (rn === 'Create Event') {
             iconName = focused ? 'add' : 'add-outline';
-          } else if (rn === exploreName) {
+          } else if (rn === 'Explore') {
             iconName = focused ? 'map' : 'map-outline';
-          } else if (rn === searchName) {
+          } else if (rn === 'Search') {
             iconName = focused ? 'search' : 'search-outline';
           }
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -91,11 +87,11 @@ function TabNavigator() {
         tabBarStyle: { padding: 10, height: 100 }
       })}
     >
-      <Tab.Screen name={homeName} component={HomeScreen} />
-      <Tab.Screen name={exploreName} component={ExploreScreen} />
-      <Tab.Screen name={createEventName} component={CreateEventScreen} />
-      <Tab.Screen name={searchName} component={SearchScreen} options={{headerShown: false}}/>
-      <Tab.Screen name={profileName} component={ProfileScreen} options={{headerTitle: ''}}/>
+      <Tab.Screen name='Home' component={HomeScreen} />
+      <Tab.Screen name='Explore' component={ExploreScreen} />
+      <Tab.Screen name='Create Event' component={CreateEventScreen} />
+      <Tab.Screen name='Search' component={SearchScreen} options={{headerShown: false}}/>
+      <Tab.Screen name='Profile' component={ProfileScreen} options={{headerTitle: ''}}/>
     </Tab.Navigator>
   );
 }

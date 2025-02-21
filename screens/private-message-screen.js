@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, 
-    Modal, TextInput, Keyboard, TouchableWithoutFeedback } from "react-native";
+    Modal, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useContext, useRef, useCallback, useMemo } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -7,16 +7,13 @@ import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { SearchBar } from "react-native-elements";
 import { supabase } from "../lib/supabase";
-import * as ImagePicker from 'expo-image-picker';
 
 const PrivateMessageScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = useContext(UserContext);
 
-    // Modal for the conversations
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [msg, setMSG] = useState('');
+    const [conversations, setConversations] = useState([]);
 
     // Modal for the search modal
     const [searchModalVisible, setSearchModalVisible] = useState(null);
@@ -26,14 +23,31 @@ const PrivateMessageScreen = () => {
     const [results, setResults] = useState([]);
     const [userSearchCache, setUserSearchCache] = useState({});
 
-    const inputRef = useRef(null);
     const searchBarRef = useRef(null);
 
-    const placeholderData = [
-        {conversation_id: 0, id: 1, name: 'bob'},
-        {conversation_id: 1, id: 2, name: 'jane'},
-        {conversation_id: 2, id: 3, name: 'mary'}
-    ];
+    const fetchUserConversations = async () => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/get_conversations/${user.id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${idToken}`
+                },
+            });
+    
+            if (response.ok) {
+                const conversationData = await response.json();
+                setConversations(conversationData);
+            } else {
+                alert("Error getting conversation: ", response.status);
+            }
+        } catch (e) {
+            alert("Failed to retrieve conversation: ", e)
+        }
+    };
 
     useEffect(() => {
         // Set the left header component
@@ -49,41 +63,15 @@ const PrivateMessageScreen = () => {
             ),
             headerRight: () => (
                 <Ionicons 
-                    name="person-add" 
+                    name="search" 
                     size={28} 
                     onPress={() => setSearchModalVisible(true)}
                     style={{position: 'absolute', right: 15, paddingTop: 2}}
                 />
             )
         });
+        fetchUserConversations();
     }, [route.params]);
-
-    const chooseMedia = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!status) {
-            alert("Permissions not granted for camera roll access");
-            return;
-        }
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: false,
-            quality: 1
-        });
-
-        if (!result) {
-            const selectedMedia = result.assets[0]; // First selected media
-            console.log("Selected media:", selectedMedia);
-
-            // Send to chat (Modify this to integrate with your chat function)
-            sendMediaToChat(selectedMedia.uri);
-        }
-    };
-
-    // Function to handle sending media in chat
-    const sendMediaToChat = (mediaUri) => {
-        console.log("Sending media:", mediaUri);
-        // Implement logic to upload the media and send it in the chat
-    };
 
     const searchDatabase = async (query) => {
         if (userSearchCache[query]) {
@@ -124,6 +112,39 @@ const PrivateMessageScreen = () => {
         }
     };
 
+    const startConversation = async (receiverId) => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        
+        try {
+            const response = await fetch("http://192.168.1.6:8000/api/start_conversation/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    user1_id: user.id,  // Logged-in user
+                    user2_id: receiverId,  // User they want to chat with
+                })
+            });
+    
+            if (response.ok) {
+                const conversation = await response.json();
+                console.log("Conversation started:", conversation);
+                
+                setConversations((prevConversations => [conversation, ...prevConversations]));
+
+                // Navigate to the chat screen with this conversation
+                navigation.navigate("Chat Screen", { conversationId: conversation.id });
+            } else {
+                alert("Error starting conversation: ", response.status);
+            }
+        } catch (e) {
+            alert("Failed to start conversation: ", e)
+        }
+    };
+
     const handleUserPress = async (username) => {
         const profileUser = await fetchUserProfile(username);
         if (profileUser && profileUser.username !== user.username) {
@@ -145,7 +166,6 @@ const PrivateMessageScreen = () => {
     }, [userSearchCache]);
 
     const toggleModal = (item) => {
-        setSelectedItem(item ? item.id : null); // Set to item's ID when opening, null when closing
         connectToWebSocket(item.conversation_id);
     };
 
@@ -161,7 +181,7 @@ const PrivateMessageScreen = () => {
             <View style={{paddingBottom: 5}}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TouchableOpacity 
-                        onPress={() => handleUserPress(item.username)} 
+                        onPress={() => startConversation(item.id)} 
                         style={{ flexDirection: 'row', alignItems: 'center' }}
                     >
                         <Image 
@@ -213,14 +233,14 @@ const PrivateMessageScreen = () => {
     return (
         <View>
             <FlatList 
-                data={placeholderData}
+                data={conversations}
                 keyExtractor={(item) => item.id}
                 renderItem={({item}) => (
                     <View style={{padding: 5}}>
-                        <TouchableOpacity onPress={() => toggleModal(item)}>
+                        <TouchableOpacity onPress={() => navigation.navigate("Chat Screen", {conversationId: item.id})}>
                             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                <Image source={FallbackPhoto} style={styles.image}/>
-                                <Text style={{fontWeight: 'bold', fontSize: 14, marginLeft: 10}}>{item.name}</Text>
+                                <Image source={item.participants[1].profile_pic ? {uri: item.participants[1].profile_pic} : FallbackPhoto} style={styles.image}/>
+                                <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>{item.participants[1]}</Text>
                             </View>
                         </TouchableOpacity>
                         <View style={{height: 1, backgroundColor: 'gray', marginTop: 5, opacity: 0.6}} />
@@ -254,45 +274,6 @@ const PrivateMessageScreen = () => {
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
-                </Modal>
-            )}
-            {selectedItem && (
-                <Modal animationType="slide" visible={!!selectedItem} onRequestClose={() => toggleModal(null)} transparent={true}> 
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalContent}>
-                            <View style={{paddingTop: 5}}>
-                                <Text style={{fontSize: 18, fontWeight: 'bold', justifyContent: 'center', alignSelf: 'center'}}>
-                                    Chat with {placeholderData.find(i => i.id === selectedItem)?.name}
-                                </Text>
-                                <Ionicons 
-                                    name="close-outline" 
-                                    size={32} 
-                                    onPress={() => toggleModal(null)}
-                                    style={{position: 'absolute', right: 10, paddingTop: 2}}
-                                />
-                            </View>
-                            <View style={styles.commentInputContainer}>
-                                <TextInput 
-                                    ref={inputRef}
-                                    placeholder="Type your message"
-                                    autoCapitalize="none"
-                                    returnKeyType="next"
-                                    onChangeText={(val) => setMSG(val)}
-                                    value={msg}
-                                    style={styles.commentInput}
-                                />
-                                <Ionicons 
-                                    name="add" 
-                                    size={28} 
-                                    onPress={chooseMedia}
-                                    style={{marginLeft: 7, paddingTop: 2}}
-                                />
-                                <TouchableOpacity onPress={() => console.log("Message")} style={styles.postButton}>
-                                    <Text style={{justifyContent: 'center', alignSelf: 'center', color: 'white'}}>POST</Text>
-                                </TouchableOpacity>
-                            </View> 
-                        </View>
-                    </View>
                 </Modal>
             )}
         </View>
