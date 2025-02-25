@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TextInput, RefreshControl, TouchableOpacity, 
-    TouchableWithoutFeedback, Keyboard, Modal, FlatList, Image } from "react-native";
+    TouchableWithoutFeedback, Keyboard, Modal, FlatList, Image, Alert } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -19,11 +19,17 @@ const ChatScreen = () => {
     // Text input
     const [msg, setMSG] = useState('');
 
+    const [media, setMedia] = useState(null);
+
     // Messages in the chat
     const [messages, setMessages] = useState([]);
+    const [selectedMsgId, setSelectedMsgId] = useState(null);
 
     // Modal for the search modal
     const [searchModalVisible, setSearchModalVisible] = useState(null);
+
+    // Modal for the message option modal
+    const [msgModal, setMsgModal] = useState(false);
 
     // For users - taken from search-screen.js
     const [searchUser, setUserSearch] = useState('');
@@ -50,6 +56,7 @@ const ChatScreen = () => {
             }
             const retrievedMessages = await response.json();
             setMessages(retrievedMessages);
+            // console.log("messages: ", messages);
         } catch (err) {
             console.log("Error fetching user profile: ", err);
         }
@@ -112,6 +119,7 @@ const ChatScreen = () => {
         } else {
             alert("Websocket is not open");
         }
+        setMessages((prevMessages) => [...prevMessages, { sender_username: user.username, text: msg }]);
         setMSG('');
     };
 
@@ -219,6 +227,33 @@ const ChatScreen = () => {
         }
     };
 
+    const handleLongPress = (messageId) => {
+        setSelectedMsgId(messageId);
+        console.log("selectedMsgId: ", selectedMsgId);
+        setMsgModal(true);
+    };
+
+    const handleDeleteMessage = async (messageId) => {
+        try {
+            const { data } = await supabase.auth.getSession();
+            const idToken = data?.session?.access_token;
+            const response = await fetch(`http://192.168.1.6:8000/api/delete_message/${messageId}/`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${idToken}`
+                }
+            });
+            if (response.ok) {
+                setMessages((prevMessages => prevMessages.filter(m => m.id !== messageId)));
+            } else {
+                alert(`Error deleting conversation: ${response.status}`);
+            }
+        } catch (e) {
+            alert(`Failed to delete message: ${e.message}`);
+        }
+    };
+
     const handleUserSearchChange = useCallback((text) => {
         setUserSearch(text);
         if (text.length > 0) {
@@ -233,6 +268,14 @@ const ChatScreen = () => {
         setUserSearch('');
         Keyboard.dismiss();
         searchBarRef.current?.blur();
+    };
+
+    const confirmRemoveMessage = () => {
+        Alert.alert(
+            "Delete Message", 
+            "Are you sure you want to delete this message?", 
+            [{text: "No", onPress: () => {}, style: "cancel"}, {text: "Yes", onPress: () => handleDeleteMessage(selectedMsgId)}]
+        );
     };
 
     const renderUserItem = ({ item }) => {
@@ -285,7 +328,13 @@ const ChatScreen = () => {
                                 styles.messageContainer, 
                                 item.sender_username === user.username ? styles.sentMessage : styles.receivedMessage
                             ]}>
-                                <Text style={styles.messageText}>{item.text}</Text>
+                                {item.sender_username === user.username ? (
+                                    <TouchableOpacity onLongPress={() => handleLongPress(item.id)}>
+                                        <Text style={styles.messageText}>{item.text}</Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <Text style={styles.messageText}>{item.text}</Text>
+                                )}
                             </View>
                         )}
                         contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', paddingBottom: 90 }}
@@ -338,6 +387,25 @@ const ChatScreen = () => {
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
+                    </Modal>
+                )}
+                {msgModal && (
+                    <Modal
+                        transparent={true}
+                        visible={msgModal}
+                        animationType="slide"
+                        onRequestClose={() => setMsgModal(false)}
+                    >
+                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+                            <View style={{backgroundColor: 'white', padding: 30, borderRadius: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'}}>
+                                <TouchableOpacity onPress={confirmRemoveMessage}>
+                                    <Text style={{fontSize: 14, paddingRight: 8}}>DELETE</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setMsgModal(false)}>
+                                    <Text style={{color: 'red', fontSize: 14}}>CANCEL</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </Modal>
                 )}
             </View>
@@ -417,7 +485,7 @@ const styles = StyleSheet.create({
     },
     receivedMessage: {
         alignSelf: 'flex-start',  // Left align for other users
-        backgroundColor: '#f0f0f0', // Light grey for received messages
+        backgroundColor: '#209594', // Light grey for received messages
         marginLeft: 10
     },
     messageText: {

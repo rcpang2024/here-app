@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, 
-    Modal, Keyboard, TouchableWithoutFeedback } from "react-native";
+    Modal, Keyboard, TouchableWithoutFeedback, Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useContext, useRef, useCallback, useMemo } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -7,6 +7,7 @@ import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { SearchBar } from "react-native-elements";
 import { supabase } from "../lib/supabase";
+import { scale, verticalScale } from 'react-native-size-matters';
 
 const PrivateMessageScreen = () => {
     const navigation = useNavigation();
@@ -41,6 +42,7 @@ const PrivateMessageScreen = () => {
             if (response.ok) {
                 const conversationData = await response.json();
                 setConversations(conversationData);
+                // console.log("conversations[0]: ", conversations[0].participants.find(p => p !== user.username));
             } else {
                 alert("Error getting conversation: ", response.status);
             }
@@ -145,6 +147,29 @@ const PrivateMessageScreen = () => {
         }
     };
 
+    const deleteConversation = async (conversationId) => {
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
+        
+        try {
+            const response = await fetch(`http://192.168.1.6:8000/api/delete_conversation/${conversationId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${idToken}`
+                },
+            });
+    
+            if (response.ok) {
+                setConversations((prevConversations => prevConversations.filter(conv => conv.id !== conversationId)));
+            } else {
+                alert(`Error deleting conversation: ${response.status}`);
+            }
+        } catch (e) {
+            alert(`Failed to delete conversation: ${e.message}`);
+        }
+    };
+
     const handleUserPress = async (username) => {
         const profileUser = await fetchUserProfile(username);
         if (profileUser && profileUser.username !== user.username) {
@@ -165,15 +190,18 @@ const PrivateMessageScreen = () => {
         }
     }, [userSearchCache]);
 
-    const toggleModal = (item) => {
-        connectToWebSocket(item.conversation_id);
-    };
-
     const handleCloseSearchModal = () => {
         setSearchModalVisible(false);
         setUserSearch('');
         Keyboard.dismiss();
         searchBarRef.current?.blur();
+    };
+
+    const handleDeleteConversation = (conversationId) => {
+        Alert.alert("Delete conversation?", "This action cannot be reversed.", [
+            {text: "Cancel", onPress: () => {}, style: "cancel"},
+            {text: "Delete", onPress: () => deleteConversation(conversationId)}
+        ])
     };
 
     const renderUserItem = ({ item }) => {
@@ -213,23 +241,6 @@ const PrivateMessageScreen = () => {
         </View>
     ), [results]);
 
-    const connectToWebSocket = (conversation_id) => {
-        const socket = new WebSocket(`ws://192.168.1.6:8000/ws/chat/${conversation_id}/`);
-    
-        socket.onopen = () => {
-            console.log(`Connected to chat room ${conversation_id}`);
-        };
-    
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log(`Message from ${data.sender}: ${data.message}`);
-        };
-    
-        socket.onclose = () => {
-            console.log("WebSocket closed");
-        };
-    };
-
     return (
         <View>
             <FlatList 
@@ -239,10 +250,24 @@ const PrivateMessageScreen = () => {
                     <View style={{padding: 5}}>
                         <TouchableOpacity onPress={() => navigation.navigate("Chat Screen", {conversationId: item.id})}>
                             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                <Image source={item.participants[1].profile_pic ? {uri: item.participants[1].profile_pic} : FallbackPhoto} style={styles.image}/>
-                                <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>{item.participants[1]}</Text>
+                                <Image source={item.participants.find(p => p !== user.username)?.profile_pic 
+                                    ? {uri: item.participants.find(p => p !== user.username)?.profile_pic} 
+                                    : FallbackPhoto}  
+                                    style={styles.image}
+                                />
+                                <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>
+                                    {item.participants.find(p => p !== user.username)}
+                                </Text>
                             </View>
+                            <Text style={{fontSize: 10, paddingLeft: 3}}>Last message at: {item.formatted_timestamp}</Text>
                         </TouchableOpacity>
+                        <Ionicons 
+                            name="trash" 
+                            size={22} 
+                            color="#bd7979"
+                            onPress={() => handleDeleteConversation(item.id)}
+                            style={{position: 'absolute', right: 5, marginTop: 5}}
+                        />
                         <View style={{height: 1, backgroundColor: 'gray', marginTop: 5, opacity: 0.6}} />
                     </View>
                 )}
