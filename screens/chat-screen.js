@@ -8,6 +8,9 @@ import { UserContext } from "../user-context";
 import { SearchBar } from "react-native-elements";
 import { supabase } from "../lib/supabase";
 import * as ImagePicker from 'expo-image-picker';
+import uuid from 'react-native-uuid';
+import {decode} from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system';
 
 const ChatScreen = () => {
     const navigation = useNavigation();
@@ -19,11 +22,15 @@ const ChatScreen = () => {
     // Text input
     const [msg, setMSG] = useState('');
 
+    const [supabaseUserId, setSupabaseUserId] = useState('');
     const [media, setMedia] = useState(null);
 
     // Messages in the chat
     const [messages, setMessages] = useState([]);
     const [selectedMsgId, setSelectedMsgId] = useState(null);
+
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageModalVisible, setImageModalVisible] = useState(false);
 
     // Modal for the search modal
     const [searchModalVisible, setSearchModalVisible] = useState(null);
@@ -56,7 +63,7 @@ const ChatScreen = () => {
             }
             const retrievedMessages = await response.json();
             setMessages(retrievedMessages);
-            // console.log("messages: ", messages);
+            console.log("messages: ", messages);
         } catch (err) {
             console.log("Error fetching user profile: ", err);
         }
@@ -106,21 +113,17 @@ const ChatScreen = () => {
         };
     }, [conversationId]);
 
-    const sendMessage = () => {
-        if (msg.trim() === '') return;
-
-        const messageData = {
-            sender: user.username,
-            message: msg
-        };
-
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            socketRef.current.send(JSON.stringify(messageData));
-        } else {
-            alert("Websocket is not open");
+    const getSupabaseUser = async () => {
+        try {
+            const { data: {user} } = await supabase.auth.getUser();
+            if (user !== null) {
+                setSupabaseUserId(user.id);
+            } else {
+                setSupabaseUserId('');
+            }
+        } catch (e) {
+            alert(`Failed to retrieve Supabase user: ${e.message}`);
         }
-        setMessages((prevMessages) => [...prevMessages, { sender_username: user.username, text: msg }]);
-        setMSG('');
     };
 
     const chooseMedia = async () => {
@@ -132,22 +135,115 @@ const ChatScreen = () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: false,
-            quality: 1
+            quality: 1,
+            base64: true
         });
 
-        if (!result) {
+        if (!result.canceled) {
             const selectedMedia = result.assets[0]; // First selected media
             console.log("Selected media:", selectedMedia);
 
-            // Send to chat (Modify this to integrate with your chat function)
-            sendMediaToChat(selectedMedia.uri);
+            const mediaUrl = await uploadToStorage(selectedMedia.uri);        
+            if (mediaUrl) {
+                sendMediaToChat(mediaUrl);
+            }
+        }
+    };
+
+    const uploadToStorage = async (fileUri) => {
+        try {
+            const fileExt = fileUri.split('.').pop();
+            const fileName = `${supabaseUserId}/${uuid.v4()}.${fileExt}`;
+            const base64File = await FileSystem.readAsStringAsync(fileUri, {encoding: FileSystem.EncodingType.Base64});
+            const fileBuffer = decode(base64File);
+            
+            // Define MIME types
+            const mimeTypes = {
+                jpg: "image/jpeg",
+                jpeg: "image/jpeg",
+                png: "image/png",
+                gif: "image/gif",
+                mp4: "video/mp4",
+                mov: "video/quicktime",
+                avi: "video/x-msvideo"
+            };
+            const contentType = mimeTypes[fileExt] || "application/octet-stream";
+            const { data, error } = await supabase
+                .storage
+                .from('here-files')
+                .upload(fileName, fileBuffer, {
+                    contentType: contentType
+            });
+
+            if (error) {
+                console.error("Upload error: ", error.message);
+                alert("Failed to upload media");
+                return null;
+            }
+            // Retrieve public URL
+            // const { data: publicUrlData } = supabase.storage.from('here-files').getPublicUrl(fileName);
+            // console.log("File uploaded successfully: ", publicUrlData.publicUrl);
+            // return publicUrlData.publicUrl;
+            const { data: signedUrlData, error: signedUrlError } = await supabase
+            .storage
+            .from('here-files')
+            .createSignedUrl(fileName, 60 * 60 * 24); // Expiration: 24 hours
+
+            if (signedUrlError) {
+                console.error("Signed URL error:", signedUrlError.message);
+                alert("Failed to generate signed URL");
+                return null;
+            }
+
+            return signedUrlData.signedUrl;
+        } catch (e) {
+            alert(`Failed to upload file: ${e.message}`);
         }
     };
 
     // Function to handle sending media in chat
     const sendMediaToChat = (mediaUri) => {
-        console.log("Sending media:", mediaUri);
-        // Implement logic to upload the media and send it in the chat
+        if (!mediaUri) return;
+
+        // Create message object with media
+        const newMessage = {
+            sender_username: user.username,
+            media: mediaUri,
+            text: "",  
+        };
+
+        // Append to messages state immediately
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+        // Send through WebSocket
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify(newMessage));
+        } else {
+            alert("Websocket is not open");
+        }
+    };
+    // ISSUE: photo urls aren't being appended to messages which means they don't appear when re-rendered
+    const sendMessage = (text = msg, mediaUrl = null) => {
+        if (!text && !mediaUrl) return;
+
+        const messageData = {
+            sender: user.username,
+            message: text,
+            media: mediaUrl || null
+        };
+
+        setMessages(prev => [...prev, messageData]);
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify(messageData));
+        } else {
+            alert("Websocket is not open");
+        }
+        // setMessages(prev => [...prev, {
+        //     sender_username: user.username,
+        //     text: text || "",
+        //     media: mediaUrl || null
+        // }]);
+        setMSG('');
     };
 
     const fetchUserProfile = async (username) => {
@@ -223,7 +319,7 @@ const ChatScreen = () => {
                 alert("Error getting conversation: ", response.status);
             }
         } catch (e) {
-            alert("Failed to retrieve conversation: ", e)
+            alert(`Failed to retrieve conversation: ${e.message}`);
         }
     };
 
@@ -328,12 +424,23 @@ const ChatScreen = () => {
                                 styles.messageContainer, 
                                 item.sender_username === user.username ? styles.sentMessage : styles.receivedMessage
                             ]}>
-                                {item.sender_username === user.username ? (
-                                    <TouchableOpacity onLongPress={() => handleLongPress(item.id)}>
+                                {item.text && (
+                                    item.sender_username === user.username ? (
+                                        <TouchableOpacity onLongPress={() => handleLongPress(item.id)}>
+                                            <Text style={styles.messageText}>{item.text}</Text>
+                                        </TouchableOpacity>
+                                    ) : (
                                         <Text style={styles.messageText}>{item.text}</Text>
-                                    </TouchableOpacity>
-                                ) : (
-                                    <Text style={styles.messageText}>{item.text}</Text>
+                                    )
+                                )}
+                                {item.media && (
+                                    item.sender_username === user.username ? (
+                                        <TouchableOpacity onPress={() => {setSelectedImage(item.media), setImageModalVisible(true)}} onLongPress={() => {handleLongPress(item.id); console.log("item: ", item.media)}}>
+                                            <Image source={{ uri: item.media }} style={{ width: 200, height: 200, borderRadius: 5 }} />
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <Image source={{ uri: item.media }} style={{ width: 200, height: 200, borderRadius: 5 }} />
+                                    )
                                 )}
                             </View>
                         )}
@@ -355,7 +462,7 @@ const ChatScreen = () => {
                             onPress={chooseMedia}
                             style={{marginLeft: 7, paddingTop: 2}}
                         />
-                        <TouchableOpacity onPress={sendMessage} style={styles.postButton}>
+                        <TouchableOpacity onPress={() => sendMessage(msg)} style={styles.postButton}>
                             <Text style={{justifyContent: 'center', alignSelf: 'center', color: 'white'}}>POST</Text>
                         </TouchableOpacity>
                     </View> 
@@ -406,6 +513,15 @@ const ChatScreen = () => {
                                 </TouchableOpacity>
                             </View>
                         </View>
+                    </Modal>
+                )}
+                {imageModalVisible && (
+                    <Modal visible={imageModalVisible} transparent={true} animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
+                            <View style={styles.modalBackground}>
+                                <Image source={{ uri: selectedImage }} style={styles.fullScreenImage} />
+                            </View>
+                        </TouchableWithoutFeedback>
                     </Modal>
                 )}
             </View>
@@ -490,6 +606,12 @@ const styles = StyleSheet.create({
     },
     messageText: {
         color: 'white', // Ensure text is visible
+    },
+    fullScreenImage: {
+        width: '90%',
+        height: '80%',
+        resizeMode: 'contain', // Prevents stretching
+        borderRadius: 10
     }
 })
 
