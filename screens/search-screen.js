@@ -15,10 +15,8 @@ const SearchScreen = () => {
     const [searchEvent, setEventSearch] = useState('');
     const { user } = useContext(UserContext);
 
-    // For Users
-    const [results, setResults] = useState([]);
-    // For Events
-    const [eventResults, setEventResults] = useState([]);
+    const [results, setResults] = useState([]); // For Users
+    const [eventResults, setEventResults] = useState([]); // For Events
 
     const [index, setIndex] = useState(0);
     const [userSearchCache, setUserSearchCache] = useState({});
@@ -255,13 +253,7 @@ const styles = StyleSheet.create({
         fontSize: 18, color: 'black'
     },
     image: {
-        marginLeft: 8,
-        marginTop: 5,
-        width: 50,
-        height: 50,
-        borderRadius: 50 / 2,
-        overflow: "hidden",
-        borderWidth: 2,
+        marginLeft: 8, marginTop: 5, width: 50, height: 50, borderRadius: 50 / 2, overflow: "hidden", borderWidth: 2
     }
 })
 

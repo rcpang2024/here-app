@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
@@ -13,11 +12,10 @@ import { supabase } from "../lib/supabase";
 
 const OtherProfileScreen = ({ route }) => {
     const navigation = useNavigation();
-    // User who is logged in
-    const { user, updateUserContext } = useContext(UserContext); 
+    const { user, updateUserContext } = useContext(UserContext); // User who is logged in
     const { profileUser } = route.params || {};
     const currUser = profileUser;
-    const [idToken, setIdToken] = useState(null);
+    // const [idToken, setIdToken] = useState(null);
 
     const [isRequested, setIsRequested] = useState(user.requesting_users.includes(profileUser.id));
     const [followingStatus, setFollowingStatus] = useState(user.list_of_following.includes(profileUser.id));
@@ -27,10 +25,8 @@ const OtherProfileScreen = ({ route }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
 
-    // created is the array of all created events
-    const [created, setCreated] = useState([]);
-    // createdEvent is the individual created event
-    const [createdEvent, setCreatedEvent] = useState('');
+    const [created, setCreated] = useState([]); // created is the array of all created events
+    const [createdEvent, setCreatedEvent] = useState(''); // createdEvent is the individual created event
 
     // same structure as for created/createdEvent
     const [attending, setAttending] = useState([]);
@@ -123,16 +119,16 @@ const OtherProfileScreen = ({ route }) => {
                 />
             ),
         });
-        const fetchToken = async () => {
-            const { data, error } = await supabase.auth.getSession();
-            if (error) {
-                alert("Error retrieving token: ", error);
-            }
-            const token = data?.session?.access_token;
-            setIdToken(token);
-            console.log("token set in otherprofilescreen");
-        };
-        fetchToken();
+        // const fetchToken = async () => {
+        //     const { data, error } = await supabase.auth.getSession();
+        //     if (error) {
+        //         alert("Error retrieving token: ", error);
+        //     }
+        //     const token = data?.session?.access_token;
+        //     setIdToken(token);
+        //     console.log("token set in otherprofilescreen");
+        // };
+        // fetchToken();
     }, [route.params, profileUser]);
 
     const onTabChange = (newIndex) => {
@@ -146,7 +142,8 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleFollow = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             if (isPrivateUser && !followingStatus) {
                 const followRequestResponse = await fetch(`http://192.168.1.6:8000/api/request_to_follow_user/${user.username}/${profileUser.username}/`, {
@@ -195,7 +192,8 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleUnfollow = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
@@ -222,7 +220,8 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleSettingNotifications = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/setnotification/${user.username}/${profileUser.username}/`, {
                 method: 'POST',
@@ -244,7 +243,8 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleRemoveNotifications = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/removenotification/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
@@ -266,7 +266,8 @@ const OtherProfileScreen = ({ route }) => {
     };
     
     const handleRemoveFollower = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${profileUser.username}/${user.username}/`, {
                 method: 'DELETE',
@@ -290,7 +291,8 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleRemoveRequest = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const removeRequestResponse = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
@@ -317,7 +319,8 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleBlockUser = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
+        const { data } = await supabase.auth.getSession();
+        const idToken = data?.session?.access_token;
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/blockuser/${user.username}/${profileUser.username}/`, {
                 method: 'POST',

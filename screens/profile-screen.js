@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// import HereLogo from '../assets/images/HereLogo.png';
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
@@ -13,8 +12,7 @@ import { scale, verticalScale } from 'react-native-size-matters';
 
 const ProfileScreen = ({ route }) => {
     const navigation = useNavigation();
-    // User who is logged in
-    const { user, updateUserContext } = useContext(UserContext); // Access user from context
+    const { user, updateUserContext } = useContext(UserContext); // User who is logged in
     const { profileUser } = route.params || {};
     const currUser = profileUser || user;
     const [idToken, setIdToken] = useState(null);
@@ -22,10 +20,8 @@ const ProfileScreen = ({ route }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
 
-    // created is the array of all created events
-    const [created, setCreated] = useState([]);
-    // createdEvent is the individual created event
-    const [createdEvent, setCreatedEvent] = useState('');
+    const [created, setCreated] = useState([]); // created is the array of all created events
+    const [createdEvent, setCreatedEvent] = useState(''); // createdEvent is the individual created event
 
     // same structure as for created/createdEvent
     const [attending, setAttending] = useState([]);
@@ -319,12 +315,7 @@ const styles = StyleSheet.create({
         fontSize: 18, color: 'grey', paddingBottom: 5
     },
     bio: {
-        fontSize: 15,
-        paddingLeft: 10,
-        paddingRight: 10,
-        paddingTop: 15,
-        paddingBottom: 10,
-        alignItems: 'center',
+        fontSize: 15, paddingLeft: 10, paddingRight: 10, paddingTop: 15, paddingBottom: 10, alignItems: 'center'
     },
     text: {
         borderWidth: 3,

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, RefreshControl, TouchableOpacity, 
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, 
     TouchableWithoutFeedback, Keyboard, Modal, FlatList, Image, Alert } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
@@ -16,26 +16,16 @@ const ChatScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = useContext(UserContext);
-
     const { conversationId } = route.params;
 
-    // Text input
-    const [msg, setMSG] = useState('');
-
-    const [media, setMedia] = useState(null);
-
-    // Messages in the chat
-    const [messages, setMessages] = useState([]);
+    const [msg, setMSG] = useState(''); // Text input
+    const [messages, setMessages] = useState([]); // Messages in the chat
     const [selectedMsgId, setSelectedMsgId] = useState(null);
 
     const [selectedImage, setSelectedImage] = useState(null);
-    const [imageModalVisible, setImageModalVisible] = useState(false);
-
-    // Modal for the search modal
-    const [searchModalVisible, setSearchModalVisible] = useState(null);
-
-    // Modal for the message option modal
-    const [msgModal, setMsgModal] = useState(false);
+    const [imageModalVisible, setImageModalVisible] = useState(false); // Modal for when image is clicked
+    const [searchModalVisible, setSearchModalVisible] = useState(null); // Modal for the search modal
+    const [msgModal, setMsgModal] = useState(false); // Modal for the message option modal
 
     // For users - taken from search-screen.js
     const [searchUser, setUserSearch] = useState('');
@@ -62,7 +52,7 @@ const ChatScreen = () => {
             }
             const retrievedMessages = await response.json();
             setMessages(retrievedMessages);
-            console.log("messages: ", messages);
+            // console.log("messages: ", messages);
         } catch (err) {
             console.log("Error fetching user profile: ", err);
         }
@@ -100,16 +90,10 @@ const ChatScreen = () => {
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log("onmessage data: ", data);
-            // console.log(`Message from ${data.sender}: ${data.message}`);
-            setMessages(prevMessages => {
-                const messageExists = prevMessages.some(msg => msg.timestamp === data.timestamp);
-                if (!messageExists) {
-                    return [...prevMessages, { ...data, sender_username: data.sender }];
-                }
-                return prevMessages;
-            });
-        }
+            console.log("onmessage data: ", JSON.stringify(data));
+            console.log("onmessage messages last element: ", messages.length);
+            setMessages((prevMessages => [...prevMessages, data]));
+        };
 
         socket.onclose = () => {
             console.log("Websocket closed");
@@ -117,8 +101,8 @@ const ChatScreen = () => {
         return () => {
             socket.close();
         };
-    }, [conversationId]);
-
+    }, []);
+    
     const chooseMedia = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!status) {
@@ -135,7 +119,6 @@ const ChatScreen = () => {
         if (!result.canceled) {
             const selectedMedia = result.assets[0]; // First selected media
             // console.log("Selected media:", selectedMedia);
-
             const mediaUrl = await uploadToStorage(selectedMedia.uri);        
             if (mediaUrl) {
                 sendMessage(null, mediaUrl);
@@ -155,8 +138,7 @@ const ChatScreen = () => {
             const fileName = `${supabaseUserId}/${uuid.v4()}.${fileExt}`;
             const base64File = await FileSystem.readAsStringAsync(fileUri, {encoding: FileSystem.EncodingType.Base64});
             const fileBuffer = decode(base64File);
-            
-            // Define MIME types
+
             const mimeTypes = {
                 jpg: "image/jpeg",
                 jpeg: "image/jpeg",
@@ -179,10 +161,6 @@ const ChatScreen = () => {
                 alert("Failed to upload media");
                 return null;
             }
-            // Retrieve public URL
-            // const { data: publicUrlData } = supabase.storage.from('here-files').getPublicUrl(fileName);
-            // console.log("File uploaded successfully: ", publicUrlData.publicUrl);
-            // return publicUrlData.publicUrl;
             const { data: signedUrlData, error: signedUrlError } = await supabase
                 .storage
                 .from('here-files')
@@ -195,24 +173,23 @@ const ChatScreen = () => {
                 alert("Failed to generate signed URL");
                 return null;
             }
-
             return decodedUrl;
         } catch (e) {
             alert(`Failed to upload file: ${e.message}`);
         }
     };
 
-    const sendMessage = (text = msg, mediaUrl = null) => {
-        if (!text && !mediaUrl) return;
+    const sendMessage = (theMessage = msg, mediaUrl = null) => {
+        if (!theMessage && !mediaUrl) return;
         const cleanMediaUrl = mediaUrl ? decodeURIComponent(mediaUrl).replace(/^\/+/, '') : null;
 
         const messageData = {
-            sender: user.username,
-            message: text || "",
-            media: cleanMediaUrl
+            sender_username: user.username,
+            text: theMessage.trim() || "",
+            media: cleanMediaUrl,
+            timestamp: new Date().toISOString()
         };
-        console.log("messageData: ", messageData);
-        // setMessages(prev => [...prev, messageData]);
+
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify(messageData));
         } else {
@@ -221,34 +198,34 @@ const ChatScreen = () => {
         setMSG('');
     };
 
-    const fetchUserProfile = async (username) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        try {
-            const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
-                }
-            });
-            const userData = response.json();
-            return userData;
-        } catch (err) {
-            console.log("Error fetching user profile: ", err);
-        }
-    };
+    // const fetchUserProfile = async (username) => {
+    //     const { data } = await supabase.auth.getSession();
+    //     const idToken = data?.session?.access_token;
+    //     try {
+    //         const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': `Bearer ${idToken}`
+    //             }
+    //         });
+    //         const userData = response.json();
+    //         return userData;
+    //     } catch (err) {
+    //         console.log("Error fetching user profile: ", err);
+    //     }
+    // };
 
-    const handleUserPress = async (username) => {
-        const profileUser = await fetchUserProfile(username);
-        if (profileUser && profileUser.username !== user.username) {
-            navigation.navigate('Other Profile', { profileUser });
-        } else if (username === user.username) {
-            navigation.navigate('Profile');
-        } else {
-            console.error('Failed to fetch profile user');
-        }
-    };
+    // const handleUserPress = async (username) => {
+    //     const profileUser = await fetchUserProfile(username);
+    //     if (profileUser && profileUser.username !== user.username) {
+    //         navigation.navigate('Other Profile', { profileUser });
+    //     } else if (username === user.username) {
+    //         navigation.navigate('Profile');
+    //     } else {
+    //         console.error('Failed to fetch profile user');
+    //     }
+    // };
 
     const searchDatabase = async (query) => {
         if (userSearchCache[query]) {
@@ -391,9 +368,9 @@ const ChatScreen = () => {
             <View style={{flex: 1}}>
                 <View style={{flex: 1}}>
                     <FlatList
-                        data={messages}
+                        data={[...messages].reverse()}
                         keyExtractor={(item, index) => index.toString()} 
-                        // inverted
+                        inverted
                         renderItem={({ item }) => (
                             <View style={[
                                 styles.messageContainer, 
@@ -401,10 +378,10 @@ const ChatScreen = () => {
                             ]}>
                                 {item.text && (
                                     item.sender_username !== user.username ? (
-                                        <Text style={styles.messageText}>{item.text}</Text>
+                                        <Text style={{color: 'white'}}>{item.text}</Text>
                                     ) : (
                                         <TouchableOpacity onLongPress={() => handleLongPress(item.id)}>
-                                            <Text style={styles.messageText}>{item.text}</Text>
+                                            <Text style={{color: 'white'}}>{item.text}</Text>
                                         </TouchableOpacity>
                                     )
                                 )}
@@ -422,7 +399,7 @@ const ChatScreen = () => {
                                 )}
                             </View>
                         )}
-                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', paddingBottom: 90 }}
+                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', paddingTop: 90 }}
                     />
                     <View style={styles.commentInputContainer}>
                         <TextInput 
@@ -567,36 +544,19 @@ const styles = StyleSheet.create({
         fontSize: 18, paddingBottom: 5, marginLeft: 10, fontWeight: 'bold'
     },
     messageContainer: {
-        maxWidth: '70%', // Prevents message from stretching too far
-        padding: 10,
-        marginVertical: 5,
-        borderRadius: 10,
+        maxWidth: '70%', padding: 10, marginVertical: 5, borderRadius: 10
     },
     sentMessage: {
-        alignSelf: 'flex-end',  // Right align for logged-in user
-        backgroundColor: '#bd7979', // Custom color for sent messages
-        marginRight: 10
+        alignSelf: 'flex-end', backgroundColor: '#bd7979', marginRight: 10
     },
     receivedMessage: {
-        alignSelf: 'flex-start',  // Left align for other users
-        backgroundColor: '#209594', // Light grey for received messages
-        marginLeft: 10
-    },
-    messageText: {
-        color: 'white', // Ensure text is visible
+        alignSelf: 'flex-start', backgroundColor: '#209594', marginLeft: 10
     },
     modalBackground: {
-        flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.7)", 
-        justifyContent: "center", 
-        alignItems: "center", 
-        padding: 10, 
+        flex: 1, backgroundColor: "rgba(0, 0, 0, 0.7)", justifyContent: "center",  alignItems: "center",  padding: 10
     },
     fullScreenImage: {
-        width: '95%',
-        height: '85%',
-        resizeMode: 'contain', // Prevents stretching
-        borderRadius: 10
+        width: '95%', height: '85%', resizeMode: 'contain', borderRadius: 10
     }
 })
 

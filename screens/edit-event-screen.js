@@ -13,6 +13,7 @@ const EditEventScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
 
+    // Current event parameters
     const event_id = route.params.eventID;
     const currEventName = route.params.eventName;
     const currDescription = route.params.eventDescription;
@@ -32,7 +33,6 @@ const EditEventScreen = () => {
     const eventNameRef = useRef();
     const descriptionRef = useRef();
     const locationRef = useRef();
-    const dateRef = useRef();
 
     const [mode, setMode] = useState('date');
 

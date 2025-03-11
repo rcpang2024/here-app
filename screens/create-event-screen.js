@@ -150,7 +150,7 @@ const CreateEventScreen = () => {
         throw new Error(errorData.detail || 'Unknown error');
       }
       const theData = await response.json();
-      console.log("Event created:", theData);
+      // console.log("Event created:", theData);
       return theData;
     } catch (error) {
       console.log('Error creating event:', error);

@@ -17,8 +17,7 @@ const LogInScreen = () => {
     const [email, setEmail] = useState('');
     const [pw, setPW] = useState('');
 
-    // Toggles whether password is shown or not on the screen
-    const [showPW, setShowPW] = useState(false);
+    const [showPW, setShowPW] = useState(false); // Toggles whether password is shown or not on the screen
 
     const [loading, setLoading] = useState(false);
 
@@ -32,7 +31,6 @@ const LogInScreen = () => {
     const fetchUser = async () => {
         const { data } = await supabase.auth.getSession();
         const idToken = data?.session?.access_token;
-        // console.log("idToken: ", idToken);
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/email/${email}/`, {
                 method: 'GET',

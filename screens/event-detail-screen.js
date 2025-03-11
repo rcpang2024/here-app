@@ -429,16 +429,6 @@ const styles = StyleSheet.create({
     postButton: {
         backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10,
     },
-    commentContainer: {
-        paddingVertical: 10, 
-    },
-    replyContainer: {
-        paddingLeft: 20,  
-        borderLeftWidth: 2,
-        borderLeftColor: '#ccc',
-        marginLeft: 10,
-        paddingVertical: 10,
-    },
 })
 
 export default EventDetailScreen;

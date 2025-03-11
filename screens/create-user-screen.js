@@ -246,7 +246,7 @@ const CreateUserScreen = () => {
                         {loading ? (
                             <ActivityIndicator size="small" color="white"/>
                         ) : (
-                            <Text style={styles.createText}>Create Account</Text>
+                            <Text style={{fontWeight: 'bold', color: 'white'}}>Create Account</Text>
                         )}
                     </TouchableOpacity>
                 </ScrollView>
@@ -258,9 +258,6 @@ const CreateUserScreen = () => {
 const styles = StyleSheet.create({
     title: {
         alignContent: 'center', marginLeft: scale(12), marginRight: scale(12), flex: 1
-    },
-    container: {
-        flex: 1, paddingHorizontal: scale(15)
     },
     textFields: {
         backgroundColor: 'white',
@@ -285,9 +282,6 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 5
     },
-    createText: {
-        fontWeight: 'bold', color: 'white'
-    }
 })
 
 export default CreateUserScreen;

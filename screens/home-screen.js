@@ -9,7 +9,7 @@ import { supabase } from "../lib/supabase";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
-    const [eventData, setEventData] = useState([]);
+    const [eventData, setEventData] = useState([]); // Retrieved events
     const [refreshing, setRefreshing] = useState(false);
     const { user, updateUserLocation } = useContext(UserContext);
 
@@ -51,7 +51,6 @@ const HomeScreen = () => {
             }
         });
         const theData = await response.json();
-        // console.log("data", data);
         // const filteredEvents = data.filter(event => followedUserIDs.includes(event.creation_user));
         setEventData(theData);
         console.log("eventData after setting: ", eventData);

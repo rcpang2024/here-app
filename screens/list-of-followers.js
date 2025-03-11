@@ -73,7 +73,6 @@ const FollowersScreen = () => {
 
     useEffect(() => {
         // Set the left header component
-        // setFollowers([]);
         navigation.setOptions({
             headerLeft: () => (
             <Ionicons
@@ -118,13 +117,7 @@ const styles = StyleSheet.create({
         fontSize: 14, marginLeft: 8
     },
     image: {
-        marginLeft: 8,
-        marginTop: 5,
-        width: 70,
-        height: 70,
-        borderRadius: 70 / 2,
-        overflow: "hidden",
-        borderWidth: 2,
+        marginLeft: 8, marginTop: 5, width: 70, height: 70, borderRadius: 70 / 2, overflow: "hidden", borderWidth: 2
     }
 })
 

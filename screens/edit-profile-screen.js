@@ -23,7 +23,6 @@ const EditProfileScreen = () => {
     const route = useRoute();
     const { user, updateUserContext } = useContext(UserContext); // Access updateUser from context
 
-    // const currPic = route.params.pic;
     const currName = route.params.name;
     const currUsername = route.params.username;
     const currBio = route.params.bio;
@@ -34,7 +33,6 @@ const EditProfileScreen = () => {
     const [usernameTaken, setUsernameTaken] = useState(false);
     const [newBio, setNewBio] = useState(currBio);
 
-    // const picRef = useRef();
     const nameRef = useRef();
     const usernameRef = useRef();
     const bioRef = useRef();

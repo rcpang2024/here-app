@@ -14,10 +14,8 @@ const PrivateMessageScreen = () => {
     const route = useRoute();
     const { user } = useContext(UserContext);
 
-    const [conversations, setConversations] = useState([]);
-
-    // Modal for the search modal
-    const [searchModalVisible, setSearchModalVisible] = useState(null);
+    const [conversations, setConversations] = useState([]); // User's conversations
+    const [searchModalVisible, setSearchModalVisible] = useState(null); // Modal for the search modal
 
     // For users - taken from search-screen.js
     const [searchUser, setUserSearch] = useState('');
@@ -335,29 +333,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-    },
-    commentInputContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 10,
-        borderTopWidth: 1,
-        borderTopColor: "#ccc",
-        backgroundColor: "#fff",
-        flex: 1,
-        position: 'absolute', 
-        left: 0, 
-        right: 0, 
-        bottom: 15
-    },
-    commentInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 5,
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        fontSize: 16,
-        backgroundColor: "#f5f5f5",
     },
     postButton: {
         backgroundColor: "#bd7979", padding: 10, borderRadius: 5, marginLeft: 10,

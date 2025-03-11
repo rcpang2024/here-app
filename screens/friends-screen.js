@@ -156,7 +156,7 @@ const ExploreScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={{flex: 1}}>
             <TabView 
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
@@ -170,9 +170,6 @@ const ExploreScreen = () => {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
     map: {
         width: '100%', height: '60%'
     },
