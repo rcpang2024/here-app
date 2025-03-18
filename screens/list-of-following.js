@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
+import { getToken } from "../secureStorage";
 
 const FollowingScreen = () => {
     const navigation = useNavigation();
@@ -15,14 +16,13 @@ const FollowingScreen = () => {
     const [following, setFollowing] = useState([]);
 
     const fetchFollowing = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/following/${currUsername}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) {
@@ -43,14 +43,13 @@ const FollowingScreen = () => {
     };
 
     const fetchUserProfile = async (username) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = response.json();

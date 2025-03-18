@@ -11,6 +11,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import uuid from 'react-native-uuid';
 import {decode} from 'base64-arraybuffer';
+import { getToken } from "../secureStorage";
 
 const UploadImage = ({ theURI, isEditable }) => {
     // const [image, setImage] = useState(imageUri || null);
@@ -138,15 +139,16 @@ const UploadImage = ({ theURI, isEditable }) => {
     };
 
     const handleSetPicURI = async (uri) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        console.log("uri:", uri);
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        // console.log("uri:", uri);
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/set_picture/${user.username}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ uri: uri }),
             });

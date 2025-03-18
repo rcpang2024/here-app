@@ -7,6 +7,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from 'date-fns';
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
+import { getToken } from "../secureStorage";
 // import uuid from 'react-native-uuid';
 
 const EditEventScreen = () => {
@@ -92,14 +93,13 @@ const EditEventScreen = () => {
     }, [route.params]);
 
     const updateEventInDB = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateevent/${event_id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     event_name: newEventName,

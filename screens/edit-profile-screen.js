@@ -73,15 +73,13 @@ const EditProfileScreen = () => {
     );
 
     const updateUserInDB = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${currUsername}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     name: newName,

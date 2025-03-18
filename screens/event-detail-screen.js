@@ -8,6 +8,7 @@ import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
+import { getToken } from "../secureStorage";
 
 const EventDetailScreen = () => {
     const navigation = useNavigation();
@@ -58,14 +59,13 @@ const EventDetailScreen = () => {
     }, [route.params]);
 
     const fetchUserProfile = async (username) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = response.json();
@@ -76,14 +76,13 @@ const EventDetailScreen = () => {
     };
 
     const retrieveComments = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/comments/${event_id}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {
@@ -96,14 +95,13 @@ const EventDetailScreen = () => {
     };
 
     const postComment = async (parentID = null, mentionedUser = null) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/addcomment/${event_id}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     author: user.id,
@@ -138,14 +136,13 @@ const EventDetailScreen = () => {
     };
 
     const deleteComment = async (commentID) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/deletecomment/${commentID}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {

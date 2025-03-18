@@ -35,7 +35,7 @@
     },
     "owner": "rcp23",
     "plugins": [
-      
+      "expo-secure-store"
     ]
   }
 }

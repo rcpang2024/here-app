@@ -7,6 +7,7 @@ import FallbackPhoto from '../assets/images/fallbackProfilePic.jpg';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from "../secureStorage";
 
 const NotificationsScreen = () => {
     const navigation = useNavigation();
@@ -30,14 +31,15 @@ const NotificationsScreen = () => {
 
     // Retrieve data from AsyncStorage
     const retrieveNotifications = async () => {
+        const token = await getToken();
         try {
             const storedNotifications = await AsyncStorage.getItem('notifications');
             if (storedNotifications) {
                 setNotifications(JSON.parse(storedNotifications));
                 setFetched(true); // Set fetched to true to avoid re-fetching
             } else {
-                retrieveFollowerNotification(); // Fetch from the API if no saved data
-                retrieveEventNotification();
+                retrieveFollowerNotification(token); // Fetch from the API if no saved data
+                retrieveEventNotification(token);
             }
         } catch (error) {
             console.error("Error retrieving notifications: ", error);
@@ -58,24 +60,16 @@ const NotificationsScreen = () => {
         });
         if (!fetched) {
             retrieveNotifications();
-            // console.log("fetched: ", fetched);
-            // retrieveFollowerNotification();
-            // retrieveEventNotification();
-            // setFetched(true);
-            // console.log("fetched 2: ", fetched);
         }
     }, [fetched]);
 
-    const retrieveFollowerNotification = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        // console.log("idToken in retrieveFollower: ", idToken);
+    const retrieveFollowerNotification = async (token) => {
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/follower_notifications/${user.id}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {
@@ -97,16 +91,13 @@ const NotificationsScreen = () => {
         }
     };
 
-    const retrieveEventNotification = async () => {
-        // const idToken = await auth.currentUser.getIdToken();
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+    const retrieveEventNotification = async (token) => {
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/event_notifications/${user.id}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {
@@ -129,14 +120,13 @@ const NotificationsScreen = () => {
     };
 
     const fetchUserProfile = async (username) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = await response.json();
@@ -158,14 +148,13 @@ const NotificationsScreen = () => {
     };
 
     const fetchEvent = async (eventID) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/events/${eventID}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const data = await response.json()

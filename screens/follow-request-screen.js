@@ -13,14 +13,13 @@ const FollowRequestScreen = () => {
     const { user, updateUserContext } = useContext(UserContext);
 
     const fetchListOfFollowRequests = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/follow_requests/${user.username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) {
@@ -56,14 +55,15 @@ const FollowRequestScreen = () => {
     }, []);
 
     const fetchUserProfile = async (username) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = response.json();
@@ -86,14 +86,15 @@ const FollowRequestScreen = () => {
 
     // ISSUE: Item is a username, but I need the ID of the user
     const handleAccept = async (item) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/followuser/${item.username}/${user.username}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ follower: user.username }),
             });
@@ -115,14 +116,15 @@ const FollowRequestScreen = () => {
     };
 
     const handleDeny = async (item) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${item.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 // body: JSON.stringify({ follower: user.username })
             });

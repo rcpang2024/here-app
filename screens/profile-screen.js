@@ -1,5 +1,5 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable, 
-    RefreshControl, ScrollView } from "react-native";
+    RefreshControl, ScrollView, Alert } from "react-native";
 import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../user-context";
@@ -9,13 +9,13 @@ import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
+import { getToken } from "../secureStorage";
 
 const ProfileScreen = ({ route }) => {
     const navigation = useNavigation();
     const { user, updateUserContext } = useContext(UserContext); // User who is logged in
     const { profileUser } = route.params || {};
     const currUser = profileUser || user;
-    const [idToken, setIdToken] = useState(null);
 
     const [refreshing, setRefreshing] = useState(false);
     const [index, setIndex] = useState(0);
@@ -34,12 +34,13 @@ const ProfileScreen = ({ route }) => {
     ]), []);
 
     const fetchEvent = async (eventId) => {
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) {
@@ -85,6 +86,15 @@ const ProfileScreen = ({ route }) => {
     };
 
     useEffect(() => {
+        // const fetchToken = async () => {
+        //     const token = await getToken();
+        //     if (token) {
+        //         setIdToken(token);
+        //     } else {
+        //         Alert.alert("Error", "Authentication required. Try logging in again.");
+        //     }
+        // };
+        // fetchToken();
         if (currUser) {
             setCreated(currUser.created_events);
             setAttending(currUser.attending_events);
@@ -123,20 +133,6 @@ const ProfileScreen = ({ route }) => {
                 ),
             });
         }
-        const fetchToken = async () => {
-            const { data, error } = await supabase.auth.getSession();
-            if (!user) {
-                console.log('No user is logged in.');
-                return;
-            }
-            if (error) {
-                alert("Error retrieving profile, please try again later: ", error);
-            }
-            const token = data?.session?.access_token;
-            setIdToken(token);
-            console.log("token set in profilescreen");
-        };
-        fetchToken();
     }, [route.params, currUser]);
 
     const onTabChange = (newIndex) => {

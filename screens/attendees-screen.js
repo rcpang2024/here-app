@@ -16,14 +16,15 @@ const AttendeesScreen = () => {
     const [attendeesWithUsernames, setAttendeesWithUsernames] = useState([]);
 
     const fetchAttendees = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/event_attendees/${event_id}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) {
@@ -59,14 +60,15 @@ const AttendeesScreen = () => {
     }, []);
 
     const fetchUserProfile = async (username) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = response.json();

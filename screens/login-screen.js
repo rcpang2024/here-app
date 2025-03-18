@@ -7,6 +7,7 @@ import HereLogo from '../assets/images/HereLogo.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
+import { saveToken, getToken } from "../secureStorage";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LogInScreen = () => {
@@ -29,8 +30,9 @@ const LogInScreen = () => {
     };
 
     const fetchUser = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const idToken = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/email/${email}/`, {
                 method: 'GET',
@@ -65,6 +67,8 @@ const LogInScreen = () => {
             Alert.alert(error.message);
             setLoading(false);
         } else {
+            const idToken = data?.session?.access_token;
+            await saveToken(idToken);
             const userData = await fetchUser();
             if (userData) {
                 console.log("In signInWithEmail");

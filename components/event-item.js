@@ -6,6 +6,7 @@ import { UserContext } from "../user-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import format from "date-fns/format";
 import { supabase } from "../lib/supabase";
+import { getToken } from "../secureStorage";
 
 const EventItem = ({ event_id, creation_user, creation_user_username, event_name, event_description, location_addr, date, list_of_attendees }) => {
   const navigation = useNavigation();
@@ -35,14 +36,13 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   
   // Registers user to the event
   const handleRegister = async () => {
-    const { data } = await supabase.auth.getSession();
-    const idToken = data?.session?.access_token;
+    const token = await getToken();
     try {
       const response = await fetch(`http://192.168.1.6:8000/api/registeruser/${event_id}/${user.username}/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
+          'Authorization': `Bearer ${token}`
         },
       });
       if (response.ok) {
@@ -69,14 +69,13 @@ const EventItem = ({ event_id, creation_user, creation_user_username, event_name
   };
 
   const handleUnregister = async () => {
-    const { data } = await supabase.auth.getSession();
-    const idToken = data?.session?.access_token;
+    const token = await getToken();
     try {
       const response = await fetch(`http://192.168.1.6:8000/api/unregisteruser/${event_id}/${user.username}/`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
+          'Authorization': `Bearer ${token}`
         },
       });
 
@@ -105,14 +104,15 @@ const handleDelete = async () => {
     [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", onPress: async () => {
-          const { data } = await supabase.auth.getSession();
-          const idToken = data?.session?.access_token;
+          // const { data } = await supabase.auth.getSession();
+          // const idToken = data?.session?.access_token;
+          const token = await getToken();
           try {
             const response = await fetch(`http://192.168.1.6:8000/api/deleteevent/${event_id}/`, {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
+                'Authorization': `Bearer ${token}`
               },
             });
 

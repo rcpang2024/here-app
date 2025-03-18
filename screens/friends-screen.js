@@ -4,6 +4,7 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { UserContext } from "../user-context";
 import EventItem from '../components/event-item';
 import { supabase } from "../lib/supabase";
+import { getToken } from '../secureStorage';
 
 const ExploreScreen = () => {
     const layout = useWindowDimensions();
@@ -13,7 +14,6 @@ const ExploreScreen = () => {
 
     const [nearbyEvents, setNearbyEvents] = useState([]);
     const { user, userLocation } = useContext(UserContext); 
-    // const [idToken, setIdToken] = useState(null);
 
     const routes = useMemo(() => ([
         {key: 'first', title: 'FRIENDS ATTENDING'},
@@ -21,15 +21,6 @@ const ExploreScreen = () => {
     ]), []);
 
     useEffect(() => {
-        // const fetchToken = async () => {
-        //     const { data, error } = await supabase.auth.getSession();
-        //     if (error) {
-        //         alert("Error fetching friends' events: ", error);
-        //     }
-        //     const token = data?.session?.access_token;
-        //     setIdToken(token);
-        // };
-        // fetchToken();
         if (user) {
             fetchFriendsAttending();
         }
@@ -43,15 +34,13 @@ const ExploreScreen = () => {
     };
 
     const fetchFriendsAttending = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        console.log("idToken in fetchFriendsAttending: ", idToken);
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/friends_attending_events/${user.username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const theData = await response.json();
@@ -62,15 +51,13 @@ const ExploreScreen = () => {
     };
 
     const fetchNearbyEvents = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        console.log("idToken in fetchNearbyEvents: ", idToken);
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/nearby_events/${userLocation.latitude}/${userLocation.longitude}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const theData = await response.json();

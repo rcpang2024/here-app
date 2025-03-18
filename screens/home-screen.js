@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { supabase } from "../lib/supabase";
+import { getToken } from "../secureStorage";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -14,6 +15,15 @@ const HomeScreen = () => {
     const { user, updateUserLocation } = useContext(UserContext);
 
     useEffect(() => {
+        const fetchToken = async () => {
+            const token = await getToken();
+            if (token) {
+                fetchData(token);
+            } else {
+                alert("Authentication required. Try logging in again.");
+            }
+        };
+        fetchToken();
         navigation.setOptions({
             headerRight: () => (
                 <Ionicons
@@ -25,7 +35,6 @@ const HomeScreen = () => {
                 />
             )
         });
-        fetchData();
         const getPermissions = async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
@@ -40,14 +49,12 @@ const HomeScreen = () => {
         getPermissions();
     }, []);
 
-    const fetchData = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+    const fetchData = async (token) => {
         const response = await fetch(`http://192.168.1.6:8000/api/friendsevents/${user.username}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
+                'Authorization': `Bearer ${token}`
             }
         });
         const theData = await response.json();

@@ -8,6 +8,7 @@ import { UserContext } from "../user-context";
 import * as Location from 'expo-location';
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
+import { getToken } from "../secureStorage";
 
 const CreateEventScreen = () => {
   const [eventName, setEventName] = useState("");
@@ -126,13 +127,12 @@ const CreateEventScreen = () => {
       // if (!auth.currentUser) {
       //   throw new Error("User is not authenticated.");
       // }
-      const { data } = await supabase.auth.getSession();
-      const idToken = data?.session.access_token;
+      const token = await getToken();
       const response = await fetch('http://192.168.1.6:8000/api/createevent/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}` 
+          'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
           id: uuid.v4(),

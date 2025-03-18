@@ -4,6 +4,7 @@ import { useEffect, useContext } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { UserContext } from "../user-context";
 import { supabase } from "../lib/supabase";
+import { getToken } from "../secureStorage";
 
 const SecurityScreen = () => {
     const navigation = useNavigation();
@@ -36,14 +37,13 @@ const SecurityScreen = () => {
     }, []);
 
     const handleDeleteAccount = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/deleteuser/${user.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (response.ok) {

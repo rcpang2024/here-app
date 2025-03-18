@@ -47,14 +47,13 @@ const SettingsScreen = () => {
     const initialPrivacyIndex = privacyItems.findIndex(item => item.value === user.user_privacy);
 
     const updateUserInDB = async (newPrivacy) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/updateuser/${user.username}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     user_privacy: newPrivacy

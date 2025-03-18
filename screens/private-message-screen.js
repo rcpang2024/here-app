@@ -8,6 +8,7 @@ import { UserContext } from "../user-context";
 import { SearchBar } from "react-native-elements";
 import { supabase } from "../lib/supabase";
 import { scale, verticalScale } from 'react-native-size-matters';
+import { getToken } from "../secureStorage";
 
 const PrivateMessageScreen = () => {
     const navigation = useNavigation();
@@ -21,19 +22,16 @@ const PrivateMessageScreen = () => {
     const [searchUser, setUserSearch] = useState('');
     const [results, setResults] = useState([]);
     const [userSearchCache, setUserSearchCache] = useState({});
-
     const searchBarRef = useRef(null);
 
     const fetchUserConversations = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/get_conversations/${user.id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${idToken}`
+                    "Authorization": `Bearer ${token}`
                 },
             });
     
@@ -96,13 +94,12 @@ const PrivateMessageScreen = () => {
 
     const fetchUserProfile = async (username) => {
         try {
-            const { data } = await supabase.auth.getSession();
-            const idToken = data?.session?.access_token;
+            const token = await getToken();
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = response.json();
@@ -113,15 +110,14 @@ const PrivateMessageScreen = () => {
     };
 
     const startConversation = async (receiverId) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         
         try {
             const response = await fetch("http://192.168.1.6:8000/api/start_conversation/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${idToken}`
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     user1_id: user.id,  // Logged-in user
@@ -146,15 +142,14 @@ const PrivateMessageScreen = () => {
     };
 
     const deleteConversation = async (conversationId) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/delete_conversation/${conversationId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${idToken}`
+                    "Authorization": `Bearer ${token}`
                 },
             });
     

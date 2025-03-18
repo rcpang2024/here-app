@@ -13,14 +13,13 @@ const BlockedUsersScreen = () => {
     const [blockedUserUsernames, setBlockedUserUsernames] = useState([]);
 
     const fetchUsernamesForBlockedUsers = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/blocked/${user.username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) {
@@ -57,14 +56,15 @@ const BlockedUsersScreen = () => {
     }, []);
 
     const fetchUserProfile = async (username) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/users/username/${username}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const userData = response.json();
@@ -86,14 +86,15 @@ const BlockedUsersScreen = () => {
     };
 
     const handleUnblockUser = async (item) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unblockuser/${user.username}/${item.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 // body: JSON.stringify({ follower: user.username })
             });

@@ -9,13 +9,13 @@ import EventItem from "../components/event-item";
 import UploadImage from "../components/upload-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../lib/supabase";
+import { getToken } from "../secureStorage";
 
 const OtherProfileScreen = ({ route }) => {
     const navigation = useNavigation();
     const { user, updateUserContext } = useContext(UserContext); // User who is logged in
     const { profileUser } = route.params || {};
     const currUser = profileUser;
-    // const [idToken, setIdToken] = useState(null);
 
     const [isRequested, setIsRequested] = useState(user.requesting_users.includes(profileUser.id));
     const [followingStatus, setFollowingStatus] = useState(user.list_of_following.includes(profileUser.id));
@@ -42,12 +42,13 @@ const OtherProfileScreen = ({ route }) => {
     ]), []);
 
     const fetchEvent = async (eventId) => {
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/events/${eventId}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) {
@@ -93,7 +94,7 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     useEffect(() => {
-        console.log("isRequested: ", isRequested);
+        // console.log("isRequested: ", isRequested);
         if (profileUser) {
             setCreated(profileUser.created_events);
             setAttending(profileUser.attending_events);
@@ -119,16 +120,6 @@ const OtherProfileScreen = ({ route }) => {
                 />
             ),
         });
-        // const fetchToken = async () => {
-        //     const { data, error } = await supabase.auth.getSession();
-        //     if (error) {
-        //         alert("Error retrieving token: ", error);
-        //     }
-        //     const token = data?.session?.access_token;
-        //     setIdToken(token);
-        //     console.log("token set in otherprofilescreen");
-        // };
-        // fetchToken();
     }, [route.params, profileUser]);
 
     const onTabChange = (newIndex) => {
@@ -142,15 +133,14 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleFollow = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             if (isPrivateUser && !followingStatus) {
                 const followRequestResponse = await fetch(`http://192.168.1.6:8000/api/request_to_follow_user/${user.username}/${profileUser.username}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ follower: user.username }),
                 });
@@ -170,7 +160,7 @@ const OtherProfileScreen = ({ route }) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ follower: user.username }),
                 });
@@ -192,14 +182,13 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleUnfollow = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (response.ok) {
@@ -220,14 +209,13 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleSettingNotifications = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/setnotification/${user.username}/${profileUser.username}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (response.ok) {
@@ -243,14 +231,13 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleRemoveNotifications = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/removenotification/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (response.ok) {
@@ -266,14 +253,13 @@ const OtherProfileScreen = ({ route }) => {
     };
     
     const handleRemoveFollower = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/unfollowuser/${profileUser.username}/${user.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (response.ok) {
@@ -291,14 +277,13 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleRemoveRequest = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const removeRequestResponse = await fetch(`http://192.168.1.6:8000/api/remove_request/${user.username}/${profileUser.username}/`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (removeRequestResponse.ok) {
@@ -319,14 +304,13 @@ const OtherProfileScreen = ({ route }) => {
     };
 
     const handleBlockUser = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/blockuser/${user.username}/${profileUser.username}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (response.ok) {

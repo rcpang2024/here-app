@@ -11,6 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import uuid from 'react-native-uuid';
 import {decode} from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system';
+import { getToken } from "../secureStorage";
 
 const ChatScreen = () => {
     const navigation = useNavigation();
@@ -37,14 +38,15 @@ const ChatScreen = () => {
     const socketRef = useRef(null);
 
     const fetchMessages = async () => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/get_messages/${conversationId}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) {
@@ -80,7 +82,6 @@ const ChatScreen = () => {
             )
         });
         fetchMessages();
-
         const socket = new WebSocket(`ws://192.168.1.6:8000/ws/chat/${conversationId}/`);
         socketRef.current = socket;
 
@@ -249,15 +250,15 @@ const ChatScreen = () => {
     };
 
     const addUserToConversation = async (userID) => {
-        const { data } = await supabase.auth.getSession();
-        const idToken = data?.session?.access_token;
-        
+        // const { data } = await supabase.auth.getSession();
+        // const idToken = data?.session?.access_token;
+        const token = await getToken();
         try {
             const response = await fetch(`http://192.168.1.6:8000/api/add_to_conversation/${conversationId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${idToken}`
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     user_id: userID,  // User to add
@@ -283,13 +284,14 @@ const ChatScreen = () => {
 
     const handleDeleteMessage = async (messageId) => {
         try {
-            const { data } = await supabase.auth.getSession();
-            const idToken = data?.session?.access_token;
+            // const { data } = await supabase.auth.getSession();
+            // const idToken = data?.session?.access_token;
+            const token = await getToken();
             const response = await fetch(`http://192.168.1.6:8000/api/delete_message/${messageId}/`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${idToken}`
+                    "Authorization": `Bearer ${token}`
                 }
             });
             if (response.ok) {
